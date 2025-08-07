@@ -9,7 +9,6 @@ const ColorSchema = new mongoose.Schema({
   price: {
     type: Number,
     required: true,
-   
   }, // e.g., "Red", "Blue"
   userId: {
     type: mongoose.Schema.Types.ObjectId,

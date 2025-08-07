@@ -39,27 +39,6 @@ async function startServer() {
     cors(),
     express.json(),
     expressMiddleware(server, {
-      // context: async ({ req }) => {
-      //   const token = req.headers.authorization || "";
-      //   let user = null;
-
-      //   if (token) {
-      //     try {
-      //       const decoded = jwt.verify(token.replace("Bearer ", ""), SECRET);
-      //       user = {
-      //         id: decoded.id,
-      //         role: decoded.role?.name,
-      //         superadmin_id: decoded.superadmin_id || null,
-      //       };
-      //     } catch (error) {
-
-      //       // Still return null user, don't block here
-      //     }
-      //   }
-
-      //   return { user };
-      // },
-
       context: async ({ req }) => {
         const token = req.headers.authorization || "";
         let user = null;

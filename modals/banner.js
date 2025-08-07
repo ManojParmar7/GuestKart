@@ -5,10 +5,14 @@ const bannerSchema = new mongoose.Schema({
   title: String,
   subTitle: String,
   description: String,
-  images: [String],
-  userId: {
+  image: String,
+  subadminId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "subadminId",
+  },
+  superadminId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "superadminId",
   },
 });
 

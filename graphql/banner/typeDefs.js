@@ -8,17 +8,31 @@ module.exports = gql`
     title: String!
     subTitle: String
     description: String
-    images: [String]
+    image: String
     user: User
+  }
+  type BannerPaginationResponse {
+    success: Boolean!
+    message: String
+    total: Int
+    currentPage: Int
+    totalPages: Int
+    banners: [Banner]
   }
 
   type BannerResponse {
     success: Boolean!
     message: String!
-    product: Banner
+    banner: Banner
   }
   extend type Query {
-    getAllBanners: [Banner]
+    getAllBanners(
+      page: Int
+      limit: Int
+      search: String
+      subadminId: ID
+      superadminId: ID
+    ): BannerPaginationResponse
     getBanner(id: ID!): Banner
   }
 
@@ -27,9 +41,9 @@ module.exports = gql`
       title: String!
       subTitle: String
       description: String
-      userId: ID!
-
-      images: [Upload!]!
+      subadminId: ID!
+      superadminId: ID!
+      image: Upload!
     ): BannerResponse
 
     updateBanner(
@@ -37,9 +51,11 @@ module.exports = gql`
       title: String
       subTitle: String
       description: String
-      images: [Upload!]
-      userId: ID!
+      image: Upload
+      subadminId: ID!
+      superadminId: ID!
     ): BannerResponse
+
     deleteBanner(id: ID!): BannerResponse
   }
 `;

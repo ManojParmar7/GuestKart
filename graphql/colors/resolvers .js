@@ -2,8 +2,42 @@ const Color = require("../../modals/colors");
 
 module.exports = {
   Query: {
-    getColorsByUser: async (_, { userId }) => {
-      return await Color.find({ userId });
+    getAllColors: async (
+      _,
+      { page = 1, limit = 10, search = "", subadminId, superadminId }
+    ) => {
+      try {
+        const skip = (page - 1) * limit;
+        const query = {};
+
+        if (superadminId) query.superadminId = superadminId;
+        if (subadminId) query.subadminId = subadminId;
+        if (search) query.name = { $regex: search, $options: "i" };
+
+        const total = await Color.countDocuments(query);
+        const colors = await Color.find(query)
+          .skip(skip)
+          .limit(limit)
+          .sort({ createdAt: -1 });
+
+        return {
+          success: true,
+          message: "Colors fetched successfully",
+          total,
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
+          colors,
+        };
+      } catch (err) {
+        return {
+          success: false,
+          message: "Failed to fetch colors",
+          total: 0,
+          currentPage: page,
+          totalPages: 0,
+          colors: [],
+        };
+      }
     },
 
     getColor: async (_, { id }) => {
@@ -12,19 +46,36 @@ module.exports = {
   },
 
   Mutation: {
-    createColor: async (_, { name, price, userId }) => {
+    createColor: async (
+      _,
+      { name, price, colorCode, userId, subadminId, superadminId }
+    ) => {
       try {
-        const existing = await Color.findOne({ name, userId });
+        // Check for uniqueness based on name + subadminId + superadminId
+        const existing = await Color.findOne({
+          name: name.trim(),
+          subadminId,
+          superadminId,
+        });
 
         if (existing) {
           return {
             success: false,
-            message: "Color with this name already exists.",
+            message:
+              "Color with this name already exists for this subadmin and superadmin.",
             color: null,
           };
         }
 
-        const color = new Color({ name, price, userId });
+        const color = new Color({
+          name: name.trim(),
+          price,
+          colorCode,
+          userId,
+          subadminId,
+          superadminId,
+        });
+
         const saved = await color.save();
 
         return {
@@ -41,11 +92,12 @@ module.exports = {
       }
     },
 
-    updateColor: async (_, { id, name, price }) => {
+    updateColor: async (_, { id, name, price, colorCode }) => {
       try {
         const updateFields = {};
-        if (name !== undefined) updateFields.name = name;
+        if (name !== undefined) updateFields.name = name.trim();
         if (price !== undefined) updateFields.price = price;
+        if (colorCode !== undefined) updateFields.colorCode = colorCode;
 
         const updated = await Color.findByIdAndUpdate(id, updateFields, {
           new: true,

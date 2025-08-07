@@ -172,11 +172,13 @@ module.exports = {
     //     role,
     //     superadmin_id,
     //     country = "IN",
+    //     image, // 👈 add this
     //   }
     // ) => {
     //   try {
     //     const currency = getCurrencyFromCountry(country);
     //     const roleDoc = await Role.findById(role);
+
     //     if (!roleDoc) {
     //       return {
     //         success: false,
@@ -185,50 +187,12 @@ module.exports = {
     //       };
     //     }
 
-    //     if (roleDoc.name === "superadmin") {
-    //       console.log("oleDoc.name: ", roleDoc.name);
-
-    //       const existingSuperadmin = await User.findOne({
-    //         $or: [{ email }, { username }],
-    //       });
-
-    //       if (existingSuperadmin) {
-    //         console.log("existingSuperadmin: ", existingSuperadmin);
-    //         return {
-    //           success: false,
-    //           message: "Superadmin with this email or username already exists",
-    //           users: [],
-    //         };
-    //       }
+    //     // ✅ Handle image upload
+    //     let imagePath = null;
+    //     if (image) {
+    //       imagePath = await saveImage(image); // 👈 Save image using your utility
     //     }
 
-    //     // Subadmin logic
-    //     if (roleDoc.name === "subadmin") {
-    //       if (!superadmin_id) {
-    //         console.log("superadmin_id: ", superadmin_id);
-    //         return {
-    //           success: false,
-    //           message: "Sub admin must be linked to a superadmin",
-    //           users: [],
-    //         };
-    //       }
-
-    //       const duplicateSubadmin = await User.findOne({
-    //         superadmin_id,
-    //         $or: [{ email }, { username }],
-    //       });
-
-    //       if (duplicateSubadmin) {
-    //         return {
-    //           success: false,
-    //           message:
-    //             "Sub admin with this email or username already exists under the given superadmin",
-    //           users: [],
-    //         };
-    //       }
-    //     }
-
-    //     console.log("====");
     //     // Create user
     //     const newUser = new User({
     //       name,
@@ -239,43 +203,16 @@ module.exports = {
     //       password,
     //       country,
     //       currency,
+    //       image: imagePath, // 👈 add image path
     //       role: roleDoc._id,
     //       superadmin_id: roleDoc.name === "subadmin" ? superadmin_id : null,
     //     });
-    //     const savedUser = await newUser.save();
-    //     if (roleDoc.name === "subadmin") {
-    //       const modules = {
-    //         products: {
-    //           view: false,
-    //           create: false,
-    //           update: false,
-    //           delete: false,
-    //         },
-    //         categories: {
-    //           view: false,
-    //           create: false,
-    //           update: false,
-    //           delete: false,
-    //         },
-    //         orders: { view: false, update: false },
-    //         banners: {
-    //           view: false,
-    //           create: false,
-    //           update: false,
-    //           delete: false,
-    //         },
-    //         users: { view: false },
-    //       };
-    //       const newPermission = new Permission({
-    //         subadmin_id: savedUser._id,
-    //         superadmin_id,
-    //         modules: modules || [],
-    //       });
 
-    //       await newPermission.save();
-    //     }
+    //     const savedUser = await newUser.save();
+
+    //     // (Subadmin permission logic remains unchanged...)
+
     //     const populatedUser = await savedUser.populate("role");
-    //     console.log("populatedUser: ", populatedUser);
 
     //     return {
     //       success: true,
@@ -305,8 +242,9 @@ module.exports = {
         role,
         superadmin_id,
         country = "IN",
-        image, // 👈 add this
-      }
+        image,
+      },
+      { user } // 👈 context se aaya hua user
     ) => {
       try {
         const currency = getCurrencyFromCountry(country);
@@ -320,13 +258,23 @@ module.exports = {
           };
         }
 
+        if (roleDoc.name === "subadmin") {
+          if (!user || user.role !== "superadmin") {
+            return {
+              success: false,
+              message:
+                "Unauthorized access: Please login as a superadmin to create a subadmin.",
+              users: null,
+            };
+          }
+        }
+
         // ✅ Handle image upload
         let imagePath = null;
         if (image) {
-          imagePath = await saveImage(image); // 👈 Save image using your utility
+          imagePath = await saveImage(image);
         }
 
-        // Create user
         const newUser = new User({
           name,
           username,
@@ -336,15 +284,12 @@ module.exports = {
           password,
           country,
           currency,
-          image: imagePath, // 👈 add image path
+          image: imagePath,
           role: roleDoc._id,
           superadmin_id: roleDoc.name === "subadmin" ? superadmin_id : null,
         });
 
         const savedUser = await newUser.save();
-
-        // (Subadmin permission logic remains unchanged...)
-
         const populatedUser = await savedUser.populate("role");
 
         return {
@@ -364,130 +309,6 @@ module.exports = {
       }
     },
 
-    // updateUser: async (
-    //   _,
-    //   {
-    //     id,
-    //     name,
-    //     username,
-    //     email,
-    //     phone,
-    //     website,
-    //     password,
-    //     role,
-    //     createdBy,
-    //     superadmin_id,
-    //     country,
-    //   }
-    // ) => {
-    //   try {
-    //     // Validate required fields
-    //     if (!id) {
-    //       return {
-    //         success: false,
-    //         message: "User ID is required",
-    //         users: null,
-    //       };
-    //     }
-
-    //     const currency = getCurrencyFromCountry(country);
-    //     console.log("currency: ", currency);
-
-    //     // Validate role if provided
-    //     if (role) {
-    //       const roleExists = await Role.findById(role);
-    //       if (!roleExists) {
-    //         return {
-    //           success: false,
-    //           message: "Role not found",
-    //           users: null,
-    //         };
-    //       }
-    //     }
-
-    //     // Build update object with only defined values
-    //     const updateData = {};
-    //     if (name !== undefined) updateData.name = name;
-    //     if (username !== undefined) updateData.username = username;
-    //     if (email !== undefined) updateData.email = email;
-    //     if (phone !== undefined) updateData.phone = phone;
-    //     if (website !== undefined) updateData.website = website;
-    //     if (password !== undefined) updateData.password = password;
-    //     if (role !== undefined) updateData.role = role;
-    //     if (createdBy !== undefined) updateData.createdBy = createdBy;
-    //     if (superadmin_id !== undefined)
-    //       updateData.superadmin_id = superadmin_id;
-    //     if (country !== undefined) updateData.country = country;
-    //     if (currency !== undefined) updateData.currency = currency;
-
-    //     // Check if user exists before updating
-    //     const existingUser = await User.findById(id);
-    //     if (!existingUser) {
-    //       return {
-    //         success: false,
-    //         message: "User not found",
-    //         users: [],
-    //       };
-    //     }
-
-    //     const updated = await User.findByIdAndUpdate(id, updateData, {
-    //       new: true,
-    //       runValidators: true, // This ensures schema validations run
-    //     });
-
-    //     if (!updated) {
-    //       return {
-    //         success: false,
-    //         message: "Failed to update user",
-    //         users: [],
-    //       };
-    //     }
-
-    //     // Populate the role
-    //     const populatedUser = await updated.populate("role");
-    //     console.log("populatedUser: ", populatedUser);
-
-    //     return {
-    //       success: true,
-    //       message: "User updated successfully",
-    //       users: [populatedUser],
-    //     };
-    //   } catch (error) {
-    //     console.error("Error updating user:", error);
-
-    //     // Handle specific MongoDB errors
-    //     if (error.code === 11000) {
-    //       return {
-    //         success: false,
-    //         message:
-    //           "Duplicate key error: User with this email/username already exists",
-    //         users: [],
-    //       };
-    //     }
-
-    //     if (error.name === "ValidationError") {
-    //       return {
-    //         success: false,
-    //         message: `Validation error: ${error.message}`,
-    //         users: [],
-    //       };
-    //     }
-
-    //     if (error.name === "CastError") {
-    //       return {
-    //         success: false,
-    //         message: "Invalid ID format",
-    //         users: [],
-    //       };
-    //     }
-
-    //     return {
-    //       success: false,
-    //       message: `Failed to update user: ${error.message}`,
-    //       users: [],
-    //     };
-    //   }
-    // },
     updateUser: async (_, args) => {
       try {
         const {

@@ -5,7 +5,7 @@ module.exports = gql`
     id: ID!
     name: String!
     price: Float!
-    userId: ID!
+    subadmin: ID!
   }
 
   type ColorResponse {
@@ -13,15 +13,44 @@ module.exports = gql`
     message: String!
     color: Color
   }
-
+  type ColorPaginationResponse {
+    success: Boolean!
+    message: String
+    total: Int
+    currentPage: Int
+    totalPages: Int
+    colors: [Color!]!
+  }
   extend type Query {
-    getColorsByUser(userId: ID!): [Color!]!
+    getAllColors(
+      page: Int
+      limit: Int
+      search: String
+      subadminId: ID
+      superadminId: ID
+    ): ColorPaginationResponse!
+
+    getColorsByUser(subadmin: ID!): [Color!]!
     getColor(id: ID!): Color
   }
 
   extend type Mutation {
-    createColor(name: String!, price: Float!, userId: ID!): ColorResponse!
-    updateColor(id: ID!, name: String, price: Float): ColorResponse!
+    createColor(
+      name: String!
+      price: Float!
+      colorCode: String!
+      userId: ID!
+      subadminId: ID!
+      superadminId: ID!
+    ): ColorResponse!
+
+    updateColor(
+      id: ID!
+      name: String
+      price: Float
+      colorCode: String
+    ): ColorResponse!
+
     deleteColor(id: ID!): ColorResponse!
   }
 `;
