@@ -1,6 +1,8 @@
 # 🛒 GuestKart
 
-**GuestKart** is a modern digital shopping cart platform tailored for the hospitality industry — hotels, resorts, and service apartments — to enhance the guest experience. It supports **seamless shopping without login for guests**, along with a robust **admin authorization system**.
+**GuestKart** is a modern and flexible **e-commerce platform** that offers a **quick and hassle-free shopping experience**. With its **guest-first design**, users can **browse products, add to cart, and place orders without logging in** — ideal for casual shoppers or first-time buyers.
+
+It also includes a **role-based admin management system** for efficiently handling products, categories, and orders.
 
 [🔗 GitHub Repository](https://github.com/ManojParmar7/GuestKart.git)
 
@@ -16,14 +18,14 @@ _Coming soon or insert deployment link here_
 
 ### 🔹 Frontend
 - **Next.js** with **TypeScript**
-- **Tailwind CSS** (or your styling library)
+- **Tailwind CSS** (or your preferred styling library)
 - Optimized for performance and scalability
 
 ### 🔹 Backend
 - **Node.js** + **Express.js**
 - **MongoDB** (NoSQL database)
 - **GraphQL** for flexible API querying
-- **JWT Authentication** for Admin access
+- **JWT Authentication** for secure admin access
 
 ---
 
@@ -31,42 +33,50 @@ _Coming soon or insert deployment link here_
 
 | Role         | Description                                                                 |
 |--------------|-----------------------------------------------------------------------------|
-| 🧑‍💼 Super Admin | Full access — manages Sub Admins and system-wide settings.              |
-| 👨‍💻 Sub Admin    | Limited access — manages products, categories, and order flow.         |
-| 🧍 Guest        | Can browse and shop without login, like a real hotel/resort guest.       |
+| 🧑‍💼 Super Admin | Full access — manage Sub Admins, products, categories, and system settings |
+| 👨‍💻 Sub Admin    | Limited access — manage assigned products, categories, and orders         |
+| 🧍 Guest User   | Can shop without login — browse, add to cart, and place orders             |
 
 ---
 
-## 🔄 Guest Shopping Flow
+## 🛒 Guest Shopping Flow
 
 1. **Homepage Browsing**  
-   Guest lands on the home page without logging in and sees a range of available products/services.
+   Guest lands on the homepage without logging in and sees all available products.
 
 2. **Product Selection**  
-   Guest can:
-   - View product details
-   - Add items to cart
-   - View cart summary
+   - Browse products by category  
+   - View product details  
+   - Add items to the cart  
 
-3. **No Login Required**  
-   Guest proceeds with the cart without creating an account or logging in — reflecting real-world hospitality behavior.
+3. **Checkout Without Login**  
+   Guest proceeds to checkout by filling basic details (name, phone, address).
 
 4. **Order Placement**  
-   Guest places an order with minimal required details (e.g., room number, name).
+   Order is placed and stored in the backend.
 
 5. **Admin Notification**  
-   Admins (Super/Sub) receive the order in real-time in their dashboard.
+   Admins (Super/Sub) get real-time access to all orders in their dashboard.
 
 ---
 
 ## 🔐 Admin Features
 
-- **Login & Secure Access** via JWT
-- **Role-Based Authorization**
-- **Manage Products**
-- **Manage Orders**
-- **View Guest Activity**
-- **Dashboard Analytics (if implemented)**
+The platform includes a secure and scalable **admin panel** with **role-based access control**, supporting both **Super Admin** and **Sub Admin** roles.
+
+### 🧑‍💼 Super Admin
+- **Secure login** with JWT authentication  
+- Full access to the system  
+- **Create and manage Sub Admins**  
+- **Manage all products, categories, and orders**  
+- View complete **guest activity**  
+- Access to system-wide **analytics dashboard** (if implemented)
+
+### 👨‍💻 Sub Admin
+- **Secure login** with limited access  
+- **Manage assigned products and categories**  
+- **View and fulfill guest orders**  
+- Cannot modify Super Admins or global settings
 
 ---
 
