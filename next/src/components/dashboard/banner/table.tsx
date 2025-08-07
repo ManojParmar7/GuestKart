@@ -28,7 +28,6 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { GearSixIcon } from "@phosphor-icons/react/dist/ssr/GearSix";
 import { PencilIcon } from "@phosphor-icons/react/dist/ssr/Pencil";
 import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import dayjs from "dayjs";
@@ -36,7 +35,6 @@ import dayjs from "dayjs";
 import { useSelection } from "@/hooks/use-selection";
 
 import { deleteUser, GetUsersBySuperadmin } from "../../../app/query-common";
-import TableSkeletonLoader from "../loader/table-skeleton-loader";
 
 function applyPagination<T>(rows: T[] = [], page: number, rowsPerPage: number): T[] {
 	return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -45,7 +43,7 @@ function applyPagination<T>(rows: T[] = [], page: number, rowsPerPage: number): 
 type CustomersTableProps = {
 	search: string;
 };
-export function CustomersTable({ search }: CustomersTableProps): React.JSX.Element {
+export function TablePage({ search }: CustomersTableProps): React.JSX.Element {
 	const loginUser = localStorage.getItem("login_id");
 	const [page, setPage] = React.useState(0);
 	const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -131,12 +129,8 @@ export function CustomersTable({ search }: CustomersTableProps): React.JSX.Eleme
 		setPage(0); // reset to first page
 	};
 
-	const handleNavigate = (row: any) => {
-		router.push(`/dashboard/customers/permission/${row}`);
-	};
-
 	const handleEditUser = (userId: string) => {
-		router.push(`/dashboard/customers/update/${userId}`);
+		router.push(`/dashboard/banner/update/${userId}`);
 	};
 
 	const handleDeleteClick = (userId: string, userName: string) => {
@@ -174,7 +168,13 @@ export function CustomersTable({ search }: CustomersTableProps): React.JSX.Eleme
 	};
 
 	if (loading) {
-		return <TableSkeletonLoader />;
+		return (
+			<Card>
+				<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+					<CircularProgress />
+				</Box>
+			</Card>
+		);
 	}
 
 	if (error) {
@@ -209,7 +209,6 @@ export function CustomersTable({ search }: CustomersTableProps): React.JSX.Eleme
 								<TableCell>Country</TableCell>
 								<TableCell>Phone</TableCell>
 								<TableCell>Signed Up</TableCell>
-								<TableCell align="center">Permission</TableCell>
 								<TableCell align="center">Actions</TableCell>
 							</TableRow>
 						</TableHead>
@@ -236,13 +235,7 @@ export function CustomersTable({ search }: CustomersTableProps): React.JSX.Eleme
 										<TableCell>{row.country ?? "-"}</TableCell>
 										<TableCell>{row.phone}</TableCell>
 										<TableCell>{dayjs(row.createdAt).format("MMM D, YYYY")}</TableCell>
-										<TableCell align="center">
-											<Tooltip title="Manage Permissions">
-												<IconButton onClick={() => handleNavigate(row.id)} color="primary" size="small">
-													<GearSixIcon fontSize="var(--icon-fontSize-md)" />
-												</IconButton>
-											</Tooltip>
-										</TableCell>
+
 										<TableCell align="center">
 											<Stack direction="row" spacing={1} justifyContent="center">
 												<Tooltip title="Edit User">

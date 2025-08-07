@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { updateUser } from "@/app/QueryCommon";
+import { updateUser } from "@/app/query-common";
 import { useMutation } from "@apollo/client";
 import { Alert, Snackbar } from "@mui/material";
 import Grid from "@mui/material/Grid";

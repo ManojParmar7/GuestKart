@@ -18,7 +18,7 @@ import Typography from "@mui/material/Typography";
 
 import { showToast } from "@/hooks/toast-message"; // adjust the path accordingly
 
-import { creaOrUpdatePermission, GetPermissions } from "../../../app/QueryCommon";
+import { creaOrUpdatePermission, GetPermissions } from "../../../app/query-common";
 
 export function PermissionTable(): React.JSX.Element {
 	const [createOrUpdatePermissions] = useMutation(creaOrUpdatePermission);

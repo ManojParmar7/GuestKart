@@ -1,4 +1,4 @@
-/* eslint-disable unicorn/template-indent */
+// eslint-disable-next-line unicorn/template-indent
 
 import { gql } from "@apollo/client";
 
@@ -112,6 +112,8 @@ export const createSubadmin = gql`
 		$password: String!
 		$role: ID!
 		$superadminId: ID
+		$image: Upload!
+		$createdBy: ID
 	) {
 		createUser(
 			name: $name
@@ -122,6 +124,8 @@ export const createSubadmin = gql`
 			password: $password
 			role: $role
 			superadmin_id: $superadminId
+			image: $image
+			createdBy: $createdBy
 		) {
 			success
 			message
@@ -133,6 +137,7 @@ export const createSubadmin = gql`
 				phone
 				website
 				password
+				image
 				role {
 					id
 					name
@@ -239,6 +244,42 @@ export const getUserById = gql`
 			updatedAt
 			token
 			image
+		}
+	}
+`;
+
+export const getAllBanner = gql`
+	query GetAllBanners($page: Int, $limit: Int, $search: String, $subadminId: ID, $superadminId: ID) {
+		getAllBanners(page: $page, limit: $limit, search: $search, subadminId: $subadminId, superadminId: $superadminId) {
+			success
+			message
+			total
+			currentPage
+			totalPages
+			banners {
+				id
+				title
+				subTitle
+				description
+				image
+				user {
+					id
+					name
+					username
+					email
+					phone
+					website
+					password
+					createdBy
+					superadmin_id
+					country
+					currency
+					createdAt
+					updatedAt
+					image
+					token
+				}
+			}
 		}
 	}
 `;

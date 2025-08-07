@@ -1,6 +1,4 @@
 import * as React from "react";
-import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache } from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import GlobalStyles from "@mui/material/GlobalStyles";
@@ -14,26 +12,6 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps): React.JSX.Element {
-	const httpLink = new HttpLink({
-		uri: "http://localhost:8000/graphql",
-	});
-
-	// Optional: If you want to add Auth Token
-	const authLink = setContext((_, { headers }) => {
-		const token = typeof window !== "undefined" ? localStorage.getItem("custom-auth-token") : null;
-		return {
-			headers: {
-				...headers,
-				authorization: token ? `Bearer ${token}` : "",
-			},
-		};
-	});
-
-	const client = new ApolloClient({
-		link: authLink.concat(httpLink),
-		cache: new InMemoryCache(),
-	});
-
 	return (
 		<AuthGuard>
 			<>

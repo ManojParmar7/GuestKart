@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 
 import type { User } from "@/types/user";
 import { authClient } from "@/lib/auth/client";
@@ -22,10 +23,31 @@ export interface UserProviderProps {
 
 export function UserProvider({ children }: UserProviderProps): React.JSX.Element {
 	const [user, setUser] = React.useState<User | null>(null);
-	console.log("user: ", user);
 	const [error, setError] = React.useState<string | null>(null);
 	const [isLoading, setIsLoading] = React.useState<boolean>(true);
+	const router = useRouter();
 
+	// const checkSession = React.useCallback(async (): Promise<void> => {
+	// 	setIsLoading(true);
+	// 	try {
+	// 		const { data, error } = await authClient.getUser();
+
+	// 		if (error) {
+	// 			logger.error(error);
+	// 			setUser(null);
+	// 			setError("Something went wrong");
+	// 		} else {
+	// 			setUser(data ?? null);
+	// 			setError(null);
+	// 		}
+	// 	} catch (err) {
+	// 		logger.error(err);
+	// 		setUser(null);
+	// 		setError("Something went wrong");
+	// 	} finally {
+	// 		setIsLoading(false);
+	// 	}
+	// }, []);
 	const checkSession = React.useCallback(async (): Promise<void> => {
 		setIsLoading(true);
 		try {
@@ -33,16 +55,31 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
 
 			if (error) {
 				logger.error(error);
-				setUser(null);
-				setError("Something went wrong");
+
+				// Clear local storage tokens
+				localStorage.removeItem("login_id");
+				localStorage.removeItem("custom-auth-token");
+
+				// Redirect to sign-in page
+				router.push("/auth/sign-in");
+				// Stop execution
+				return;
 			} else {
 				setUser(data ?? null);
 				setError(null);
 			}
-		} catch (err) {
+		} catch (err: any) {
 			logger.error(err);
-			setUser(null);
-			setError("Something went wrong");
+
+			// Clear local storage tokens
+			localStorage.removeItem("login_id");
+			localStorage.removeItem("custom-auth-token");
+
+			// Redirect to sign-in page
+			router.push("/auth/sign-in");
+
+			// Stop execution
+			return;
 		} finally {
 			setIsLoading(false);
 		}
