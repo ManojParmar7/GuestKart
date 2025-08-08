@@ -12,7 +12,7 @@
 We also have a pro version of this product which bundles even more pages and components if you want
 to save more time and design efforts :)
 
-| Free Version (this one)  | [GuestKart Pro](https://mui.com/store/items/devias-kit-pro/)                |
+| Free Version (this one)  | [GuestKart Pro]              |
 | ------------------------ | :--------------------------------------------------------------------------- |
 | **8** Pages              | **80+** Pages                                                                |
 | ✔ Custom Authentication  | ✔ Authentication with **Amplify**, **Auth0**, **Firebase** and **Supabase**  |
