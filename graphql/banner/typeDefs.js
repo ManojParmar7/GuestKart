@@ -9,6 +9,8 @@ module.exports = gql`
     subTitle: String
     description: String
     image: String
+    subadminId: ID
+    superadminId: ID
     user: User
   }
   type BannerPaginationResponse {
@@ -52,7 +54,7 @@ module.exports = gql`
       subTitle: String
       description: String
       image: Upload
-      subadminId: ID!
+      subadminId: ID
       superadminId: ID!
     ): BannerResponse
 
