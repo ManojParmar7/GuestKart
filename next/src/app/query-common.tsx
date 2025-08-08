@@ -283,3 +283,122 @@ export const getAllBanner = gql`
 		}
 	}
 `;
+export const deleteBanner = gql`
+	mutation DeleteBanner($deleteBannerId: ID!) {
+		deleteBanner(id: $deleteBannerId) {
+			success
+			message
+			banner {
+				id
+				title
+				subTitle
+				description
+				image
+				user {
+					id
+					name
+				}
+			}
+		}
+	}
+`;
+
+export const getByIdBanner = gql`
+	query GetBanner($getBannerId: ID!) {
+		getBanner(id: $getBannerId) {
+			id
+			title
+			subTitle
+			description
+			image
+			subadminId
+			superadminId
+			user {
+				id
+				name
+			}
+		}
+	}
+`;
+
+export const updateBanner = gql`
+	mutation UpdateBanner(
+		$image: Upload
+		$subadminId: ID
+		$superadminId: ID!
+		$title: String
+		$subTitle: String
+		$description: String
+		$updateBannerId: ID!
+	) {
+		updateBanner(
+			image: $image
+			subadminId: $subadminId
+			superadminId: $superadminId
+			title: $title
+			subTitle: $subTitle
+			description: $description
+			id: $updateBannerId
+		) {
+			success
+			message
+			banner {
+				id
+				title
+				subTitle
+				description
+				image
+				user {
+					id
+					name
+				}
+			}
+		}
+	}
+`;
+export const createBanner = gql`
+	mutation CreateBanner(
+		$title: String!
+		$subadminId: ID!
+		$superadminId: ID!
+		$image: Upload!
+		$subTitle: String
+		$description: String
+	) {
+		createBanner(
+			title: $title
+			subadminId: $subadminId
+			superadminId: $superadminId
+			image: $image
+			subTitle: $subTitle
+			description: $description
+		) {
+			success
+			message
+			banner {
+				id
+				title
+				subTitle
+				description
+				user {
+					id
+					name
+					username
+					email
+					phone
+					website
+					password
+					createdBy
+					superadmin_id
+					country
+					currency
+					createdAt
+					updatedAt
+					image
+					token
+				}
+				image
+			}
+		}
+	}
+`;

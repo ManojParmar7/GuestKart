@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@apollo/client";
 import Alert from "@mui/material/Alert";
 import Avatar from "@mui/material/Avatar";
@@ -27,14 +27,13 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
 import { PencilIcon } from "@phosphor-icons/react/dist/ssr/Pencil";
 import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
-import dayjs from "dayjs";
 
 import { useSelection } from "@/hooks/use-selection";
 
-import { deleteUser, GetUsersBySuperadmin } from "../../../app/query-common";
+import { deleteBanner, getAllBanner } from "../../../app/query-common";
+import TableSkeletonLoader from "../loader/table-skeleton-loader";
 
 function applyPagination<T>(rows: T[] = [], page: number, rowsPerPage: number): T[] {
 	return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -49,37 +48,49 @@ export function TablePage({ search }: CustomersTableProps): React.JSX.Element {
 	const [rowsPerPage, setRowsPerPage] = React.useState(10);
 	const router = useRouter();
 
+	const params = useParams();
+	const subAdmin = params?.id as string;
+	const [deleteDialog, setDeleteDialog] = React.useState({
+		open: false,
+		userId: null as string | null,
+		userName: "",
+	});
+	const [snackbar, setSnackbar] = React.useState({
+		open: false,
+		message: "",
+		severity: "success" as "success" | "error" | "warning" | "info",
+	});
+	const [deletingUserId, setDeletingUserId] = React.useState<string | null>(null);
 	const variables = {
 		superadminId: loginUser,
-		filters: {
-			name: search || null,
-			email: null,
-		},
+		subadminId: subAdmin || null,
+		search: search || null,
 		limit: rowsPerPage,
 		page: page + 1,
 	};
 
-	const { data, loading, error, refetch } = useQuery(GetUsersBySuperadmin, {
+	const { data, loading, error, refetch } = useQuery(getAllBanner, {
 		variables,
 		fetchPolicy: "network-only",
 	});
 	React.useEffect(() => {
 		refetch(variables);
 	}, [search, page, rowsPerPage]);
-	const [deleteUsers] = useMutation(deleteUser, {
-		refetchQueries: [{ query: GetUsersBySuperadmin, variables: { superadminId: loginUser } }],
+
+	const [deleteUsers] = useMutation(deleteBanner, {
+		refetchQueries: [{ query: getAllBanner, variables: { deleteBannerId: deleteDialog?.userId } }],
 		onCompleted: (data) => {
-			if (data.deleteUser.success) {
+			if (data.deleteBanner.success) {
 				setSnackbar({
 					open: true,
-					message: "User deleted successfully!",
+					message: `${data?.deleteBanner?.message}` || "deleted successfully!",
 					severity: "success",
 				});
 				refetch(variables);
 			} else {
 				setSnackbar({
 					open: true,
-					message: data.deleteUser.message || "Failed to delete user",
+					message: data.deleteBanner.message || "Failed to delete user",
 					severity: "error",
 				});
 			}
@@ -95,30 +106,18 @@ export function TablePage({ search }: CustomersTableProps): React.JSX.Element {
 		},
 	});
 
-	const [deleteDialog, setDeleteDialog] = React.useState({
-		open: false,
-		userId: null as string | null,
-		userName: "",
-	});
-	const [snackbar, setSnackbar] = React.useState({
-		open: false,
-		message: "",
-		severity: "success" as "success" | "error" | "warning" | "info",
-	});
-	const [deletingUserId, setDeletingUserId] = React.useState<string | null>(null);
-
 	const rows = React.useMemo(() => {
-		const users = data?.getUsersBySuperadmin?.users ?? [];
+		const users = data?.getAllBanners?.banners ?? [];
 		return applyPagination(users, page, rowsPerPage);
 	}, [data, page, rowsPerPage]);
-
+	console.log(rows);
 	const rowIds = React.useMemo(() => rows.map((r: any) => r.id), [rows]);
 	const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
 
 	const selectedSome = selected.size > 0 && selected.size < rows.length;
 	const selectedAll = rows.length > 0 && selected.size === rows.length;
 
-	const totalCount = data?.getUsersBySuperadmin?.total || 0; // assuming backend gives total count
+	const totalCount = data?.getAllBanners?.total || 0; // assuming backend gives total count
 
 	const handlePageChange = (_event: unknown, newPage: number) => {
 		setPage(newPage);
@@ -149,7 +148,7 @@ export function TablePage({ search }: CustomersTableProps): React.JSX.Element {
 		try {
 			await deleteUsers({
 				variables: {
-					deleteUserId: deleteDialog.userId,
+					deleteBannerId: deleteDialog.userId,
 				},
 			});
 		} catch (error) {
@@ -168,13 +167,7 @@ export function TablePage({ search }: CustomersTableProps): React.JSX.Element {
 	};
 
 	if (loading) {
-		return (
-			<Card>
-				<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-					<CircularProgress />
-				</Box>
-			</Card>
-		);
+		return <TableSkeletonLoader />;
 	}
 
 	if (error) {
@@ -204,11 +197,11 @@ export function TablePage({ search }: CustomersTableProps): React.JSX.Element {
 										}}
 									/>
 								</TableCell>
-								<TableCell>Name</TableCell>
-								<TableCell>Email</TableCell>
-								<TableCell>Country</TableCell>
-								<TableCell>Phone</TableCell>
-								<TableCell>Signed Up</TableCell>
+								<TableCell>Banner</TableCell>
+
+								<TableCell>Title</TableCell>
+								<TableCell>Sub Title</TableCell>
+								<TableCell>description</TableCell>
 								<TableCell align="center">Actions</TableCell>
 							</TableRow>
 						</TableHead>
@@ -228,13 +221,12 @@ export function TablePage({ search }: CustomersTableProps): React.JSX.Element {
 										<TableCell>
 											<Stack direction="row" spacing={2} alignItems="center">
 												<Avatar src={`http://localhost:8000${row?.image}`} />
-												<Typography variant="subtitle2">{row.name}</Typography>
 											</Stack>
 										</TableCell>
-										<TableCell>{row.email}</TableCell>
-										<TableCell>{row.country ?? "-"}</TableCell>
-										<TableCell>{row.phone}</TableCell>
-										<TableCell>{dayjs(row.createdAt).format("MMM D, YYYY")}</TableCell>
+										<TableCell>{row?.title}</TableCell>
+
+										<TableCell>{row?.subTitle}</TableCell>
+										<TableCell>{row?.description ?? "-"}</TableCell>
 
 										<TableCell align="center">
 											<Stack direction="row" spacing={1} justifyContent="center">

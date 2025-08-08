@@ -2,10 +2,9 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { Delete, PhotoCamera } from "@mui/icons-material";
 import {
-	Avatar,
 	Box,
 	Button,
 	Card,
@@ -13,10 +12,8 @@ import {
 	CardContent,
 	CardHeader,
 	Divider,
-	FormControl,
 	FormHelperText,
-	InputLabel,
-	OutlinedInput,
+	MenuItem,
 	Stack,
 	TextField,
 	Typography,
@@ -24,24 +21,19 @@ import {
 
 import { showToast } from "@/hooks/toast-message"; // adjust the path accordingly
 
-import { createSubadmin } from "../../../app/query-common";
+import { createBanner, getAllBanner } from "../../../app/query-common";
 
 export function CreateForm(): React.JSX.Element {
 	const loginUser = localStorage.getItem("login_id");
-
-	const [createUser] = useMutation(createSubadmin);
+	const [createUser] = useMutation(createBanner);
 	const [formData, setFormData] = React.useState({
-		name: "",
-		username: "",
-		email: "",
-		phone: "",
-		password: "",
-		confirmPassword: "",
-		website: "",
-		role: "",
+		title: "",
+		subTitle: "",
+		discription: "",
 		superadminId: "",
+		subadminId: "",
 	});
-
+	console.log("formData", formData);
 	const [selectedImage, setSelectedImage] = React.useState<File | null>(null);
 	const [imagePreview, setImagePreview] = React.useState<string>("");
 	const [errors, setErrors] = React.useState<Record<string, string>>({});
@@ -100,35 +92,40 @@ export function CreateForm(): React.JSX.Element {
 
 	const validate = () => {
 		const newErrors: Record<string, string> = {};
-		if (!formData.name) newErrors.name = "Name is required";
-		if (!formData.username) newErrors.username = "Username is required";
-		if (!formData.email) newErrors.email = "Email is required";
-		else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email format";
-		if (!formData.phone) newErrors.phone = "Phone is required";
-		if (!formData.website) newErrors.website = "Website is required";
-		if (!formData.password) newErrors.password = "Password is required";
-		if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
-		if (formData.confirmPassword !== formData.password) newErrors.confirmPassword = "Passwords do not match";
+		if (!formData.title) newErrors.title = "Title is required";
+		if (!formData.subTitle) newErrors.subTitle = "Sub Title is required";
+		if (!formData?.discription) newErrors.discription = "Discription is required";
 
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
 	};
 
 	const router = useRouter();
+	const variables = {
+		superadminId: loginUser,
+		subadminId: null,
+		search: "",
+		limit: 100,
+		page: 1,
+	};
 
+	const { data, refetch } = useQuery(getAllBanner, {
+		variables,
+		fetchPolicy: "network-only",
+	});
+
+	React.useEffect(() => {
+		refetch(variables);
+	}, []);
+	console.log("bannerGetAll", data);
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
 		if (validate()) {
 			const payload = {
-				name: formData.name,
-				username: formData.username,
-				email: formData.email,
-				phone: formData.phone,
-				password: formData.password,
-				website: formData.website,
-				role: "68834193879abef2a86727fe",
+				title: formData.title,
+				subTitle: formData.subTitle,
+				description: formData.discription,
 				superadminId: loginUser,
-				// Add image to payload if selected
 				...(selectedImage && { image: selectedImage }),
 			};
 
@@ -144,7 +141,7 @@ export function CreateForm(): React.JSX.Element {
 				});
 
 				showToast({
-					message: data?.createUser?.message || "Sub admin created successfully.",
+					message: data?.createUser?.message || "Banner created successfully.",
 					type: "success",
 				});
 				router.push(`/dashboard/customers`);
@@ -161,27 +158,45 @@ export function CreateForm(): React.JSX.Element {
 	return (
 		<form onSubmit={handleSubmit}>
 			<Card elevation={3} sx={{ p: 2 }}>
-				<CardHeader title="Create Admin Account" subheader="Fill in the details to create a new admin" sx={{ mb: 2 }} />
+				<CardHeader title="Create Banner" subheader="Fill in the details to create a new banner" sx={{ mb: 2 }} />
 
 				<CardContent>
 					<Stack spacing={4}>
 						{/* Profile Image Upload Section */}
 						<Box>
 							<Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-								Profile Image
+								Banner Image
 							</Typography>
 							<Stack direction="row" spacing={3} alignItems="center">
-								<Avatar
-									src={imagePreview}
+								<Box
 									sx={{
-										width: 100,
-										height: 100,
+										width: "100%",
+										maxWidth: 600, // banner ki max width
+										height: 200, // banner ki height
 										border: "2px dashed #ddd",
 										bgcolor: "grey.100",
+										borderRadius: 2,
+										overflow: "hidden",
+										display: "flex",
+										alignItems: "center",
+										justifyContent: "center",
 									}}
 								>
-									{!imagePreview && <PhotoCamera sx={{ fontSize: 40, color: "grey.500" }} />}
-								</Avatar>
+									{imagePreview ? (
+										<Box
+											component="img"
+											src={imagePreview}
+											alt="Banner Preview"
+											sx={{
+												width: "100%",
+												height: "100%",
+												objectFit: "cover",
+											}}
+										/>
+									) : (
+										<PhotoCamera sx={{ fontSize: 50, color: "grey.500" }} />
+									)}
+								</Box>
 
 								<Stack spacing={1}>
 									<input
@@ -228,80 +243,51 @@ export function CreateForm(): React.JSX.Element {
 						<Stack spacing={2}>
 							<TextField
 								fullWidth
-								label="Full Name"
-								name="name"
-								value={formData.name}
+								label="Title"
+								name="title"
+								value={formData.title}
 								onChange={handleChange}
-								error={!!errors.name}
-								helperText={errors.name}
+								error={!!errors.title}
+								helperText={errors.title}
 							/>
 							<TextField
 								fullWidth
-								label="Username"
-								name="username"
-								value={formData.username}
+								label="Sub Title"
+								name="subTitle"
+								value={formData.subTitle}
 								onChange={handleChange}
-								error={!!errors.username}
-								helperText={errors.username}
+								error={!!errors.subTitle}
+								helperText={errors.subTitle}
 							/>
 							<TextField
 								fullWidth
-								label="Email Address"
-								name="email"
-								type="email"
-								value={formData.email}
+								label="Discription"
+								name="discription"
+								type="textarea"
+								value={formData.discription}
 								onChange={handleChange}
-								error={!!errors.email}
-								helperText={errors.email}
+								error={!!errors.discription}
+								helperText={errors.discription}
 							/>
-							<TextField
-								fullWidth
-								label="Phone Number"
-								name="phone"
-								value={formData.phone}
-								onChange={handleChange}
-								error={!!errors.phone}
-								helperText={errors.phone}
-							/>
-							<TextField
-								fullWidth
-								label="Website"
-								name="website"
-								value={formData.website}
-								onChange={handleChange}
-								error={!!errors.website}
-								helperText={errors.website}
-							/>
-						</Stack>
 
-						<Divider />
+							<TextField
+								fullWidth
+								select
+								label="Sub Admin"
+								name="subadminId"
+								value={formData.subadminId}
+								onChange={handleChange}
+								error={!!errors.subAdmin}
+								helperText={errors.subAdmin}
+							>
+								<MenuItem value="">Select Sub Admin</MenuItem>
+								<MenuItem value="admin1">Admin 1</MenuItem>
+								<MenuItem value="admin2">Admin 2</MenuItem>
+								<MenuItem value="admin3">Admin 3</MenuItem>
+							</TextField>
+						</Stack>
 
 						{/* Security Section */}
-						<Stack spacing={2}>
-							<FormControl fullWidth error={!!errors.password}>
-								<InputLabel>Password</InputLabel>
-								<OutlinedInput
-									label="Password"
-									name="password"
-									type="password"
-									value={formData.password}
-									onChange={handleChange}
-								/>
-								<FormHelperText>{errors.password}</FormHelperText>
-							</FormControl>
-
-							<FormControl fullWidth error={!!errors.confirmPassword}>
-								<InputLabel>Confirm Password</InputLabel>
-								<OutlinedInput
-									label="Confirm Password"
-									name="confirmPassword"
-									type="password"
-									value={formData.confirmPassword}
-									onChange={handleChange}
-								/>
-								<FormHelperText>{errors.confirmPassword}</FormHelperText>
-							</FormControl>
-						</Stack>
 					</Stack>
 				</CardContent>
 
