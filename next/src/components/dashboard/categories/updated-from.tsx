@@ -52,21 +52,23 @@ import dayjs from "dayjs";
 
 import { showToast } from "@/hooks/toast-message";
 
-import { getByIdBanner, updateBanner } from "../../../app/query-common";
-import BannerUpdateSkeleton from "../../dashboard/loader/form-skeleton-loader";
+import { GetCategotyById, UpdateCategory } from "../../../app/query-common";
+import CategoriesUpdateSkeleton from "../../dashboard/loader/form-skeleton-loader";
 
 interface FormData {
 	description: any;
-	subTitle: any;
-	title: any;
+	slug: any;
+	name: any;
+	superadminId?: any;
+	subadminId?: any;
 }
 
 interface UserData {
 	image: string;
 	id: string;
 	description: any;
-	subTitle: any;
-	title: any;
+	slug: any;
+	name: any;
 	avatar?: string;
 	createdAt: string;
 	superadminId?: any;
@@ -77,25 +79,25 @@ export function UpdateForm(): React.JSX.Element {
 	const theme = useTheme();
 	const router = useRouter();
 	const params = useParams();
-	const getBannerId = params?.id as string;
+	const getCategoryId = params?.id as string;
 
 	// Apollo hooks
-	const [updateUserMutation, { loading: updating }] = useMutation(updateBanner);
-	const { data, loading, error } = useQuery(getByIdBanner, {
-		variables: { getBannerId: getBannerId },
-		skip: !getBannerId,
+	const [updateUserMutation, { loading: updating }] = useMutation(UpdateCategory);
+	const { data, loading, error } = useQuery(GetCategotyById, {
+		variables: { getCategoryId: getCategoryId },
+		skip: !getCategoryId,
 		onCompleted: (data) => {
-			if (data?.getBanner) {
-				const banner = data.getBanner;
+			if (data?.getCategory) {
+				const categories = data.getCategory;
 				setFormData({
-					title: banner.title || "",
-					subTitle: banner.subTitle || "",
-					description: banner.description || "",
+					name: categories.name || "",
+					slug: categories.slug || "",
+					description: categories.description || "",
 				});
-				setOriginalData(banner);
+				setOriginalData(categories);
 				// Set current avatar as preview if exists
-				if (banner.avatar) {
-					setImagePreview(banner.avatar);
+				if (categories.avatar) {
+					setImagePreview(categories.avatar);
 				}
 			}
 		},
@@ -110,8 +112,8 @@ export function UpdateForm(): React.JSX.Element {
 
 	// State management
 	const [formData, setFormData] = React.useState({
-		title: "",
-		subTitle: "",
+		name: "",
+		slug: "",
 		description: "",
 		superadminId: "",
 		subadminId: "",
@@ -134,8 +136,8 @@ export function UpdateForm(): React.JSX.Element {
 		if (!originalData) return;
 
 		const hasChanges =
-			formData.title !== originalData.title ||
-			formData.subTitle !== originalData.subTitle ||
+			formData.name !== originalData.name ||
+			formData.slug !== originalData.slug ||
 			formData.description !== originalData.description ||
 			imageChanged;
 		setHasUnsavedChanges(hasChanges);
@@ -202,14 +204,10 @@ export function UpdateForm(): React.JSX.Element {
 	const validateField = (name: string, value: string): string => {
 		console.log("name: ", name);
 		switch (name) {
-			case "title":
-				return !value.trim() ? "title is required" : "";
-			case "subTitle":
-				return !value.trim()
-					? "subTitle is required"
-					: value.length < 3
-						? "subTitle must be at least 3 characters"
-						: "";
+			case "name":
+				return !value.trim() ? "name is required" : "";
+			case "slug":
+				return !value.trim() ? "slug is required" : value.length < 3 ? "slug must be at least 3 characters" : "";
 			case "discription":
 				return !value.trim() ? "discription must be at least 3 characters" : "";
 
@@ -243,19 +241,19 @@ export function UpdateForm(): React.JSX.Element {
 
 		// Prepare payload with only changed fields
 		const payload: any = {
-			updateBannerId: getBannerId,
+			updateCategoryId: getCategoryId,
 			subadminId: originalData?.subadminId,
 			superadminId: originalData?.superadminId,
 		};
 		let changeCount = 0;
 
 		// Check for changes and add to payload
-		if (formData.title !== originalData?.title) {
-			payload.title = formData.title;
+		if (formData.name !== originalData?.name) {
+			payload.name = formData.name;
 			changeCount++;
 		}
-		if (formData.subTitle !== originalData?.subTitle) {
-			payload.subTitle = formData.subTitle;
+		if (formData.slug !== originalData?.slug) {
+			payload.slug = formData.slug;
 			changeCount++;
 		}
 		if (formData.description !== originalData?.description) {
@@ -286,15 +284,15 @@ export function UpdateForm(): React.JSX.Element {
 				},
 			});
 
-			if (responseData?.updateBanner?.success) {
+			if (responseData?.updateCategory?.success) {
 				showToast({
-					message: `${responseData?.updateBanner?.message}`,
+					message: `${responseData?.updateCategory?.message}`,
 					type: "success",
 				});
-				router.push("/dashboard/banner");
+				router.push("/dashboard/categories");
 			} else {
 				showToast({
-					message: responseData?.updateBanner?.message || "An error occurred while updating user",
+					message: responseData?.updateCategory?.message || "An error occurred while updating user",
 					type: "error",
 				});
 			}
@@ -312,14 +310,14 @@ export function UpdateForm(): React.JSX.Element {
 			const confirmed = window.confirm("You have unsaved changes. Are you sure you want to leave?");
 			if (!confirmed) return;
 		}
-		router.push("/dashboard/categories");
+		router.push("/dashboard/customers");
 	};
 
 	// Loading state
 	if (loading) {
 		return (
 			<>
-				<BannerUpdateSkeleton />
+				<CategoriesUpdateSkeleton />
 			</>
 		);
 	}
@@ -356,8 +354,8 @@ export function UpdateForm(): React.JSX.Element {
 					</Button>
 				}
 			>
-				<Typography variant="h6">Banner not found</Typography>
-				<Typography variant="body2">The requested Banner could not be found.</Typography>
+				<Typography variant="h6">Categories not found</Typography>
+				<Typography variant="body2">The requested Categories could not be found.</Typography>
 			</Alert>
 		);
 	}
@@ -367,8 +365,8 @@ export function UpdateForm(): React.JSX.Element {
 			<form onSubmit={handleSubmit}>
 				<Card elevation={3} sx={{ p: 2 }}>
 					<CardHeader
-						title="Update Banner Information"
-						subheader="Modify Banner details and preferences"
+						name="Update Categories Information"
+						subheader="Modify Categories details and preferences"
 						sx={{ mb: 2 }}
 					/>
 
@@ -376,17 +374,17 @@ export function UpdateForm(): React.JSX.Element {
 						<Stack spacing={4}>
 							{/* Profile Image Upload Section */}
 							<Box>
-								<Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-									Banner Image
+								<Typography variant="slug1" gutterBottom sx={{ fontWeight: 600 }}>
+									Categories Image
 								</Typography>
 								<Stack direction="row" spacing={3} alignItems="center">
 									<Box
 										sx={{
 											width: "100%",
-											maxWidth: 600, // banner ki max width
-											height: 200, // banner ki height
-											border: "2px dashed #ddd",
-											bgcolor: "grey.100",
+											maxWidth: 300,
+											height: 150,
+											border: "2px dashed #ccc",
+											bgcolor: "grey.50",
 											borderRadius: 2,
 											overflow: "hidden",
 											display: "flex",
@@ -398,7 +396,7 @@ export function UpdateForm(): React.JSX.Element {
 											<Box
 												component="img"
 												src={imagePreview || `http://localhost:8000${originalData?.image}`}
-												alt="Banner Preview"
+												alt="Categories Preview"
 												sx={{
 													width: "100%",
 													height: "100%",
@@ -455,21 +453,21 @@ export function UpdateForm(): React.JSX.Element {
 							<Stack spacing={2}>
 								<TextField
 									fullWidth
-									label="Title"
-									name="title"
-									value={formData.title}
+									label="name"
+									name="name"
+									value={formData.name}
 									onChange={handleChange}
-									error={!!errors.title}
-									helperText={errors.title}
+									error={!!errors.name}
+									helperText={errors.name}
 								/>
 								<TextField
 									fullWidth
-									label="Sub Title"
-									name="subTitle"
-									value={formData.subTitle}
+									label="Sub name"
+									name="slug"
+									value={formData.slug}
 									onChange={handleChange}
-									error={!!errors.subTitle}
-									helperText={errors.subTitle}
+									error={!!errors.slug}
+									helperText={errors.slug}
 								/>
 								<TextField
 									fullWidth

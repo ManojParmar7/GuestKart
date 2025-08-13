@@ -66,6 +66,8 @@ export default function Page(): React.JSX.Element {
 					message: `${responseData?.updateUser?.message || "Updated successfully"}`,
 					type: "success",
 				});
+
+				await authClient.getUser();
 			} else {
 				showToast({
 					message: responseData?.updateUser?.message || "An error occurred while updating user",

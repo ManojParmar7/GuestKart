@@ -1,7 +1,6 @@
 
 'use client';
 
-import type { User } from '@/types/user';
 
 export interface SignUpParams {
   firstName: string;
@@ -82,7 +81,6 @@ class AuthClient {
 
     try {
       const data = await graphqlRequest(query, params);
-      console.log('data: ', data);
       localStorage.setItem('custom-auth-token', data.login.token);
       localStorage.setItem('login_id', data.login.user.id);
 
@@ -130,7 +128,7 @@ class AuthClient {
   "getUserId":loginUser
 }
       const data = await graphqlRequest(query, variables, token);
-      console.log('data: ', data);
+      console.log('*****: ', data);
       return { data: data?.getUser };
     } catch (err: any) {
       return { error: err.message };

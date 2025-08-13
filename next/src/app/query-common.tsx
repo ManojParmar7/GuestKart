@@ -402,3 +402,189 @@ export const createBanner = gql`
 		}
 	}
 `;
+
+export const GetCategotyById = gql`
+	query GetCategory($getCategoryId: ID!) {
+		getCategory(id: $getCategoryId) {
+			id
+			name
+			slug
+			description
+			image
+			subadminId
+			superadminId
+		}
+	}
+`;
+
+export const GetAllCategories = gql`
+	query GetAllCategories($subadminId: ID, $superadminId: ID, $search: String, $page: Int, $limit: Int) {
+		getAllCategories(
+			subadminId: $subadminId
+			superadminId: $superadminId
+			search: $search
+			page: $page
+			limit: $limit
+		) {
+			success
+			message
+			total
+			currentPage
+			totalPages
+			categories {
+				id
+				name
+				slug
+				description
+				image
+				subadminId
+				superadminId
+			}
+		}
+	}
+`;
+export const UpdateCategory = gql`
+	mutation UpdateCategory($updateCategoryId: ID!, $subadminId: ID, $superadminId: ID, $image: Upload) {
+		updateCategory(id: $updateCategoryId, subadminId: $subadminId, superadminId: $superadminId, image: $image) {
+			success
+			message
+			category {
+				id
+				name
+				slug
+				description
+				image
+				subadminId
+				superadminId
+			}
+		}
+	}
+`;
+
+export const createCategory = gql`
+	mutation CreateCategory(
+		$name: String!
+		$slug: String!
+		$image: Upload!
+		$subadminId: ID!
+		$superadminId: ID!
+		$description: String
+	) {
+		createCategory(
+			name: $name
+			slug: $slug
+			image: $image
+			subadminId: $subadminId
+			superadminId: $superadminId
+			description: $description
+		) {
+			success
+			message
+			category {
+				id
+				name
+				slug
+				description
+				image
+				subadminId
+				superadminId
+			}
+		}
+	}
+`;
+export const deleteCategoryId = gql`
+	mutation DeleteCategory($deleteCategoryId: ID!) {
+		deleteCategory(id: $deleteCategoryId) {
+			success
+			message
+			category {
+				id
+				name
+				slug
+				description
+				image
+				subadminId
+				superadminId
+			}
+		}
+	}
+`;
+export const createRole = gql`
+	mutation CreateRole($name: String!, $description: String, $createdBy: ID) {
+		createRole(name: $name, description: $description, createdBy: $createdBy) {
+			success
+			message
+			role {
+				id
+				name
+				description
+				createdAt
+				updatedAt
+				createdBy
+			}
+		}
+	}
+`;
+export const updateRole = gql`
+	mutation UpdateRole($updateRoleId: ID!, $name: String, $description: String) {
+		updateRole(id: $updateRoleId, name: $name, description: $description) {
+			success
+			message
+			role {
+				id
+				name
+				description
+				createdAt
+				updatedAt
+				createdBy
+			}
+		}
+	}
+`;
+export const getRole = gql`
+	query GetRole($getRoleId: ID!) {
+		getRole(id: $getRoleId) {
+			id
+			name
+			description
+			createdAt
+			updatedAt
+			createdBy
+		}
+	}
+`;
+export const getAllRoles = gql`
+	query GetAllRoles($page: Int, $limit: Int, $search: String) {
+		getAllRoles(page: $page, limit: $limit, search: $search) {
+			success
+			message
+			total
+			currentPage
+			totalPages
+			roles {
+				id
+				name
+				description
+				createdAt
+				updatedAt
+				createdBy
+			}
+		}
+	}
+`;
+export const deleteRoles = gql`
+	mutation DeleteRole($deleteRoleId: ID!) {
+		deleteRole(id: $deleteRoleId) {
+			success
+			message
+			role {
+				id
+				name
+				description
+				createdAt
+				updatedAt
+				createdBy
+			}
+		}
+	}
+`;

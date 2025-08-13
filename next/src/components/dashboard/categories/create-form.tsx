@@ -22,19 +22,18 @@ import {
 import { authClient } from "@/lib/auth/client";
 import { showToast } from "@/hooks/toast-message"; // adjust the path accordingly
 
-import { createBanner, GetUsersBySuperadmin } from "../../../app/query-common";
+import { createCategory, GetUsersBySuperadmin } from "../../../app/query-common";
 
 export function CreateForm(): React.JSX.Element {
 	const loginUser = localStorage.getItem("login_id");
-	const [createUser] = useMutation(createBanner);
+	const [CreateCategory] = useMutation(createCategory);
 	const [formData, setFormData] = React.useState({
-		title: "",
-		subTitle: "",
+		name: "",
+		slug: "",
 		description: "",
 		superadminId: "",
 		subadminId: "",
 	});
-	console.log("formData", formData);
 	const [selectedImage, setSelectedImage] = React.useState<File | null>(null);
 	const [imagePreview, setImagePreview] = React.useState<string>("");
 	const [errors, setErrors] = React.useState<Record<string, string>>({});
@@ -95,8 +94,8 @@ export function CreateForm(): React.JSX.Element {
 
 	const validate = () => {
 		const newErrors: Record<string, string> = {};
-		if (!formData.title) newErrors.title = "Title is required";
-		if (!formData.subTitle) newErrors.subTitle = "Sub Title is required";
+		if (!formData.name) newErrors.name = "name is required";
+		if (!formData.slug) newErrors.slug = "Sub name is required";
 		if (!formData?.description) newErrors.description = "description is required";
 
 		setErrors(newErrors);
@@ -123,7 +122,6 @@ export function CreateForm(): React.JSX.Element {
 		variables,
 		fetchPolicy: "network-only",
 	});
-
 	React.useEffect(() => {
 		refetch(variables);
 	}, []);
@@ -140,8 +138,8 @@ export function CreateForm(): React.JSX.Element {
 		event.preventDefault();
 		if (validate()) {
 			const payload = {
-				title: formData.title,
-				subTitle: formData.subTitle,
+				name: formData.name,
+				slug: formData.slug,
 				description: formData.description, // spelling fix
 				...(selectedImage && { image: selectedImage }),
 
@@ -162,7 +160,7 @@ export function CreateForm(): React.JSX.Element {
 			console.log("Selected Image:", selectedImage);
 
 			try {
-				const { data } = await createUser({
+				const { data } = await CreateCategory({
 					variables: {
 						...payload,
 						image: selectedImage,
@@ -170,10 +168,10 @@ export function CreateForm(): React.JSX.Element {
 				});
 
 				showToast({
-					message: data?.createUser?.message || "Banner created successfully.",
+					message: data?.createCategory?.message || " created successfully.",
 					type: "success",
 				});
-				router.push(`/dashboard/banner`);
+				router.push(`/dashboard/categories`);
 			} catch (error) {
 				console.error("Error submitting permissions:", error);
 				showToast({
@@ -183,28 +181,31 @@ export function CreateForm(): React.JSX.Element {
 			}
 		}
 	};
-	console.log("bannerGetAll", data?.getAllBanners?.banners);
 
 	return (
 		<form onSubmit={handleSubmit}>
 			<Card elevation={3} sx={{ p: 2 }}>
-				<CardHeader title="Create Banner" subheader="Fill in the details to create a new banner" sx={{ mb: 2 }} />
+				<CardHeader
+					name="Create Categories"
+					subheader="Fill in the details to create a new categories"
+					sx={{ mb: 2 }}
+				/>
 
 				<CardContent>
 					<Stack spacing={4}>
 						{/* Profile Image Upload Section */}
 						<Box>
 							<Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-								Banner Image
+								Categories Image
 							</Typography>
 							<Stack direction="row" spacing={3} alignItems="center">
 								<Box
 									sx={{
 										width: "100%",
-										maxWidth: 600, // banner ki max width
-										height: 200, // banner ki height
-										border: "2px dashed #ddd",
-										bgcolor: "grey.100",
+										maxWidth: 300,
+										height: 150,
+										border: "2px dashed #ccc",
+										bgcolor: "grey.50",
 										borderRadius: 2,
 										overflow: "hidden",
 										display: "flex",
@@ -216,7 +217,7 @@ export function CreateForm(): React.JSX.Element {
 										<Box
 											component="img"
 											src={imagePreview}
-											alt="Banner Preview"
+											alt="Category Preview"
 											sx={{
 												width: "100%",
 												height: "100%",
@@ -224,7 +225,7 @@ export function CreateForm(): React.JSX.Element {
 											}}
 										/>
 									) : (
-										<PhotoCamera sx={{ fontSize: 50, color: "grey.500" }} />
+										<PhotoCamera sx={{ fontSize: 40, color: "grey.400" }} />
 									)}
 								</Box>
 
@@ -232,11 +233,11 @@ export function CreateForm(): React.JSX.Element {
 									<input
 										accept="image/*"
 										style={{ display: "none" }}
-										id="image-upload"
+										id="category-image-upload"
 										type="file"
 										onChange={handleImageUpload}
 									/>
-									<label htmlFor="image-upload">
+									<label htmlFor="category-image-upload">
 										<Button variant="outlined" component="span" startIcon={<PhotoCamera />} size="small">
 											Choose Image
 										</Button>
@@ -273,21 +274,21 @@ export function CreateForm(): React.JSX.Element {
 						<Stack spacing={2}>
 							<TextField
 								fullWidth
-								label="Title"
-								name="title"
-								value={formData.title}
+								label="name"
+								name="name"
+								value={formData.name}
 								onChange={handleChange}
-								error={!!errors.title}
-								helperText={errors.title}
+								error={!!errors.name}
+								helperText={errors.name}
 							/>
 							<TextField
 								fullWidth
-								label="Sub Title"
-								name="subTitle"
-								value={formData.subTitle}
+								label="Slug"
+								name="slug"
+								value={formData.slug}
 								onChange={handleChange}
-								error={!!errors.subTitle}
-								helperText={errors.subTitle}
+								error={!!errors.slug}
+								helperText={errors.slug}
 							/>
 							<TextField
 								fullWidth
@@ -328,7 +329,7 @@ export function CreateForm(): React.JSX.Element {
 				<Divider sx={{ my: 2 }} />
 
 				<CardActions sx={{ justifyContent: "flex-end", gap: 2 }}>
-					<Button variant="outlined" color="error" onClick={() => router.push(`/dashboard/categories`)}>
+					<Button variant="outlined" color="error" onClick={() => router.push(`/dashboard/customers`)}>
 						Cancel
 					</Button>
 					<Button variant="contained" type="submit">

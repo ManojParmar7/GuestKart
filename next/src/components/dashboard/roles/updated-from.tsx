@@ -52,21 +52,21 @@ import dayjs from "dayjs";
 
 import { showToast } from "@/hooks/toast-message";
 
-import { getByIdBanner, updateBanner } from "../../../app/query-common";
+import { getRole, updateRole } from "../../../app/query-common";
 import BannerUpdateSkeleton from "../../dashboard/loader/form-skeleton-loader";
 
 interface FormData {
 	description: any;
-	subTitle: any;
-	title: any;
+
+	name: any;
 }
 
 interface UserData {
 	image: string;
 	id: string;
 	description: any;
-	subTitle: any;
-	title: any;
+	slug: any;
+	name: any;
 	avatar?: string;
 	createdAt: string;
 	superadminId?: any;
@@ -77,25 +77,25 @@ export function UpdateForm(): React.JSX.Element {
 	const theme = useTheme();
 	const router = useRouter();
 	const params = useParams();
-	const getBannerId = params?.id as string;
+	const getRolesId = params?.id as string;
 
 	// Apollo hooks
-	const [updateUserMutation, { loading: updating }] = useMutation(updateBanner);
-	const { data, loading, error } = useQuery(getByIdBanner, {
-		variables: { getBannerId: getBannerId },
-		skip: !getBannerId,
+	const [updateUserMutation, { loading: updating }] = useMutation(updateRole);
+	const { data, loading, error } = useQuery(getRole, {
+		variables: { getRoleId: getRolesId },
+		skip: !getRolesId,
 		onCompleted: (data) => {
-			if (data?.getBanner) {
-				const banner = data.getBanner;
+			if (data?.getRole) {
+				const role = data.getRole;
 				setFormData({
-					title: banner.title || "",
-					subTitle: banner.subTitle || "",
-					description: banner.description || "",
+					name: role.name || "",
+
+					description: role.description || "",
 				});
-				setOriginalData(banner);
+				setOriginalData(role);
 				// Set current avatar as preview if exists
-				if (banner.avatar) {
-					setImagePreview(banner.avatar);
+				if (role.avatar) {
+					setImagePreview(role.avatar);
 				}
 			}
 		},
@@ -110,17 +110,13 @@ export function UpdateForm(): React.JSX.Element {
 
 	// State management
 	const [formData, setFormData] = React.useState({
-		title: "",
-		subTitle: "",
+		name: "",
+
 		description: "",
-		superadminId: "",
-		subadminId: "",
 	});
 
 	const [originalData, setOriginalData] = React.useState<UserData | null>(null);
-	console.log("originalData: ", originalData);
 	const [errors, setErrors] = React.useState<Record<string, string>>({});
-	const [passwordChange, setPasswordChange] = React.useState(false);
 
 	const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
 
@@ -133,57 +129,11 @@ export function UpdateForm(): React.JSX.Element {
 	React.useEffect(() => {
 		if (!originalData) return;
 
-		const hasChanges =
-			formData.title !== originalData.title ||
-			formData.subTitle !== originalData.subTitle ||
-			formData.description !== originalData.description ||
-			imageChanged;
+		const hasChanges = formData.name !== originalData.name || formData.description !== originalData.description;
 		setHasUnsavedChanges(hasChanges);
-	}, [formData, originalData, imageChanged]);
+	}, [formData, originalData]);
 
 	// Image upload handlers
-	const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const file = event.target.files?.[0];
-		if (file) {
-			// Validate file type
-			const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
-			if (!allowedTypes.includes(file.type)) {
-				setErrors((prev) => ({ ...prev, image: "Please select a valid image file (JPEG, PNG, GIF)" }));
-				return;
-			}
-
-			// Validate file size (5MB limit)
-			const maxSize = 5 * 1024 * 1024; // 5MB in bytes
-			if (file.size > maxSize) {
-				setErrors((prev) => ({ ...prev, image: "Image size should be less than 5MB" }));
-				return;
-			}
-
-			setSelectedImage(file);
-			setImageChanged(true);
-			setErrors((prev) => ({ ...prev, image: "" }));
-
-			// Create preview URL
-			const reader = new FileReader();
-			reader.onload = () => {
-				setImagePreview(reader.result as string);
-			};
-			reader.readAsDataURL(file);
-		}
-	};
-
-	const handleRemoveImage = () => {
-		setSelectedImage(null);
-		setImagePreview(originalData?.avatar || "");
-		setImageChanged(originalData?.avatar ? true : false); // Mark as changed if removing existing image
-		setErrors((prev) => ({ ...prev, image: "" }));
-
-		// Reset file input
-		const fileInput = document.getElementById("image-upload") as HTMLInputElement;
-		if (fileInput) {
-			fileInput.value = "";
-		}
-	};
 
 	// Form handlers
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -202,14 +152,9 @@ export function UpdateForm(): React.JSX.Element {
 	const validateField = (name: string, value: string): string => {
 		console.log("name: ", name);
 		switch (name) {
-			case "title":
-				return !value.trim() ? "title is required" : "";
-			case "subTitle":
-				return !value.trim()
-					? "subTitle is required"
-					: value.length < 3
-						? "subTitle must be at least 3 characters"
-						: "";
+			case "name":
+				return !value.trim() ? "name is required" : "";
+
 			case "discription":
 				return !value.trim() ? "discription must be at least 3 characters" : "";
 
@@ -243,37 +188,22 @@ export function UpdateForm(): React.JSX.Element {
 
 		// Prepare payload with only changed fields
 		const payload: any = {
-			updateBannerId: getBannerId,
-			subadminId: originalData?.subadminId,
-			superadminId: originalData?.superadminId,
+			updateRoleId: getRolesId,
 		};
 		let changeCount = 0;
 
 		// Check for changes and add to payload
-		if (formData.title !== originalData?.title) {
-			payload.title = formData.title;
+		if (formData.name !== originalData?.name) {
+			payload.name = formData.name;
 			changeCount++;
 		}
-		if (formData.subTitle !== originalData?.subTitle) {
-			payload.subTitle = formData.subTitle;
-			changeCount++;
-		}
+
 		if (formData.description !== originalData?.description) {
 			payload.description = formData.description;
 			changeCount++;
 		}
 
 		// Handle image upload
-		if (imageChanged) {
-			if (selectedImage) {
-				// Upload new image
-				payload.profileImage = selectedImage;
-			} else {
-				// Remove image
-				payload.removeImage = true;
-			}
-			changeCount++;
-		}
 
 		try {
 			// If you need to upload image separately
@@ -286,15 +216,15 @@ export function UpdateForm(): React.JSX.Element {
 				},
 			});
 
-			if (responseData?.updateBanner?.success) {
+			if (responseData?.updateRole?.success) {
 				showToast({
-					message: `${responseData?.updateBanner?.message}`,
+					message: `${responseData?.updateRole?.message}`,
 					type: "success",
 				});
-				router.push("/dashboard/banner");
+				router.push("/dashboard/roles");
 			} else {
 				showToast({
-					message: responseData?.updateBanner?.message || "An error occurred while updating user",
+					message: responseData?.updateRole?.message || "An error occurred while updating user",
 					type: "error",
 				});
 			}
@@ -312,7 +242,7 @@ export function UpdateForm(): React.JSX.Element {
 			const confirmed = window.confirm("You have unsaved changes. Are you sure you want to leave?");
 			if (!confirmed) return;
 		}
-		router.push("/dashboard/categories");
+		router.push("/dashboard/roles");
 	};
 
 	// Loading state
@@ -356,8 +286,8 @@ export function UpdateForm(): React.JSX.Element {
 					</Button>
 				}
 			>
-				<Typography variant="h6">Banner not found</Typography>
-				<Typography variant="body2">The requested Banner could not be found.</Typography>
+				<Typography variant="h6">Roles not found</Typography>
+				<Typography variant="body2">The requested Roles could not be found.</Typography>
 			</Alert>
 		);
 	}
@@ -366,88 +296,11 @@ export function UpdateForm(): React.JSX.Element {
 		<Box sx={{ width: "100%", p: 2 }}>
 			<form onSubmit={handleSubmit}>
 				<Card elevation={3} sx={{ p: 2 }}>
-					<CardHeader
-						title="Update Banner Information"
-						subheader="Modify Banner details and preferences"
-						sx={{ mb: 2 }}
-					/>
+					<CardHeader name="Update Roles Information" subheader="Modify Roles details and preferences" sx={{ mb: 2 }} />
 
 					<CardContent>
 						<Stack spacing={4}>
 							{/* Profile Image Upload Section */}
-							<Box>
-								<Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-									Banner Image
-								</Typography>
-								<Stack direction="row" spacing={3} alignItems="center">
-									<Box
-										sx={{
-											width: "100%",
-											maxWidth: 600, // banner ki max width
-											height: 200, // banner ki height
-											border: "2px dashed #ddd",
-											bgcolor: "grey.100",
-											borderRadius: 2,
-											overflow: "hidden",
-											display: "flex",
-											alignItems: "center",
-											justifyContent: "center",
-										}}
-									>
-										{imagePreview || originalData?.image ? (
-											<Box
-												component="img"
-												src={imagePreview || `http://localhost:8000${originalData?.image}`}
-												alt="Banner Preview"
-												sx={{
-													width: "100%",
-													height: "100%",
-													objectFit: "cover",
-												}}
-											/>
-										) : (
-											<PhotoCamera sx={{ fontSize: 50, color: "grey.500" }} />
-										)}
-									</Box>
-
-									<Stack spacing={1}>
-										<input
-											accept="image/*"
-											style={{ display: "none" }}
-											id="image-upload"
-											type="file"
-											onChange={handleImageUpload}
-										/>
-										<label htmlFor="image-upload">
-											<Button variant="outlined" component="span" startIcon={<PhotoCamera />} size="small">
-												Choose Image
-											</Button>
-										</label>
-
-										{selectedImage && (
-											<Button
-												variant="text"
-												color="error"
-												size="small"
-												startIcon={<Delete />}
-												onClick={handleRemoveImage}
-											>
-												Remove Image
-											</Button>
-										)}
-
-										<Typography variant="caption" color="textSecondary">
-											Allowed: JPG, PNG, GIF up to 5MB
-										</Typography>
-									</Stack>
-								</Stack>
-
-								{errors.image && (
-									<FormHelperText error sx={{ mt: 1 }}>
-										{errors.image}
-									</FormHelperText>
-								)}
-							</Box>
 
 							<Divider />
 
@@ -455,22 +308,14 @@ export function UpdateForm(): React.JSX.Element {
 							<Stack spacing={2}>
 								<TextField
 									fullWidth
-									label="Title"
-									name="title"
-									value={formData.title}
+									label="name"
+									name="name"
+									value={formData.name}
 									onChange={handleChange}
-									error={!!errors.title}
-									helperText={errors.title}
+									error={!!errors.name}
+									helperText={errors.name}
 								/>
-								<TextField
-									fullWidth
-									label="Sub Title"
-									name="subTitle"
-									value={formData.subTitle}
-									onChange={handleChange}
-									error={!!errors.subTitle}
-									helperText={errors.subTitle}
-								/>
+
 								<TextField
 									fullWidth
 									label="Description"

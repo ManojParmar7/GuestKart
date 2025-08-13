@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import RouterLink from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,14 +32,30 @@ type Values = zod.infer<typeof schema>;
 const defaultValues = { email: "manojsuperadmin@gmail.com", password: "manoj@1234567" } satisfies Values;
 
 export function SignInForm(): React.JSX.Element {
+	const [navItems, setNavItems] = useState<any[]>([]);
+	const [user, setUser] = useState<any>(null);
+
 	const router = useRouter();
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 	const { checkSession } = useUser();
 
 	const [showPassword, setShowPassword] = React.useState<boolean>();
 
 	const [isPending, setIsPending] = React.useState<boolean>(false);
+	useEffect(() => {
+		(async () => {
+			const { data } = await authClient.getUser();
+			setUser(data);
+		})();
 
+		// emitUserUpdate();
+	}, []);
+	useEffect(() => {
+		import("../dashboard/layout/config").then((module) => {
+			setNavItems(module.navItems);
+		});
+	}, [user]);
 	const {
 		control,
 		handleSubmit,

@@ -1,26 +1,86 @@
+/* eslint-disable unicorn/prefer-single-call */
 "use client";
 
 import * as React from "react";
 import RouterLink from "next/link";
 import { usePathname } from "next/navigation";
+import { useQuery } from "@apollo/client";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { ArrowSquareUpRightIcon } from "@phosphor-icons/react/dist/ssr/ArrowSquareUpRight";
 import { CaretUpDownIcon } from "@phosphor-icons/react/dist/ssr/CaretUpDown";
 
 import type { NavItemConfig } from "@/types/nav";
 import { paths } from "@/paths";
+import { authClient } from "@/lib/auth/client";
 import { isNavItemActive } from "@/lib/is-nav-item-active";
 import { Logo } from "@/components/core/logo";
 
-import { navItems } from "./config";
+import { GetPermissions } from "../../../app/query-common";
 import { navIcons } from "./nav-icons";
 
 export function SideNav(): React.JSX.Element {
 	const pathname = usePathname();
+	const [user, setUser] = React.useState<any>(null);
+	const [navItems, setNavItems] = React.useState<NavItemConfig[]>([]);
+
+	// 1️⃣ Load user
+	React.useEffect(() => {
+		(async () => {
+			const { data } = await authClient.getUser();
+			setUser(data);
+		})();
+	}, []);
+
+	const { data } = useQuery(GetPermissions, {
+		variables: {
+			subadminId: user?.id,
+			superadminId: user?.superadmin_id,
+		},
+
+		fetchPolicy: "network-only",
+	});
+	// 3️⃣ Build nav items
+	React.useEffect(() => {
+		if (!user) return;
+		let items: NavItemConfig[] = [
+			{ key: "overview", title: "Overview", href: paths.dashboard.overview, icon: "chart-pie" },
+		];
+
+		if (user.role.name === "superadmin") {
+			// Superadmin → direct items
+			items.push({ key: "customers", title: "Sub Admins", href: paths.dashboard.customers, icon: "users" });
+			items.push({ key: "banner", title: "Banners", href: paths.dashboard.banner, icon: "image-square" });
+			items.push({ key: "categories", title: "Categories", href: paths.dashboard.categories, icon: "squares-four" });
+			items.push({ key: "roles", title: "Roles", href: paths.dashboard.roles, icon: "roles" });
+		} else if (data?.getPermission?.modules) {
+			const modules = data.getPermission.modules;
+
+			if (modules.products?.view) {
+				// items.push({ key: "products", title: "Products", href: paths.dashboard.products, icon: "package" });
+			}
+			if (modules.categories?.view) {
+				items.push({ key: "categories", title: "Categories", href: paths.dashboard.categories, icon: "SquaresFour" });
+			}
+			// if (modules.orders?.view) {
+			// 	items.push({ key: "orders", title: "Orders", href: paths.dashboard.orders, icon: "shopping-cart" });
+			// }
+			if (modules?.banners?.view) {
+				items.push({ key: "banner", title: "Banners", href: paths.dashboard.banner, icon: "image-square" });
+			}
+		}
+
+		// Common items
+		items.push(
+			{ key: "integrations", title: "Integrations", href: paths.dashboard.integrations, icon: "plugs-connected" },
+			{ key: "settings", title: "Settings", href: paths.dashboard.settings, icon: "gear-six" },
+			{ key: "account", title: "Account", href: paths.dashboard.account, icon: "user" },
+			{ key: "error", title: "Error", href: paths.errors.notFound, icon: "x-square" }
+		);
+
+		setNavItems(items);
+	}, [user, data]);
 
 	return (
 		<Box
@@ -81,47 +141,16 @@ export function SideNav(): React.JSX.Element {
 				{renderNavItems({ pathname, items: navItems })}
 			</Box>
 			<Divider sx={{ borderColor: "var(--mui-palette-neutral-700)" }} />
-			{/* <Stack spacing={2} sx={{ p: '12px' }}>
-        <div>
-          <Typography color="var(--mui-palette-neutral-100)" variant="subtitle2">
-            Need more features?
-          </Typography>
-          <Typography color="var(--mui-palette-neutral-400)" variant="body2">
-            Check out our Pro solution template.
-          </Typography>
-        </div>
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Box
-            component="img"
-            alt="Pro version"
-            src="/assets/devias-kit-pro.png"
-            sx={{ height: 'auto', width: '160px' }}
-          />
-        </Box>
-        <Button
-          component="a"
-          endIcon={<ArrowSquareUpRightIcon fontSize="var(--icon-fontSize-md)" />}
-          fullWidth
-          href="https://material-kit-pro-react.devias.io/"
-          sx={{ mt: 2 }}
-          target="_blank"
-          variant="contained"
-        >
-          Pro version
-        </Button>
-      </Stack> */}
 		</Box>
 	);
 }
 
 function renderNavItems({ items = [], pathname }: { items?: NavItemConfig[]; pathname: string }): React.JSX.Element {
-	const children = items.reduce((acc: React.ReactNode[], curr: NavItemConfig): React.ReactNode[] => {
-		const { key, ...item } = curr;
-
-		acc.push(<NavItem key={key} pathname={pathname} {...item} />);
-
-		return acc;
-	}, []);
+	const children = items.map(({ key, ...rest }) => (
+		<div key={key}>
+			<NavItem key={""} pathname={pathname} {...rest} />
+		</div>
+	));
 
 	return (
 		<Stack component="ul" spacing={1} sx={{ listStyle: "none", m: 0, p: 0 }}>

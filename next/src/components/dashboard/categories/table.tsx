@@ -34,7 +34,7 @@ import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { authClient } from "@/lib/auth/client";
 import { useSelection } from "@/hooks/use-selection";
 
-import { deleteBanner, getAllBanner, GetPermissions } from "../../../app/query-common";
+import { deleteCategoryId, GetAllCategories, GetPermissions } from "../../../app/query-common";
 import TableSkeletonLoader from "../loader/table-skeleton-loader";
 
 function applyPagination<T>(rows: T[] = [], page: number, rowsPerPage: number): T[] {
@@ -97,6 +97,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	});
 	const variables = {
 		search: search,
+
 		...(user?.role?.name === "superadmin"
 			? {
 					superadminId: loginUser,
@@ -110,11 +111,11 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 				: {}),
 	};
 
-	const { data, loading, error, refetch } = useQuery(getAllBanner, {
+	const { data, loading, error, refetch } = useQuery(GetAllCategories, {
 		variables,
 		fetchPolicy: "network-only",
 	});
-	const modules = permissionsData?.getPermission?.modules?.banners;
+	const modules = permissionsData?.getPermission?.modules?.categories;
 	const handleData = () => {
 		setPermissionsData(modules?.create);
 	};
@@ -123,20 +124,20 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 		handleData();
 	}, [search, page, rowsPerPage, handleData]);
 
-	const [deleteUsers] = useMutation(deleteBanner, {
-		refetchQueries: [{ query: getAllBanner, variables: { deleteBannerId: deleteDialog?.userId } }],
+	const [deleteCategory] = useMutation(deleteCategoryId, {
+		refetchQueries: [{ query: GetAllCategories, variables: { deleteCategoryId: deleteDialog?.userId } }],
 		onCompleted: (data) => {
-			if (data.deleteBanner.success) {
+			if (data.deleteCategory.success) {
 				setSnackbar({
 					open: true,
-					message: `${data?.deleteBanner?.message}` || "deleted successfully!",
+					message: `${data?.deleteCategory?.message}` || "deleted successfully!",
 					severity: "success",
 				});
 				refetch(variables);
 			} else {
 				setSnackbar({
 					open: true,
-					message: data.deleteBanner.message || "Failed to delete user",
+					message: data.deleteCategory.message || "Failed to delete user",
 					severity: "error",
 				});
 			}
@@ -153,7 +154,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	});
 
 	const rows = React.useMemo(() => {
-		const users = data?.getAllBanners?.banners ?? [];
+		const users = data?.getAllCategories?.categories ?? [];
 		return applyPagination(users, page, rowsPerPage);
 	}, [data, page, rowsPerPage]);
 	console.log(rows);
@@ -163,7 +164,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	const selectedSome = selected.size > 0 && selected.size < rows.length;
 	const selectedAll = rows.length > 0 && selected.size === rows.length;
 
-	const totalCount = data?.getAllBanners?.total || 0; // assuming backend gives total count
+	const totalCount = data?.getAllCategories?.total || 0; // assuming backend gives total count
 
 	const handlePageChange = (_event: unknown, newPage: number) => {
 		setPage(newPage);
@@ -175,7 +176,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	};
 
 	const handleEditUser = (userId: string) => {
-		router.push(`/dashboard/banner/update/${userId}`);
+		router.push(`/dashboard/categories/update/${userId}`);
 	};
 
 	const handleDeleteClick = (userId: string, userName: string) => {
@@ -192,9 +193,9 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 		setDeletingUserId(deleteDialog.userId);
 
 		try {
-			await deleteUsers({
+			await deleteCategory({
 				variables: {
-					deleteBannerId: deleteDialog.userId,
+					deleteCategoryId: deleteDialog.userId,
 				},
 			});
 		} catch (error) {
@@ -243,10 +244,10 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 										}}
 									/>
 								</TableCell>
-								<TableCell>Banner</TableCell>
+								<TableCell>Categories</TableCell>
 
-								<TableCell>Title</TableCell>
-								<TableCell>Sub Title</TableCell>
+								<TableCell>Category Name</TableCell>
+								<TableCell>Slug</TableCell>
 								<TableCell>description</TableCell>
 								<TableCell align="center">Actions</TableCell>
 							</TableRow>
@@ -276,8 +277,8 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 													<Avatar src={`http://localhost:8000${row?.image}`} />
 												</Stack>
 											</TableCell>
-											<TableCell>{row?.title}</TableCell>
-											<TableCell>{row?.subTitle}</TableCell>
+											<TableCell>{row?.name}</TableCell>
+											<TableCell>{row?.slug}</TableCell>
 											<TableCell>{row?.description ?? "-"}</TableCell>
 											<TableCell align="center">
 												<Stack direction="row" spacing={1} justifyContent="center">

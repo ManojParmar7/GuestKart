@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@apollo/client";
 import Alert from "@mui/material/Alert";
-import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -34,10 +33,11 @@ import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { authClient } from "@/lib/auth/client";
 import { useSelection } from "@/hooks/use-selection";
 
-import { deleteBanner, getAllBanner, GetPermissions } from "../../../app/query-common";
+import { deleteRoles, getAllRoles, GetPermissions } from "../../../app/query-common";
 import TableSkeletonLoader from "../loader/table-skeleton-loader";
 
 function applyPagination<T>(rows: T[] = [], page: number, rowsPerPage: number): T[] {
+	console.log("rows: ", rows);
 	return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }
 
@@ -47,7 +47,6 @@ type CustomersTableProps = {
 	setUserData: any;
 };
 export function TablePage({ search, setPermissionsData, setUserData }: CustomersTableProps): React.JSX.Element {
-	const loginUser = localStorage.getItem("login_id");
 	const [page, setPage] = React.useState(0);
 	const [rowsPerPage, setRowsPerPage] = React.useState(10);
 	const router = useRouter();
@@ -74,13 +73,6 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 		// emitUserUpdate();
 	}, []);
 	const [deletingUserId, setDeletingUserId] = React.useState<string | null>(null);
-	// const variables = {
-	// 	superadminId: loginUser,
-	// 	subadminId: subAdmin || null,
-	// 	search: search || null,
-	// 	limit: rowsPerPage,
-	// 	page: page + 1,
-	// };
 
 	React.useEffect(() => {
 		(async () => {
@@ -97,24 +89,15 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	});
 	const variables = {
 		search: search,
-		...(user?.role?.name === "superadmin"
-			? {
-					superadminId: loginUser,
-					subadminId: null,
-				}
-			: user?.role?.name === "subadmin"
-				? {
-						superadminId: user?.superadmin_id,
-						subadminId: loginUser,
-					}
-				: {}),
+		page: page,
+		limit: rowsPerPage,
 	};
 
-	const { data, loading, error, refetch } = useQuery(getAllBanner, {
+	const { data, loading, error, refetch } = useQuery(getAllRoles, {
 		variables,
 		fetchPolicy: "network-only",
 	});
-	const modules = permissionsData?.getPermission?.modules?.banners;
+	const modules = permissionsData?.getPermission?.modules?.categories;
 	const handleData = () => {
 		setPermissionsData(modules?.create);
 	};
@@ -123,20 +106,20 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 		handleData();
 	}, [search, page, rowsPerPage, handleData]);
 
-	const [deleteUsers] = useMutation(deleteBanner, {
-		refetchQueries: [{ query: getAllBanner, variables: { deleteBannerId: deleteDialog?.userId } }],
+	const [deleteCategory] = useMutation(deleteRoles, {
+		refetchQueries: [{ query: getAllRoles, variables: { deleteRoles: deleteDialog?.userId } }],
 		onCompleted: (data) => {
-			if (data.deleteBanner.success) {
+			if (data.deleteRole.success) {
 				setSnackbar({
 					open: true,
-					message: `${data?.deleteBanner?.message}` || "deleted successfully!",
+					message: `${data?.deleteRole?.message}` || "deleted successfully!",
 					severity: "success",
 				});
 				refetch(variables);
 			} else {
 				setSnackbar({
 					open: true,
-					message: data.deleteBanner.message || "Failed to delete user",
+					message: data.deleteRole.message || "Failed to delete user",
 					severity: "error",
 				});
 			}
@@ -153,8 +136,8 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	});
 
 	const rows = React.useMemo(() => {
-		const users = data?.getAllBanners?.banners ?? [];
-		return applyPagination(users, page, rowsPerPage);
+		const roles = data?.getAllRoles?.roles ?? [];
+		return applyPagination(roles, page, rowsPerPage);
 	}, [data, page, rowsPerPage]);
 	console.log(rows);
 	const rowIds = React.useMemo(() => rows.map((r: any) => r.id), [rows]);
@@ -163,7 +146,8 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	const selectedSome = selected.size > 0 && selected.size < rows.length;
 	const selectedAll = rows.length > 0 && selected.size === rows.length;
 
-	const totalCount = data?.getAllBanners?.total || 0; // assuming backend gives total count
+	const totalCount = data?.getAllRoles?.total || 0; // assuming backend gives total count
+	console.log("totalCount: ", totalCount);
 
 	const handlePageChange = (_event: unknown, newPage: number) => {
 		setPage(newPage);
@@ -175,7 +159,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	};
 
 	const handleEditUser = (userId: string) => {
-		router.push(`/dashboard/banner/update/${userId}`);
+		router.push(`/dashboard/categories/update/${userId}`);
 	};
 
 	const handleDeleteClick = (userId: string, userName: string) => {
@@ -192,9 +176,9 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 		setDeletingUserId(deleteDialog.userId);
 
 		try {
-			await deleteUsers({
+			await deleteCategory({
 				variables: {
-					deleteBannerId: deleteDialog.userId,
+					deleteRoleId: deleteDialog.userId,
 				},
 			});
 		} catch (error) {
@@ -243,10 +227,8 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 										}}
 									/>
 								</TableCell>
-								<TableCell>Banner</TableCell>
 
-								<TableCell>Title</TableCell>
-								<TableCell>Sub Title</TableCell>
+								<TableCell> Name</TableCell>
 								<TableCell>description</TableCell>
 								<TableCell align="center">Actions</TableCell>
 							</TableRow>
@@ -271,13 +253,9 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 													onChange={(event) => (event.target.checked ? selectOne(row.id) : deselectOne(row.id))}
 												/>
 											</TableCell>
-											<TableCell>
-												<Stack direction="row" spacing={2} alignItems="center">
-													<Avatar src={`http://localhost:8000${row?.image}`} />
-												</Stack>
-											</TableCell>
-											<TableCell>{row?.title}</TableCell>
-											<TableCell>{row?.subTitle}</TableCell>
+
+											<TableCell>{row?.name}</TableCell>
+
 											<TableCell>{row?.description ?? "-"}</TableCell>
 											<TableCell align="center">
 												<Stack direction="row" spacing={1} justifyContent="center">
