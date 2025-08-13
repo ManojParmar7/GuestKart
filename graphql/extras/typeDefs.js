@@ -5,8 +5,17 @@ module.exports = gql`
     id: ID!
     name: String!
     price: Float!
+    superadminId: ID!
+    subadminId: ID
+    createdAt: String
+    updatedAt: String
+  }
 
-    userId: ID!
+  type ExtraListResponse {
+    extras: [Extra!]!
+    totalCount: Int!
+    totalPages: Int!
+    currentPage: Int!
   }
 
   type ExtraResponse {
@@ -16,13 +25,24 @@ module.exports = gql`
   }
 
   extend type Query {
-    getExtrasByUser(userId: ID!): [Extra!]!
+    getExtras(
+      search: String
+      page: Int
+      limit: Int
+      superadminId: ID!
+      subadminId: ID
+    ): ExtraListResponse!
     getExtra(id: ID!): Extra
   }
 
   extend type Mutation {
-    createExtra(name: String!, price: Float!, userId: ID!): ExtraResponse!
-    updateExtra(id: ID!, name: String, price: Float!): ExtraResponse!
+    createExtra(
+      name: String!
+      price: Float!
+      superadminId: ID!
+      subadminId: ID
+    ): ExtraResponse!
+    updateExtra(id: ID!, name: String, price: Float): ExtraResponse!
     deleteExtra(id: ID!): ExtraResponse!
   }
 `;

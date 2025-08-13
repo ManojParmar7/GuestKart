@@ -1,22 +1,28 @@
 const mongoose = require("mongoose");
 
-const ColorSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
+const ColorSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    superadminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    subadminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
   },
-  price: {
-    type: Number,
-    required: true,
-  }, // e.g., "Red", "Blue"
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-});
-
-ColorSchema.index({ userId: 1, name: 1 }, { unique: true });
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("Color", ColorSchema);

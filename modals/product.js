@@ -98,6 +98,17 @@ const productSchema = new mongoose.Schema(
         ref: "Extra",
       },
     ],
+
+    superadminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "superadminId",
+      required: true,
+    },
+    subadminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "subadminId",
+      required: true,
+    },
   },
   {
     timestamps: true,

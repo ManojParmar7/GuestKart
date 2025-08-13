@@ -2,8 +2,33 @@ const Size = require("../../modals/size");
 
 module.exports = {
   Query: {
-    getSizesByUser: async (_, { userId }) => {
-      return await Size.find({ userId });
+    getSizes: async (
+      _,
+      { search, page = 1, limit = 10, superadminId, subadminId }
+    ) => {
+      try {
+        const filter = { superadminId };
+        if (subadminId) filter.subadminId = subadminId;
+        if (search && search.trim() !== "") {
+          filter.name = { $regex: search, $options: "i" };
+        }
+
+        const skip = (page - 1) * limit;
+
+        const [sizes, totalCount] = await Promise.all([
+          Size.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 }),
+          Size.countDocuments(filter),
+        ]);
+
+        return {
+          sizes,
+          totalCount,
+          totalPages: Math.ceil(totalCount / limit),
+          currentPage: page,
+        };
+      } catch (err) {
+        throw new Error("Error fetching sizes: " + err.message);
+      }
     },
 
     getSize: async (_, { id }) => {
@@ -12,11 +37,10 @@ module.exports = {
   },
 
   Mutation: {
-    createSize: async (_, { name, price, userId }) => {
+    createSize: async (_, { name, price, superadminId, subadminId }) => {
       try {
-        const existing = await Size.findOne({ name, userId });
-
-        if (existing) {
+        const exists = await Size.findOne({ name, superadminId, subadminId });
+        if (exists) {
           return {
             success: false,
             message: "Size with this name already exists.",
@@ -24,7 +48,7 @@ module.exports = {
           };
         }
 
-        const size = new Size({ name, price, userId });
+        const size = new Size({ name, price, superadminId, subadminId });
         const saved = await size.save();
 
         return {
@@ -46,6 +70,7 @@ module.exports = {
         const updateFields = {};
         if (name !== undefined) updateFields.name = name;
         if (price !== undefined) updateFields.price = price;
+
         const updated = await Size.findByIdAndUpdate(id, updateFields, {
           new: true,
         });

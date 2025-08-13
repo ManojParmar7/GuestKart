@@ -5,7 +5,8 @@ module.exports = gql`
     id: ID!
     name: String!
     price: Float!
-    subadmin: ID!
+    superadminId: ID
+    subadminId: ID
   }
 
   type ColorResponse {
@@ -13,24 +14,23 @@ module.exports = gql`
     message: String!
     color: Color
   }
-  type ColorPaginationResponse {
-    success: Boolean!
-    message: String
-    total: Int
-    currentPage: Int
-    totalPages: Int
+
+  type PaginatedColors {
     colors: [Color!]!
+    totalCount: Int!
+    totalPages: Int!
+    currentPage: Int!
   }
+
   extend type Query {
-    getAllColors(
+    getColors(
+      search: String
       page: Int
       limit: Int
-      search: String
-      subadminId: ID
       superadminId: ID
-    ): ColorPaginationResponse!
+      subadminId: ID
+    ): PaginatedColors!
 
-    getColorsByUser(subadmin: ID!): [Color!]!
     getColor(id: ID!): Color
   }
 
@@ -38,17 +38,16 @@ module.exports = gql`
     createColor(
       name: String!
       price: Float!
-      colorCode: String!
-      userId: ID!
-      subadminId: ID!
-      superadminId: ID!
+      superadminId: ID
+      subadminId: ID
     ): ColorResponse!
 
     updateColor(
       id: ID!
       name: String
       price: Float
-      colorCode: String
+      superadminId: ID
+      subadminId: ID
     ): ColorResponse!
 
     deleteColor(id: ID!): ColorResponse!

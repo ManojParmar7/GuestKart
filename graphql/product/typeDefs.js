@@ -11,10 +11,12 @@ module.exports = gql`
     stock: Int!
     images: [String]
     category: Category
-    user: User
     sizes: [Size]
+    user: User
     colors: [Color]
     extras: [Extra]
+    subadminId: ID
+    superadminId: ID
   }
 
   type ProductResponse {
@@ -22,14 +24,32 @@ module.exports = gql`
     message: String!
     product: Product
   }
-
+  type ProductPaginationResponse {
+    success: Boolean!
+    message: String
+    total: Int
+    currentPage: Int
+    totalPages: Int
+    products: [Product]
+  }
   extend type Query {
-    getAllProducts: [Product]
-    getProduct(userId: ID!, getProductId: ID!): ProductResponse
+    getAllProducts(
+      page: Int
+      limit: Int
+      search: String
+      subadminId: ID
+      superadminId: ID
+      categoryId: ID
+    ): ProductPaginationResponse
+    getProduct(getProductId: ID!): ProductResponse
 
     getUserProducts(userId: ID!): [Product]
-    getProductUserCategories(userId: ID!): [Category]
-    getUserProductsByCategory(userId: ID!, categoryId: ID!): [Product]
+    getProductUserCategories(superadminId: ID!, subadminId: ID): [Category]
+    getUserProductsByCategory(
+      superadminId: ID!
+      subadminId: ID
+      categoryId: ID!
+    ): [Product]
   }
 
   extend type Mutation {
@@ -39,7 +59,8 @@ module.exports = gql`
       description: String
       stock: Int!
       categoryId: ID!
-      userId: ID!
+      subadminId: ID! #
+      superadminId: ID!
       images: [Upload!]!
       sizes: [ID!]!
       colors: [ID!]!
@@ -53,11 +74,12 @@ module.exports = gql`
       description: String
       stock: Int
       categoryId: ID
-      userId: ID
       images: [Upload!]
       sizes: [ID!]
       colors: [ID!]
       extras: [ID!]
+      subadminId: ID!
+      superadminId: ID!
     ): ProductResponse
 
     deleteProduct(id: ID!): ProductResponse

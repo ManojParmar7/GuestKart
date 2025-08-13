@@ -10,10 +10,15 @@ const ExtraSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  userId: {
+  superadminId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
+    default: null,
+  },
+  subadminId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
   },
 });
 

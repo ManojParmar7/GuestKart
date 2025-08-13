@@ -2,80 +2,71 @@ const Color = require("../../modals/colors");
 
 module.exports = {
   Query: {
-    getAllColors: async (
-      _,
-      { page = 1, limit = 10, search = "", subadminId, superadminId }
-    ) => {
+    getColors: async (_, { search, page, limit, superadminId, subadminId }) => {
       try {
-        const skip = (page - 1) * limit;
-        const query = {};
+        if (!superadminId) {
+          throw new Error("superadminId is required");
+        }
 
-        if (superadminId) query.superadminId = superadminId;
-        if (subadminId) query.subadminId = subadminId;
-        if (search) query.name = { $regex: search, $options: "i" };
+        const filter = { superadminId };
 
-        const total = await Color.countDocuments(query);
-        const colors = await Color.find(query)
-          .skip(skip)
-          .limit(limit)
-          .sort({ createdAt: -1 });
+        if (subadminId) {
+          filter.subadminId = subadminId;
+        }
+
+        // search filter
+        if (search && search.trim() !== "") {
+          filter.name = { $regex: search, $options: "i" };
+        }
+
+        // Pagination logic
+        let query = Color.find(filter).sort({ createdAt: -1 });
+
+        if (page && limit) {
+          const skip = (page - 1) * limit;
+          query = query.skip(skip).limit(limit);
+        }
+
+        // Parallel queries for performance
+        const [colors, totalCount] = await Promise.all([
+          query,
+          Color.countDocuments(filter),
+        ]);
 
         return {
-          success: true,
-          message: "Colors fetched successfully",
-          total,
-          currentPage: page,
-          totalPages: Math.ceil(total / limit),
           colors,
+          totalCount,
+          totalPages: limit ? Math.ceil(totalCount / limit) : 1,
+          currentPage: page || 1,
         };
       } catch (err) {
-        return {
-          success: false,
-          message: "Failed to fetch colors",
-          total: 0,
-          currentPage: page,
-          totalPages: 0,
-          colors: [],
-        };
+        throw new Error("Error fetching colors: " + err.message);
       }
     },
-
     getColor: async (_, { id }) => {
       return await Color.findById(id);
     },
   },
 
   Mutation: {
-    createColor: async (
-      _,
-      { name, price, colorCode, userId, subadminId, superadminId }
-    ) => {
+    createColor: async (_, { name, price, superadminId, subadminId }) => {
       try {
-        // Check for uniqueness based on name + subadminId + superadminId
         const existing = await Color.findOne({
-          name: name.trim(),
-          subadminId,
+          name: { $regex: `^${name}$`, $options: "i" }, // case-insensitive match
           superadminId,
+          subadminId,
         });
 
         if (existing) {
           return {
             success: false,
             message:
-              "Color with this name already exists for this subadmin and superadmin.",
+              "Color with this name already exists for this Superadmin & Subadmin.",
             color: null,
           };
         }
 
-        const color = new Color({
-          name: name.trim(),
-          price,
-          colorCode,
-          userId,
-          subadminId,
-          superadminId,
-        });
-
+        const color = new Color({ name, price, superadminId, subadminId });
         const saved = await color.save();
 
         return {
@@ -84,6 +75,7 @@ module.exports = {
           color: saved,
         };
       } catch (err) {
+        console.log("err: ", err);
         return {
           success: false,
           message: "Failed to create color",
@@ -91,13 +83,14 @@ module.exports = {
         };
       }
     },
-
-    updateColor: async (_, { id, name, price, colorCode }) => {
+    updateColor: async (_, { id, name, price, superadminId, subadminId }) => {
       try {
         const updateFields = {};
-        if (name !== undefined) updateFields.name = name.trim();
+        if (name !== undefined) updateFields.name = name;
         if (price !== undefined) updateFields.price = price;
-        if (colorCode !== undefined) updateFields.colorCode = colorCode;
+        if (superadminId !== undefined)
+          updateFields.superadminId = superadminId;
+        if (subadminId !== undefined) updateFields.subadminId = subadminId;
 
         const updated = await Color.findByIdAndUpdate(id, updateFields, {
           new: true,
