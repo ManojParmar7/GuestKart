@@ -5,12 +5,12 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@apollo/client";
+import { Typography } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -34,7 +34,7 @@ import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { authClient } from "@/lib/auth/client";
 import { useSelection } from "@/hooks/use-selection";
 
-import { deleteCategoryId, GetAllCategories, GetPermissions } from "../../../app/query-common";
+import { deleteBanner, getAllProducts, GetPermissions } from "../../../app/query-common";
 import TableSkeletonLoader from "../loader/table-skeleton-loader";
 
 function applyPagination<T>(rows: T[] = [], page: number, rowsPerPage: number): T[] {
@@ -97,7 +97,6 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	});
 	const variables = {
 		search: search,
-
 		...(user?.role?.name === "superadmin"
 			? {
 					superadminId: loginUser,
@@ -111,11 +110,11 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 				: {}),
 	};
 
-	const { data, loading, error, refetch } = useQuery(GetAllCategories, {
+	const { data, loading, error, refetch } = useQuery(getAllProducts, {
 		variables,
 		fetchPolicy: "network-only",
 	});
-	const modules = permissionsData?.getPermission?.modules?.categories;
+	const modules = permissionsData?.getPermission?.modules?.banners;
 	const handleData = () => {
 		setPermissionsData(modules?.create);
 	};
@@ -124,20 +123,20 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 		handleData();
 	}, [search, page, rowsPerPage, handleData]);
 
-	const [deleteCategory] = useMutation(deleteCategoryId, {
-		refetchQueries: [{ query: GetAllCategories, variables: { deleteCategoryId: deleteDialog?.userId } }],
+	const [deleteUsers] = useMutation(deleteBanner, {
+		refetchQueries: [{ query: getAllProducts, variables: { deleteBannerId: deleteDialog?.userId } }],
 		onCompleted: (data) => {
-			if (data.deleteCategory.success) {
+			if (data.deleteBanner.success) {
 				setSnackbar({
 					open: true,
-					message: `${data?.deleteCategory?.message}` || "deleted successfully!",
+					message: `${data?.deleteBanner?.message}` || "deleted successfully!",
 					severity: "success",
 				});
 				refetch(variables);
 			} else {
 				setSnackbar({
 					open: true,
-					message: data.deleteCategory.message || "Failed to delete user",
+					message: data.deleteBanner.message || "Failed to delete user",
 					severity: "error",
 				});
 			}
@@ -154,17 +153,14 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	});
 
 	const rows = React.useMemo(() => {
-		const users = data?.getAllCategories?.categories ?? [];
+		const users = data?.getAllProducts?.products ?? [];
 		return applyPagination(users, page, rowsPerPage);
 	}, [data, page, rowsPerPage]);
 	console.log(rows);
 	const rowIds = React.useMemo(() => rows.map((r: any) => r.id), [rows]);
-	const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
+	const { selected } = useSelection(rowIds);
 
-	const selectedSome = selected.size > 0 && selected.size < rows.length;
-	const selectedAll = rows.length > 0 && selected.size === rows.length;
-
-	const totalCount = data?.getAllCategories?.total || 0; // assuming backend gives total count
+	const totalCount = data?.getAllProducts?.total || 0;
 
 	const handlePageChange = (_event: unknown, newPage: number) => {
 		setPage(newPage);
@@ -176,7 +172,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	};
 
 	const handleEditUser = (userId: string) => {
-		router.push(`/dashboard/categories/update/${userId}`);
+		router.push(`/dashboard/products/update/${userId}`);
 	};
 
 	const handleDeleteClick = (userId: string, userName: string) => {
@@ -193,9 +189,9 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 		setDeletingUserId(deleteDialog.userId);
 
 		try {
-			await deleteCategory({
+			await deleteUsers({
 				variables: {
-					deleteCategoryId: deleteDialog.userId,
+					deleteProductId: deleteDialog.userId,
 				},
 			});
 		} catch (error) {
@@ -226,36 +222,52 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 			</Card>
 		);
 	}
+	// eslint-disable-next-line unicorn/consistent-function-scoping
+	const getColorFromName = (name: string) => {
+		if (!name) return "#000"; // default black
 
+		const temp = document.createElement("div");
+		temp.style.color = name;
+		document.body.append(temp);
+
+		const rgb = getComputedStyle(temp).color;
+		temp.remove();
+
+		// Agar naam galat hua toh black
+		if (!rgb || (rgb === "rgb(0, 0, 0)" && name.toLowerCase() !== "black")) {
+			return "#000";
+		}
+
+		// RGB → HEX conversion
+		const match = rgb.match(/\d+/g);
+		if (!match) return "#000";
+
+		return `#${match.map((x) => Number.parseInt(x).toString(16).padStart(2, "0")).join("")}`;
+	};
 	return (
 		<>
 			<Card>
 				<Box sx={{ overflowX: "auto" }}>
-					<Table sx={{ minWidth: "800px" }}>
+					<Table sx={{ minWidth: "1200px" }}>
 						<TableHead>
 							<TableRow>
-								<TableCell padding="checkbox">
-									<Checkbox
-										checked={selectedAll}
-										indeterminate={selectedSome}
-										onChange={(event) => {
-											if (event.target.checked) selectAll();
-											else deselectAll();
-										}}
-									/>
-								</TableCell>
-								<TableCell>Categories</TableCell>
-
-								<TableCell>Category Name</TableCell>
-								<TableCell>Slug</TableCell>
-								<TableCell>description</TableCell>
+								<TableCell>Images</TableCell>
+								<TableCell>Name</TableCell>
+								<TableCell>Price</TableCell>
+								<TableCell>Stock</TableCell>
+								<TableCell>Category</TableCell>
+								<TableCell>Sizes</TableCell>
+								<TableCell>Colors</TableCell>
+								<TableCell>Extras</TableCell>
+								<TableCell>Created By</TableCell>
 								<TableCell align="center">Actions</TableCell>
 							</TableRow>
 						</TableHead>
+
 						<TableBody>
 							{rows.length === 0 ? (
 								<TableRow>
-									<TableCell colSpan={7} align="center">
+									<TableCell colSpan={11} align="center">
 										No data found
 									</TableCell>
 								</TableRow>
@@ -266,20 +278,68 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 
 									return (
 										<TableRow hover key={row.id} selected={isSelected}>
-											<TableCell padding="checkbox">
-												<Checkbox
-													checked={isSelected}
-													onChange={(event) => (event.target.checked ? selectOne(row.id) : deselectOne(row.id))}
-												/>
-											</TableCell>
+											{/* Images */}
 											<TableCell>
-												<Stack direction="row" spacing={2} alignItems="center">
-													<Avatar src={`http://localhost:8000${row?.image}`} />
+												<Stack direction="row" spacing={1} sx={{ overflowX: "auto", maxWidth: 180 }}>
+													{row.images?.map((img: string, i: number) => (
+														<Avatar
+															key={i}
+															src={`http://localhost:8000${img}`}
+															variant="rounded"
+															sx={{ width: 50, height: 50 }}
+														/>
+													))}
 												</Stack>
 											</TableCell>
-											<TableCell>{row?.name}</TableCell>
-											<TableCell>{row?.slug}</TableCell>
-											<TableCell>{row?.description ?? "-"}</TableCell>
+
+											<TableCell>{row.name}</TableCell>
+											<TableCell>₹{row.price}</TableCell>
+											<TableCell>{row.stock}</TableCell>
+											<TableCell>{row.category?.name}</TableCell>
+
+											{/* Sizes */}
+											<TableCell>{row.sizes?.map((size: any) => size.name).join(", ")}</TableCell>
+
+											{/* Colors with label */}
+											<TableCell>
+												<Stack direction="row" spacing={1}>
+													{row.colors?.map((color: any, i: number) => {
+														const colorCode = getColorFromName(color.name);
+
+														return (
+															<Stack
+																key={i}
+																direction="row"
+																spacing={1}
+																alignItems="center"
+																sx={{
+																	border: "1px solid #ccc",
+																	borderRadius: "8px",
+																	padding: "2px 6px",
+																}}
+															>
+																<Box
+																	sx={{
+																		width: 16,
+																		height: 16,
+																		borderRadius: "50%",
+																		backgroundColor: colorCode,
+																		border: "1px solid #999",
+																	}}
+																/>
+																<Typography variant="body2">{color.name}</Typography>
+															</Stack>
+														);
+													})}
+												</Stack>
+											</TableCell>
+
+											{/* Extras */}
+											<TableCell>{row.extras?.map((extra: any) => extra.name).join(", ")}</TableCell>
+
+											<TableCell>{row.user?.name}</TableCell>
+
+											{/* Actions (original conditional logic) */}
 											<TableCell align="center">
 												<Stack direction="row" spacing={1} justifyContent="center">
 													{user?.role?.name === "superadmin" ? (
@@ -372,7 +432,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 				<DialogTitle id="delete-dialog-title">Confirm Delete</DialogTitle>
 				<DialogContent>
 					<DialogContentText id="delete-dialog-description">
-						Are you sure you want to delete Category &quot;<strong>{deleteDialog.userName}</strong>&quot;? This action
+						Are you sure you want to delete products &quot;<strong>{deleteDialog.userName}</strong>&quot;? This action
 						cannot be undone.
 					</DialogContentText>
 				</DialogContent>

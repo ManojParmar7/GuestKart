@@ -51,6 +51,8 @@ export function SideNav(): React.JSX.Element {
 		if (user.role.name === "superadmin") {
 			// Superadmin → direct items
 			items.push({ key: "customers", title: "Sub Admins", href: paths.dashboard.customers, icon: "users" });
+			items.push({ key: "products", title: "Products", href: paths.dashboard.products, icon: "product" });
+
 			items.push({ key: "banner", title: "Banners", href: paths.dashboard.banner, icon: "image-square" });
 			items.push({ key: "categories", title: "Categories", href: paths.dashboard.categories, icon: "squares-four" });
 			items.push({ key: "roles", title: "Roles", href: paths.dashboard.roles, icon: "roles" });
@@ -58,10 +60,10 @@ export function SideNav(): React.JSX.Element {
 			const modules = data.getPermission.modules;
 
 			if (modules.products?.view) {
-				// items.push({ key: "products", title: "Products", href: paths.dashboard.products, icon: "package" });
+				items.push({ key: "products", title: "Products", href: paths.dashboard.products, icon: "product" });
 			}
 			if (modules.categories?.view) {
-				items.push({ key: "categories", title: "Categories", href: paths.dashboard.categories, icon: "SquaresFour" });
+				items.push({ key: "categories", title: "Categories", href: paths.dashboard.categories, icon: "squares-four" });
 			}
 			// if (modules.orders?.view) {
 			// 	items.push({ key: "orders", title: "Orders", href: paths.dashboard.orders, icon: "shopping-cart" });

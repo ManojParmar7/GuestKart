@@ -1,5 +1,4 @@
-// eslint-disable-next-line unicorn/template-indent
-
+/*eslint-disable */
 import { gql } from "@apollo/client";
 
 export const GetUsersBySuperadmin = gql`
@@ -584,6 +583,450 @@ export const deleteRoles = gql`
 				createdAt
 				updatedAt
 				createdBy
+			}
+		}
+	}
+`;
+export const getAllProducts = gql`
+	query GetAllProducts($page: Int, $limit: Int, $search: String, $subadminId: ID, $superadminId: ID, $categoryId: ID) {
+		getAllProducts(
+			page: $page
+			limit: $limit
+			search: $search
+			subadminId: $subadminId
+			superadminId: $superadminId
+			categoryId: $categoryId
+		) {
+			success
+			message
+			total
+			currentPage
+			totalPages
+			products {
+				id
+				name
+				price
+				description
+				stock
+				images
+				category {
+					id
+					name
+				}
+				sizes {
+					id
+					name
+				}
+				user {
+					id
+					name
+				}
+				colors {
+					id
+					name
+				}
+				extras {
+					id
+					name
+				}
+				subadminId
+				superadminId
+			}
+		}
+	}
+`;
+export const updateProduct = gql`
+	mutation UpdateProduct(
+		$updateProductId: ID!
+		$subadminId: ID!
+		$superadminId: ID!
+		$name: String
+		$price: Float
+		$description: String
+		$stock: Int
+		$categoryId: ID
+		$userId: ID
+		$images: [Upload!]
+		$sizes: [ID!]
+		$colors: [ID!]
+		$extras: [ID!]
+	) {
+		updateProduct(
+			id: $updateProductId
+			subadminId: $subadminId
+			superadminId: $superadminId
+			name: $name
+			price: $price
+			description: $description
+			stock: $stock
+			categoryId: $categoryId
+			images: $images
+			sizes: $sizes
+			colors: $colors
+			extras: $extras
+		) {
+			success
+			message
+			product {
+				id
+				name
+				subadminId
+				superadminId
+			}
+		}
+	}
+`;
+export const createProduct = gql`
+	mutation CreateProduct(
+		$name: String!
+		$price: Float!
+		$stock: Int!
+		$categoryId: ID!
+		$subadminId: ID!
+		$superadminId: ID!
+		$images: [Upload!]!
+		$sizes: [ID!]!
+		$colors: [ID!]!
+		$extras: [ID!]!
+	) {
+		createProduct(
+			name: $name
+			price: $price
+			stock: $stock
+			categoryId: $categoryId
+			subadminId: $subadminId
+			superadminId: $superadminId
+			images: $images
+			sizes: $sizes
+			colors: $colors
+			extras: $extras
+		) {
+			success
+			message
+			product {
+				id
+				name
+				price
+				description
+				stock
+				images
+				category {
+					id
+					name
+				}
+				sizes {
+					id
+					name
+				}
+				user {
+					id
+					name
+				}
+				colors {
+					id
+					name
+				}
+				extras {
+					id
+					name
+				}
+				subadminId
+				superadminId
+			}
+		}
+	}
+`;
+
+export const getProductById = gql`
+	query GetProduct($getProductId: ID!) {
+		getProduct(getProductId: $getProductId) {
+			success
+			message
+			product {
+				id
+				name
+				price
+				description
+				stock
+				images
+				category {
+					id
+					name
+				}
+				sizes {
+					id
+					name
+				}
+				user {
+					id
+					name
+				}
+				colors {
+					id
+					name
+				}
+				extras {
+					id
+					name
+					price
+				}
+				subadminId
+				superadminId
+			}
+		}
+	}
+`;
+
+export const deleteProduct = gql`
+	mutation DeleteProduct($deleteProductId: ID!) {
+		deleteProduct(id: $deleteProductId) {
+			success
+			message
+			product {
+				id
+				name
+				price
+				description
+				stock
+				images
+				subadminId
+				superadminId
+			}
+		}
+	}
+`;
+export const createColor = gql`
+	mutation CreateColor($name: String!, $price: Float!, $superadminId: ID, $subadminId: ID) {
+		createColor(name: $name, price: $price, superadminId: $superadminId, subadminId: $subadminId) {
+			success
+			message
+			color {
+				id
+				name
+				price
+				superadminId
+				subadminId
+			}
+		}
+	}
+`;
+export const updateColor = gql`
+	mutation UpdateColor($updateColorId: ID!, $name: String, $price: Float, $superadminId: ID, $subadminId: ID) {
+		updateColor(id: $updateColorId, name: $name, price: $price, superadminId: $superadminId, subadminId: $subadminId) {
+			success
+			message
+			color {
+				id
+				name
+				price
+				superadminId
+				subadminId
+			}
+		}
+	}
+`;
+export const getColors = gql`
+	query GetColors($search: String, $page: Int, $limit: Int, $superadminId: ID, $subadminId: ID) {
+		getColors(search: $search, page: $page, limit: $limit, superadminId: $superadminId, subadminId: $subadminId) {
+			colors {
+				id
+				name
+				price
+				superadminId
+				subadminId
+			}
+			totalCount
+			totalPages
+			currentPage
+		}
+	}
+`;
+export const getColorsById = gql`
+	query GetColor($getColorId: ID!) {
+		getColor(id: $getColorId) {
+			id
+			name
+			price
+			superadminId
+			subadminId
+		}
+	}
+`;
+export const deleteColor = gql`
+	mutation DeleteColor($deleteColorId: ID!) {
+		deleteColor(id: $deleteColorId) {
+			success
+			message
+			color {
+				id
+				name
+				price
+				superadminId
+				subadminId
+			}
+		}
+	}
+`;
+export const createExtra = gql`
+	mutation CreateExtra($name: String!, $price: Float!, $superadminId: ID!, $subadminId: ID) {
+		createExtra(name: $name, price: $price, superadminId: $superadminId, subadminId: $subadminId) {
+			success
+			message
+			extra {
+				id
+				name
+				price
+				superadminId
+				subadminId
+				createdAt
+				updatedAt
+			}
+		}
+	}
+`;
+export const updateExtra = gql`
+	mutation UpdateExtra($updateExtraId: ID!, $name: String, $price: Float) {
+		updateExtra(id: $updateExtraId, name: $name, price: $price) {
+			success
+			message
+			extra {
+				id
+				name
+				price
+				superadminId
+				subadminId
+				createdAt
+				updatedAt
+			}
+		}
+	}
+`;
+export const getExtras = gql`
+	query GetExtras($superadminId: ID!, $search: String, $page: Int, $limit: Int, $subadminId: ID) {
+		getExtras(superadminId: $superadminId, search: $search, page: $page, limit: $limit, subadminId: $subadminId) {
+			extras {
+				id
+				name
+				price
+				superadminId
+				subadminId
+				createdAt
+				updatedAt
+			}
+			totalCount
+			totalPages
+			currentPage
+		}
+	}
+`;
+export const getExtraById = gql`
+	query GetExtra($getExtraId: ID!) {
+		getExtra(id: $getExtraId) {
+			id
+			name
+			price
+			superadminId
+			subadminId
+			createdAt
+			updatedAt
+		}
+	}
+`;
+export const deleteExtra = gql`
+	mutation DeleteExtra($deleteExtraId: ID!) {
+		deleteExtra(id: $deleteExtraId) {
+			success
+			message
+			extra {
+				id
+				name
+				price
+				superadminId
+				subadminId
+				createdAt
+				updatedAt
+			}
+		}
+	}
+`;
+export const createSize = gql`
+	mutation CreateSize($name: String!, $price: Float!, $superadminId: ID!, $subadminId: ID) {
+		createSize(name: $name, price: $price, superadminId: $superadminId, subadminId: $subadminId) {
+			success
+			message
+			size {
+				id
+				name
+				price
+				superadminId
+				subadminId
+				createdAt
+				updatedAt
+			}
+		}
+	}
+`;
+export const updateSize = gql`
+	mutation UpdateSize($updateSizeId: ID!, $name: String, $price: Float) {
+		updateSize(id: $updateSizeId, name: $name, price: $price) {
+			success
+			message
+			size {
+				id
+				name
+				price
+				superadminId
+				subadminId
+				createdAt
+				updatedAt
+			}
+		}
+	}
+`;
+export const getSizes = gql`
+	query GetSizes($superadminId: ID!, $search: String, $page: Int, $limit: Int, $subadminId: ID) {
+		getSizes(superadminId: $superadminId, search: $search, page: $page, limit: $limit, subadminId: $subadminId) {
+			sizes {
+				id
+				name
+				price
+				superadminId
+				subadminId
+				createdAt
+				updatedAt
+			}
+			totalCount
+			totalPages
+			currentPage
+		}
+	}
+`;
+export const getSizesById = gql`
+	query GetSize($getSizeId: ID!) {
+		getSize(id: $getSizeId) {
+			id
+			name
+			price
+			superadminId
+			subadminId
+			createdAt
+			updatedAt
+		}
+	}
+`;
+export const deleteSize = gql`
+	mutation DeleteSize($deleteSizeId: ID!) {
+		deleteSize(id: $deleteSizeId) {
+			success
+			message
+			size {
+				id
+				name
+				price
+				superadminId
+				subadminId
+				createdAt
+				updatedAt
 			}
 		}
 	}

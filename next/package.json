@@ -42,6 +42,8 @@
     "react-dom": "19.1.0",
     "react-hook-form": "7.57.0",
     "react-hot-toast": "^2.5.2",
+    "react-responsive-carousel": "^3.2.23",
+    "swiper": "^11.2.10",
     "zod": "3.25.57"
   },
   "devDependencies": {

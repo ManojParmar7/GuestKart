@@ -8,8 +8,10 @@ export const paths = {
     integrations: '/dashboard/integrations',
     settings: '/dashboard/settings',
     banner: '/dashboard/banner',
-        categories: '/dashboard/categories',
-                roles: '/dashboard/roles',
+    categories: '/dashboard/categories',
+    roles: '/dashboard/roles',
+    products: '/dashboard/products',
+             
 
         
 
