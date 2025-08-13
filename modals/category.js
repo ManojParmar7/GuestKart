@@ -1,25 +1,22 @@
+// models/category.js
 const mongoose = require("mongoose");
 
 const categorySchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
+  name: { type: String, required: true },
   slug: {
     type: String,
     required: true,
     unique: true,
   },
-  image: {
-    type: String,
-    default: "",
+  image: String,
+  description: String,
+  subadminId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Subadmin",
   },
-  description: {
-    type: String,
-  },
-  userId: {
-    type: String, // Store user ID as string
-    required: true,
+  superadminId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Superadmin",
   },
 });
 

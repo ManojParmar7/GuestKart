@@ -11,22 +11,35 @@ module.exports = {
   Query: {
     getAllBanners: async (
       _,
-      { page = 1, limit = 10, search = "", subadminId, superadminId }
+      { page, limit, search = "", subadminId, superadminId }
     ) => {
-      const skip = (page - 1) * limit;
+      let query = {};
 
-      const query = {};
       if (superadminId) {
         query.superadminId = superadminId;
       }
       if (subadminId) {
         query.subadminId = subadminId;
       }
-
       if (search) {
         query.title = { $regex: search, $options: "i" };
       }
 
+      // Agar page ya limit pass nahi kiya to direct find
+      if (!page || !limit) {
+        const banners = await Banner.find(query).sort({ createdAt: -1 });
+        return {
+          success: true,
+          message: "Banners fetched successfully",
+          total: banners.length,
+          currentPage: null,
+          totalPages: null,
+          banners,
+        };
+      }
+
+      // Pagination wala logic (old code)
+      const skip = (page - 1) * limit;
       const total = await Banner.countDocuments(query);
       const banners = await Banner.find(query)
         .skip(skip)
@@ -42,7 +55,6 @@ module.exports = {
         banners,
       };
     },
-
     getBanner: async (_, { id }) => await Banner.findById(id),
   },
 
@@ -59,10 +71,8 @@ module.exports = {
           banner: null,
         };
       }
-      console.log("testing--------------------------: ", user);
 
       if (user.role === "superadmin") {
-        // ✅ superadmin can create for any subadmin under them
         if (user.id.toString() !== superadminId) {
           return {
             success: false,
@@ -72,7 +82,6 @@ module.exports = {
           };
         }
       } else if (user.role === "subadmin") {
-        // ✅ subadmin can only create for themselves
         if (user.id.toString() !== subadminId) {
           return {
             success: false,
@@ -89,7 +98,6 @@ module.exports = {
         };
       }
 
-      // Step 1: Check for existing banner
       const existingBanner = await Banner.findOne({
         title: title.trim(),
         subadminId,

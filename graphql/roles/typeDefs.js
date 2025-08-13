@@ -7,7 +7,14 @@ module.exports = gql`
     description: String
     createdBy: ID
   }
-
+  type RoleListResponse {
+    success: Boolean!
+    message: String!
+    total: Int
+    currentPage: Int
+    totalPages: Int
+    roles: [Role]
+  }
   type RoleResponse {
     success: Boolean!
     message: String!
@@ -15,7 +22,7 @@ module.exports = gql`
   }
 
   extend type Query {
-    getAllRoles: [Role!]!
+    getAllRoles(page: Int, limit: Int, search: String): RoleListResponse
     getRole(id: ID!): Role
   }
 

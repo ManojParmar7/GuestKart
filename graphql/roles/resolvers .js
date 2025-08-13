@@ -2,8 +2,53 @@ const Role = require("../../modals/roles");
 
 module.exports = {
   Query: {
-    getAllRoles: async () => {
-      return await Role.find();
+    getAllRoles: async (_, { page, limit, search = "" }) => {
+      try {
+        let query = {};
+
+        if (search) {
+          query.name = { $regex: search, $options: "i" };
+        }
+
+        // Agar page ya limit nahi diya hai, to direct sabhi roles return karo
+        if (!page || !limit) {
+          const roles = await Role.find(query).sort({ createdAt: -1 });
+          return {
+            success: true,
+            message: "Roles fetched successfully",
+            total: roles.length,
+            currentPage: null,
+            totalPages: null,
+            roles,
+          };
+        }
+
+        // Pagination logic
+        const skip = (page - 1) * limit;
+        const total = await Role.countDocuments(query);
+        const roles = await Role.find(query)
+          .skip(skip)
+          .limit(limit)
+          .sort({ createdAt: -1 });
+
+        return {
+          success: true,
+          message: "Roles fetched successfully",
+          total,
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
+          roles,
+        };
+      } catch (err) {
+        return {
+          success: false,
+          message: "Failed to fetch roles",
+          total: 0,
+          currentPage: null,
+          totalPages: null,
+          roles: [],
+        };
+      }
     },
     getRole: async (_, { id }) => {
       return await Role.findById(id);

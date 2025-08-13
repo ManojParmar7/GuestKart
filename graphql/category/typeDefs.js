@@ -7,11 +7,19 @@ const typeDefs = gql`
     id: ID!
     name: String!
     slug: String!
-    image: String
     description: String
-    userId: String!
+    image: String
+    subadminId: ID!
+    superadminId: ID!
   }
-
+  type CatgoryPaginationResponse {
+    success: Boolean!
+    message: String
+    total: Int
+    currentPage: Int
+    totalPages: Int
+    categories: [Category]
+  }
   type CategoryResponse {
     success: Boolean!
     message: String!
@@ -19,7 +27,14 @@ const typeDefs = gql`
   }
 
   type Query {
-    getAllCategories(userId: String!): [Category]
+    getAllCategories(
+      page: Int
+      limit: Int
+      subadminId: ID
+      superadminId: ID
+      search: String
+    ): CatgoryPaginationResponse
+
     getCategory(id: ID!): Category
   }
 
@@ -29,7 +44,8 @@ const typeDefs = gql`
       slug: String!
       description: String
       image: Upload!
-      userId: ID!
+      subadminId: ID!
+      superadminId: ID!
     ): CategoryResponse
 
     updateCategory(
@@ -38,7 +54,8 @@ const typeDefs = gql`
       slug: String
       description: String
       image: Upload
-      userId: ID!
+      subadminId: ID
+      superadminId: ID
     ): CategoryResponse
 
     deleteCategory(id: ID!): CategoryResponse

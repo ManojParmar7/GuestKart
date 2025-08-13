@@ -3,7 +3,7 @@ const Permission = require("../../modals/permission");
 const { GraphQLError } = require("graphql");
 
 module.exports = {
-  JSON: GraphQLJSON, // <-- register JSON scalar
+  JSON: GraphQLJSON,
 
   Query: {
     getSubAdminPermissions: async (_, { subadminId }, { user }) => {
@@ -42,21 +42,24 @@ module.exports = {
 
       return permission;
     },
-
     getPermission: async (_, { superadminId, subadminId }, { user }) => {
       console.log("user: ", user);
       if (!user) throw new Error("Unauthorized");
 
-      // ✅ Only allow superadmin to access this query
-      if (user.role !== "superadmin") {
-        throw new Error("Forbidden: Only superadmin can access this");
-      }
-
-      // ✅ Also ensure the superadminId matches logged-in user
-      if (user.id !== superadminId) {
-        throw new Error(
-          "Forbidden: You are not authorized for this superadmin ID"
-        );
+      if (user.role === "superadmin") {
+        if (user.id !== superadminId) {
+          throw new Error(
+            "Forbidden: You are not authorized for this superadmin ID"
+          );
+        }
+      } else if (user.role === "subadmin") {
+        if (user.id !== subadminId) {
+          throw new Error(
+            "Forbidden: You are not authorized for this subadmin ID"
+          );
+        }
+      } else {
+        throw new Error("Forbidden: You are not allowed to access this");
       }
 
       const permission = await Permission.findOne({
@@ -68,6 +71,31 @@ module.exports = {
 
       return permission;
     },
+    // getPermission: async (_, { superadminId, subadminId }, { user }) => {
+    //   console.log("user: ", user);
+    //   if (!user) throw new Error("Unauthorized");
+
+    //   // ✅ Only allow superadmin to access this query
+    //   if (user.role !== "superadmin") {
+    //     throw new Error("Forbidden: Only superadmin can access this");
+    //   }
+
+    //   // ✅ Also ensure the superadminId matches logged-in user
+    //   if (user.id !== superadminId) {
+    //     throw new Error(
+    //       "Forbidden: You are not authorized for this superadmin ID"
+    //     );
+    //   }
+
+    //   const permission = await Permission.findOne({
+    //     superadmin_id: superadminId,
+    //     subadmin_id: subadminId,
+    //   });
+
+    //   if (!permission) throw new Error("Permission not found");
+
+    //   return permission;
+    // },
 
     getAllPermissions: async (_, __, { user }) => {
       if (!user || user.role !== "superadmin") {
