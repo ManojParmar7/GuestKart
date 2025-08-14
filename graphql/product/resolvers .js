@@ -72,6 +72,7 @@ module.exports = {
 
       const products = await Products.find(query)
         .populate("categoryId")
+
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 });
@@ -147,6 +148,82 @@ module.exports = {
   },
 
   Mutation: {
+    // createProduct: async (
+    //   _,
+    //   { images, sizes, colors, extras, subadminId, superadminId, ...args },
+    //   { user }
+    // ) => {
+    //   if (!user) {
+    //     return {
+    //       success: false,
+    //       message: "Unauthorized access: Please login to continue.",
+    //       product: null,
+    //     };
+    //   }
+
+    //   // Role verification
+    //   if (user.role === "superadmin") {
+    //     if (user.id.toString() !== superadminId) {
+    //       return {
+    //         success: false,
+    //         message:
+    //           "Unauthorized: You can only create products under your own account.",
+    //         product: null,
+    //       };
+    //     }
+    //   } else if (user.role === "subadmin") {
+    //     if (user.id.toString() !== subadminId) {
+    //       return {
+    //         success: false,
+    //         message:
+    //           "Unauthorized: Subadmins can only create products for their own account.",
+    //         product: null,
+    //       };
+    //     }
+    //   } else {
+    //     return {
+    //       success: false,
+    //       message: "Unauthorized role.",
+    //       product: null,
+    //     };
+    //   }
+    //   const existingProduct = await Products.findOne({
+    //     name: { $regex: `^${args.name}$`, $options: "i" }, // case-insensitive exact match
+    //     superadminId,
+    //     subadminId,
+    //   });
+
+    //   if (existingProduct) {
+    //     return {
+    //       success: false,
+    //       message:
+    //         "This product name already exists for the same Superadmin and Subadmin.",
+    //       product: null,
+    //     };
+    //   }
+    //   // Save images
+    //   const imagePaths = await Promise.all(images.map(saveImage));
+
+    //   // Create product
+    //   const product = new Products({
+    //     ...args,
+    //     subadminId,
+    //     superadminId,
+    //     userId: user.id,
+    //     images: imagePaths,
+    //     sizes,
+    //     colors,
+    //     extras,
+    //   });
+
+    //   const data = await product.save();
+
+    //   return {
+    //     success: true,
+    //     message: "Product created successfully",
+    //     product: data,
+    //   };
+    // },
     createProduct: async (
       _,
       { images, sizes, colors, extras, subadminId, superadminId, ...args },
@@ -186,8 +263,9 @@ module.exports = {
           product: null,
         };
       }
+
       const existingProduct = await Products.findOne({
-        name: { $regex: `^${args.name}$`, $options: "i" }, // case-insensitive exact match
+        name: { $regex: `^${args.name}$`, $options: "i" },
         superadminId,
         subadminId,
       });
@@ -200,8 +278,12 @@ module.exports = {
           product: null,
         };
       }
+
       // Save images
       const imagePaths = await Promise.all(images.map(saveImage));
+
+      // Find creator user info
+      const creator = await User.findById(subadminId).populate("role");
 
       // Create product
       const product = new Products({
@@ -213,6 +295,10 @@ module.exports = {
         sizes,
         colors,
         extras,
+        createdBy: {
+          name: creator?.name || null,
+          role: creator?.role?.name || null,
+        },
       });
 
       const data = await product.save();

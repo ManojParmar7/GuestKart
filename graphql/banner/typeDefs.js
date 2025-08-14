@@ -2,7 +2,10 @@ const gql = String.raw;
 
 module.exports = gql`
   scalar Upload
-
+  type CreatedByInfo {
+    name: String
+    role: String
+  }
   type Banner {
     id: ID!
     title: String!
@@ -11,6 +14,7 @@ module.exports = gql`
     image: String
     subadminId: ID
     superadminId: ID
+    createdBy: CreatedByInfo
     user: User
   }
   type BannerPaginationResponse {

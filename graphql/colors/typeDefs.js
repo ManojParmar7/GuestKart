@@ -1,12 +1,18 @@
 const gql = String.raw;
 
 module.exports = gql`
+  type CreatedByInfo {
+    name: String
+    role: String
+  }
+
   type Color {
     id: ID!
     name: String!
     price: Float!
     superadminId: ID
     subadminId: ID
+    createdBy: CreatedByInfo
   }
 
   type ColorResponse {

@@ -14,6 +14,10 @@ const bannerSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "superadminId",
   },
+  createdBy: {
+    name: { type: String, required: true },
+    role: { type: String, required: true },
+  },
 });
 
 module.exports = mongoose.model("Banner", bannerSchema);

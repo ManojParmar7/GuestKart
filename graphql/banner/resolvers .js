@@ -118,12 +118,17 @@ module.exports = {
       if (image) {
         imagePath = await saveImage(image);
       }
+      const creator = await User.findById(subadminId).populate("role");
 
       // Step 3: Create and save banner
       const banner = new Banner({
         title: title.trim(),
         subadminId,
         superadminId,
+        createdBy: {
+          name: creator?.name || null,
+          role: creator?.role?.name || null,
+        },
         image: imagePath,
         ...args,
       });

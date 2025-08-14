@@ -21,6 +21,10 @@ const ColorSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    createdBy: {
+      name: { type: String, required: true },
+      role: { type: String, required: true },
+    },
   },
   { timestamps: true }
 );

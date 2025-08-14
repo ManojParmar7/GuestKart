@@ -1,12 +1,19 @@
 const gql = String.raw;
 
 module.exports = gql`
+  type CreatedBy {
+    name: String!
+    role: String!
+  }
+
   type Size {
     id: ID!
     name: String!
     price: Float!
     superadminId: ID!
     subadminId: ID
+    createdBy: CreatedBy!
+    user: User
     createdAt: String
     updatedAt: String
   }

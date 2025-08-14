@@ -18,6 +18,10 @@ const categorySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Superadmin",
   },
+  createdBy: {
+    name: { type: String, required: true },
+    role: { type: String, required: true },
+  },
 });
 
 module.exports = mongoose.model("Category", categorySchema);

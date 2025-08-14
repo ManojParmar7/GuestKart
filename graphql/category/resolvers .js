@@ -1,6 +1,7 @@
 // categoryResolvers.js
 const Category = require("../../modals/category");
 const { saveImage } = require("../../shared/uploadImage");
+const User = require("../../modals/User");
 
 const categoryResolvers = {
   Upload: require("graphql-upload").GraphQLUpload,
@@ -117,6 +118,7 @@ const categoryResolvers = {
 
       // Save image
       const imagePath = image ? await saveImage(image) : null;
+      const creator = await User.findById(subadminId).populate("role");
 
       // Create
       const category = new Category({
@@ -126,6 +128,10 @@ const categoryResolvers = {
         image: imagePath,
         subadminId,
         superadminId,
+        createdBy: {
+          name: creator?.name || null,
+          role: creator?.role?.name || null,
+        },
       });
 
       const data = await category.save();

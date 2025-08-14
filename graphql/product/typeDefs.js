@@ -2,7 +2,10 @@ const gql = String.raw;
 
 module.exports = gql`
   scalar Upload
-
+  type CreatedBy {
+    name: String
+    role: String
+  }
   type Product {
     id: ID!
     name: String!
@@ -11,6 +14,8 @@ module.exports = gql`
     stock: Int!
     images: [String]
     category: Category
+    createdBy: CreatedBy
+
     sizes: [Size]
     user: User
     colors: [Color]

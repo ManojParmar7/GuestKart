@@ -1,4 +1,5 @@
 const Color = require("../../modals/colors");
+const User = require("../../modals/User");
 
 module.exports = {
   Query: {
@@ -52,7 +53,7 @@ module.exports = {
     createColor: async (_, { name, price, superadminId, subadminId }) => {
       try {
         const existing = await Color.findOne({
-          name: { $regex: `^${name}$`, $options: "i" }, // case-insensitive match
+          name: { $regex: `^${name}$`, $options: "i" },
           superadminId,
           subadminId,
         });
@@ -66,7 +67,21 @@ module.exports = {
           };
         }
 
-        const color = new Color({ name, price, superadminId, subadminId });
+        // Find creator user
+        let creatorId = subadminId || superadminId;
+        const user = await User.findById(creatorId).populate("role");
+
+        const color = new Color({
+          name,
+          price,
+          superadminId,
+          subadminId,
+          createdBy: {
+            name: user?.name || null,
+            role: user?.role?.name || null,
+          },
+        });
+
         const saved = await color.save();
 
         return {
@@ -83,6 +98,7 @@ module.exports = {
         };
       }
     },
+
     updateColor: async (_, { id, name, price, superadminId, subadminId }) => {
       try {
         const updateFields = {};

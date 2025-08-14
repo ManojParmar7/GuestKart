@@ -20,6 +20,10 @@ const ExtraSchema = new mongoose.Schema({
     ref: "User",
     default: null,
   },
+  createdBy: {
+    name: { type: String, required: true },
+    role: { type: String, required: true },
+  },
 });
 
 ExtraSchema.index({ userId: 1, name: 1 }, { unique: true });

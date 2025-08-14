@@ -1,4 +1,5 @@
 const Size = require("../../modals/size");
+const User = require("../../modals/User");
 
 module.exports = {
   Query: {
@@ -48,7 +49,29 @@ module.exports = {
           };
         }
 
-        const size = new Size({ name, price, superadminId, subadminId });
+        // Determine who is creating
+        const creatorId = subadminId || superadminId;
+        const creatorUser = await User.findById(creatorId).populate("role");
+
+        if (!creatorUser) {
+          return {
+            success: false,
+            message: "Creator user not found.",
+            size: null,
+          };
+        }
+
+        const size = new Size({
+          name,
+          price,
+          superadminId,
+          subadminId,
+          createdBy: {
+            name: creatorUser.name,
+            role: creatorUser.role?.name || "Unknown",
+          },
+        });
+
         const saved = await size.save();
 
         return {

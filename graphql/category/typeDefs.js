@@ -2,7 +2,10 @@ const gql = String.raw;
 
 const typeDefs = gql`
   scalar Upload
-
+  type CreatedByInfo {
+    name: String
+    role: String
+  }
   type Category {
     id: ID!
     name: String!
@@ -11,6 +14,7 @@ const typeDefs = gql`
     image: String
     subadminId: ID!
     superadminId: ID!
+    createdBy: CreatedByInfo
   }
   type CatgoryPaginationResponse {
     success: Boolean!

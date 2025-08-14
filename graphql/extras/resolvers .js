@@ -1,4 +1,5 @@
 const Extra = require("../../modals/extras");
+const User = require("../../modals/User");
 
 module.exports = {
   Query: {
@@ -59,7 +60,21 @@ module.exports = {
           };
         }
 
-        const extra = new Extra({ name, price, superadminId, subadminId });
+        // Find user who is creating this extra
+        let creatorId = subadminId || superadminId;
+        const user = await User.findById(creatorId).populate("role");
+
+        const extra = new Extra({
+          name,
+          price,
+          superadminId,
+          subadminId,
+          createdBy: {
+            name: user?.name || null,
+            role: user?.role?.name || null,
+          },
+        });
+
         const saved = await extra.save();
 
         return {

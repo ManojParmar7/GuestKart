@@ -109,6 +109,10 @@ const productSchema = new mongoose.Schema(
       ref: "subadminId",
       required: true,
     },
+    createdBy: {
+      name: { type: String, required: true },
+      role: { type: String, required: true },
+    },
   },
   {
     timestamps: true,
