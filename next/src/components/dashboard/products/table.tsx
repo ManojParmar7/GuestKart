@@ -337,8 +337,14 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 											{/* Extras */}
 											<TableCell>{row.extras?.map((extra: any) => extra.name).join(", ")}</TableCell>
 
-											<TableCell>{row.user?.name}</TableCell>
-
+											<TableCell>
+												{row?.createdBy?.name}
+												{row?.createdBy?.role && (
+													<span style={{ color: "#6b7280", fontSize: "0.875rem", marginLeft: 6 }}>
+														({row.createdBy.role})
+													</span>
+												)}
+											</TableCell>
 											{/* Actions (original conditional logic) */}
 											<TableCell align="center">
 												<Stack direction="row" spacing={1} justifyContent="center">

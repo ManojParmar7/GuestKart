@@ -261,6 +261,10 @@ export const getAllBanner = gql`
 				subTitle
 				description
 				image
+				createdBy {
+					name
+					role
+				}
 				user {
 					id
 					name
@@ -379,6 +383,10 @@ export const createBanner = gql`
 				title
 				subTitle
 				description
+				createdBy {
+					name
+					role
+				}
 				user {
 					id
 					name
@@ -438,6 +446,10 @@ export const GetAllCategories = gql`
 				image
 				subadminId
 				superadminId
+				createdBy {
+					name
+					role
+				}
 			}
 		}
 	}
@@ -487,6 +499,10 @@ export const createCategory = gql`
 				image
 				subadminId
 				superadminId
+				createdBy {
+					name
+					role
+				}
 			}
 		}
 	}
@@ -613,6 +629,10 @@ export const getAllProducts = gql`
 					id
 					name
 				}
+				createdBy {
+					name
+					role
+				}
 				sizes {
 					id
 					name
@@ -621,6 +641,7 @@ export const getAllProducts = gql`
 					id
 					name
 				}
+
 				colors {
 					id
 					name
@@ -645,7 +666,6 @@ export const updateProduct = gql`
 		$description: String
 		$stock: Int
 		$categoryId: ID
-		$userId: ID
 		$images: [Upload!]
 		$sizes: [ID!]
 		$colors: [ID!]
@@ -713,6 +733,10 @@ export const createProduct = gql`
 				category {
 					id
 					name
+				}
+				createdBy {
+					name
+					role
 				}
 				sizes {
 					id
@@ -801,8 +825,12 @@ export const createColor = gql`
 			success
 			message
 			color {
-				id
 				name
+				createdBy {
+					name
+					role
+				}
+				id
 				price
 				superadminId
 				subadminId
@@ -834,6 +862,10 @@ export const getColors = gql`
 				price
 				superadminId
 				subadminId
+				createdBy {
+					name
+					role
+				}
 			}
 			totalCount
 			totalPages
@@ -878,6 +910,10 @@ export const createExtra = gql`
 				price
 				superadminId
 				subadminId
+				createdBy {
+					name
+					role
+				}
 				createdAt
 				updatedAt
 			}
@@ -912,6 +948,10 @@ export const getExtras = gql`
 				subadminId
 				createdAt
 				updatedAt
+				createdBy {
+					name
+					role
+				}
 			}
 			totalCount
 			totalPages
@@ -960,6 +1000,10 @@ export const createSize = gql`
 				price
 				superadminId
 				subadminId
+				createdBy {
+					name
+					role
+				}
 				createdAt
 				updatedAt
 			}
@@ -994,6 +1038,10 @@ export const getSizes = gql`
 				subadminId
 				createdAt
 				updatedAt
+				createdBy {
+					name
+					role
+				}
 			}
 			totalCount
 			totalPages

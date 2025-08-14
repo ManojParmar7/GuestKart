@@ -56,6 +56,9 @@ export function SideNav(): React.JSX.Element {
 			items.push({ key: "banner", title: "Banners", href: paths.dashboard.banner, icon: "image-square" });
 			items.push({ key: "categories", title: "Categories", href: paths.dashboard.categories, icon: "squares-four" });
 			items.push({ key: "roles", title: "Roles", href: paths.dashboard.roles, icon: "roles" });
+			items.push({ key: "size", title: "Size", href: paths.dashboard.size, icon: "size" });
+			items.push({ key: "color", title: "Color", href: paths.dashboard.color, icon: "color" });
+			items.push({ key: "extra", title: "Accessories", href: paths.dashboard.color, icon: "accessories" });
 		} else if (data?.getPermission?.modules) {
 			const modules = data.getPermission.modules;
 
@@ -71,6 +74,9 @@ export function SideNav(): React.JSX.Element {
 			if (modules?.banners?.view) {
 				items.push({ key: "banner", title: "Banners", href: paths.dashboard.banner, icon: "image-square" });
 			}
+			items.push({ key: "size", title: "Size", href: paths.dashboard.size, icon: "size" });
+			items.push({ key: "color", title: "Color", href: paths.dashboard.color, icon: "color" });
+			items.push({ key: "extra", title: "Accessories", href: paths.dashboard.color, icon: "accessories" });
 		}
 
 		// Common items

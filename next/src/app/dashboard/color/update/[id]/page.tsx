@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Stack from "@mui/material/Stack";
 
 import { config } from "@/config";
-import { UpdateForm } from "@/components/dashboard/products/updated-from";
+import { UpdateForm } from "@/components/dashboard/size/updated-from";
 
 export const metadata = { title: `Settings | Dashboard | ${config.site.name}` } satisfies Metadata;
 

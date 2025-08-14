@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@apollo/client";
 import Alert from "@mui/material/Alert";
-import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -34,10 +33,11 @@ import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { authClient } from "@/lib/auth/client";
 import { useSelection } from "@/hooks/use-selection";
 
-import { deleteBanner, getAllBanner, GetPermissions } from "../../../app/query-common";
+import { deleteSize, getColors, GetPermissions } from "../../../app/query-common";
 import TableSkeletonLoader from "../loader/table-skeleton-loader";
 
 function applyPagination<T>(rows: T[] = [], page: number, rowsPerPage: number): T[] {
+	console.log("rows: ", rows);
 	return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }
 
@@ -47,11 +47,11 @@ type CustomersTableProps = {
 	setUserData: any;
 };
 export function TablePage({ search, setPermissionsData, setUserData }: CustomersTableProps): React.JSX.Element {
-	const loginUser = localStorage.getItem("login_id");
 	const [page, setPage] = React.useState(0);
 	const [rowsPerPage, setRowsPerPage] = React.useState(10);
 	const router = useRouter();
 	const [user, setUser] = useState<any>(null);
+	const loginUser = localStorage.getItem("login_id");
 
 	const [deleteDialog, setDeleteDialog] = React.useState({
 		open: false,
@@ -70,17 +70,9 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 			setUser(data);
 			setUserData(data);
 		})();
-
 		// emitUserUpdate();
 	}, []);
 	const [deletingUserId, setDeletingUserId] = React.useState<string | null>(null);
-	// const variables = {
-	// 	superadminId: loginUser,
-	// 	subadminId: subAdmin || null,
-	// 	search: search || null,
-	// 	limit: rowsPerPage,
-	// 	page: page + 1,
-	// };
 
 	React.useEffect(() => {
 		(async () => {
@@ -110,11 +102,11 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 				: {}),
 	};
 
-	const { data, loading, error, refetch } = useQuery(getAllBanner, {
+	const { data, loading, error, refetch } = useQuery(getColors, {
 		variables,
 		fetchPolicy: "network-only",
 	});
-	const modules = permissionsData?.getPermission?.modules?.banners;
+	const modules = permissionsData?.getPermission?.modules?.categories;
 	const handleData = () => {
 		setPermissionsData(modules?.create);
 	};
@@ -123,20 +115,20 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 		handleData();
 	}, [search, page, rowsPerPage, handleData]);
 
-	const [deleteUsers] = useMutation(deleteBanner, {
-		refetchQueries: [{ query: getAllBanner, variables: { deleteBannerId: deleteDialog?.userId } }],
+	const [deleteCategory] = useMutation(deleteSize, {
+		refetchQueries: [{ query: getColors, variables: { deleteColorId: deleteDialog?.userId } }],
 		onCompleted: (data) => {
-			if (data.deleteBanner.success) {
+			if (data.deleteColor?.success) {
 				setSnackbar({
 					open: true,
-					message: `${data?.deleteBanner?.message}` || "deleted successfully!",
+					message: `${data?.deleteColor?.message}` || "deleted successfully!",
 					severity: "success",
 				});
 				refetch(variables);
 			} else {
 				setSnackbar({
 					open: true,
-					message: data.deleteBanner.message || "Failed to delete user",
+					message: data.deleteColor?.message || "Failed to delete user",
 					severity: "error",
 				});
 			}
@@ -153,14 +145,14 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	});
 
 	const rows = React.useMemo(() => {
-		const users = data?.getAllBanners?.banners ?? [];
-		return applyPagination(users, page, rowsPerPage);
+		const size = data?.getColors?.colors ?? [];
+		return applyPagination(size, page, rowsPerPage);
 	}, [data, page, rowsPerPage]);
 	console.log(rows);
 	const rowIds = React.useMemo(() => rows.map((r: any) => r.id), [rows]);
 	const { selected } = useSelection(rowIds);
 
-	const totalCount = data?.getAllBanners?.total || 0; // assuming backend gives total count
+	const totalCount = data?.getColors?.total || 0; // assuming backend gives total count
 
 	const handlePageChange = (_event: unknown, newPage: number) => {
 		setPage(newPage);
@@ -172,7 +164,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	};
 
 	const handleEditUser = (userId: string) => {
-		router.push(`/dashboard/banner/update/${userId}`);
+		router.push(`/dashboard/size/update/${userId}`);
 	};
 
 	const handleDeleteClick = (userId: string, userName: string) => {
@@ -189,9 +181,9 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 		setDeletingUserId(deleteDialog.userId);
 
 		try {
-			await deleteUsers({
+			await deleteCategory({
 				variables: {
-					deleteBannerId: deleteDialog.userId,
+					deleteSizeId: deleteDialog.userId,
 				},
 			});
 		} catch (error) {
@@ -230,13 +222,10 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 					<Table sx={{ minWidth: "800px" }}>
 						<TableHead>
 							<TableRow>
-								<TableCell>Banner</TableCell>
+								<TableCell> Name</TableCell>
+								<TableCell> Price</TableCell>
 
-								<TableCell>Title</TableCell>
-								<TableCell>Sub Title</TableCell>
-								<TableCell>description</TableCell>
 								<TableCell>Created By</TableCell>
-
 								<TableCell align="center">Actions</TableCell>
 							</TableRow>
 						</TableHead>
@@ -254,31 +243,9 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 
 									return (
 										<TableRow hover key={row.id} selected={isSelected}>
-											<TableCell>
-												<Stack direction="row" spacing={2} alignItems="center">
-													<Avatar
-														src={`http://localhost:8000${row?.image}`} // banner image ka path
-														variant="rounded"
-														sx={{ width: 56, height: 56 }}
-													/>
-												</Stack>
-											</TableCell>
+											<TableCell>{row?.name}</TableCell>
 
-											<TableCell>{row?.title}</TableCell>
-											<TableCell>{row?.subTitle}</TableCell>
-											<TableCell
-												sx={{
-													display: "-webkit-box",
-													WebkitLineClamp: 2, // max 2 lines
-													WebkitBoxOrient: "vertical",
-													overflow: "hidden",
-													textOverflow: "ellipsis",
-													maxWidth: 250,
-													marginBottom: 1,
-												}}
-											>
-												{row?.description ?? "-"}
-											</TableCell>
+											<TableCell>{row?.price ?? "-"}</TableCell>
 											<TableCell>
 												{row?.createdBy?.name}
 												{row?.createdBy?.role && (
@@ -290,65 +257,30 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 
 											<TableCell align="center">
 												<Stack direction="row" spacing={1} justifyContent="center">
-													{user?.role?.name === "superadmin" ? (
-														<>
-															<Tooltip title="Edit Banner">
-																<IconButton
-																	onClick={() => handleEditUser(row.id)}
-																	color="primary"
-																	size="small"
-																	disabled={isDeleting}
-																>
-																	<PencilIcon fontSize="var(--icon-fontSize-sm)" />
-																</IconButton>
-															</Tooltip>
-															<Tooltip title="Delete Banner">
-																<IconButton
-																	onClick={() => handleDeleteClick(row.id, row.name)}
-																	color="error"
-																	size="small"
-																	disabled={isDeleting}
-																>
-																	{isDeleting ? (
-																		<CircularProgress size={16} />
-																	) : (
-																		<TrashIcon fontSize="var(--icon-fontSize-sm)" />
-																	)}
-																</IconButton>
-															</Tooltip>
-														</>
-													) : (
-														<>
-															{modules?.update && (
-																<Tooltip title="Edit Banner">
-																	<IconButton
-																		onClick={() => handleEditUser(row.id)}
-																		color="primary"
-																		size="small"
-																		disabled={isDeleting}
-																	>
-																		<PencilIcon fontSize="var(--icon-fontSize-sm)" />
-																	</IconButton>
-																</Tooltip>
+													<Tooltip title="Edit User">
+														<IconButton
+															onClick={() => handleEditUser(row.id)}
+															color="primary"
+															size="small"
+															disabled={isDeleting}
+														>
+															<PencilIcon fontSize="var(--icon-fontSize-sm)" />
+														</IconButton>
+													</Tooltip>
+													<Tooltip title="Delete User">
+														<IconButton
+															onClick={() => handleDeleteClick(row.id, row.name)}
+															color="error"
+															size="small"
+															disabled={isDeleting}
+														>
+															{isDeleting ? (
+																<CircularProgress size={16} />
+															) : (
+																<TrashIcon fontSize="var(--icon-fontSize-sm)" />
 															)}
-															{modules?.delete && (
-																<Tooltip title="Delete Banner">
-																	<IconButton
-																		onClick={() => handleDeleteClick(row.id, row.name)}
-																		color="error"
-																		size="small"
-																		disabled={isDeleting}
-																	>
-																		{isDeleting ? (
-																			<CircularProgress size={16} />
-																		) : (
-																			<TrashIcon fontSize="var(--icon-fontSize-sm)" />
-																		)}
-																	</IconButton>
-																</Tooltip>
-															)}
-														</>
-													)}
+														</IconButton>
+													</Tooltip>
 												</Stack>
 											</TableCell>
 										</TableRow>
@@ -380,7 +312,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 				<DialogTitle id="delete-dialog-title">Confirm Delete</DialogTitle>
 				<DialogContent>
 					<DialogContentText id="delete-dialog-description">
-						Are you sure you want to delete user &quot;<strong>{deleteDialog.userName}</strong>&quot;? This action
+						Are you sure you want to delete size &quot;<strong>{deleteDialog.userName}</strong>&quot;? This action
 						cannot be undone.
 					</DialogContentText>
 				</DialogContent>

@@ -25,7 +25,7 @@ export function Filters({ onSearch }: Props): React.JSX.Element {
 				value={search}
 				onChange={handleSearchChange}
 				fullWidth
-				placeholder="Search Categories"
+				placeholder="Search Size"
 				startAdornment={
 					<InputAdornment position="start">
 						<MagnifyingGlassIcon fontSize="var(--icon-fontSize-md)" />

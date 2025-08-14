@@ -234,21 +234,13 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 					<Table sx={{ minWidth: "800px" }}>
 						<TableHead>
 							<TableRow>
-								<TableCell padding="checkbox">
-									<Checkbox
-										checked={selectedAll}
-										indeterminate={selectedSome}
-										onChange={(event) => {
-											if (event.target.checked) selectAll();
-											else deselectAll();
-										}}
-									/>
-								</TableCell>
 								<TableCell>Categories</TableCell>
 
 								<TableCell>Category Name</TableCell>
 								<TableCell>Slug</TableCell>
 								<TableCell>description</TableCell>
+								<TableCell>Created By</TableCell>
+
 								<TableCell align="center">Actions</TableCell>
 							</TableRow>
 						</TableHead>
@@ -266,12 +258,6 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 
 									return (
 										<TableRow hover key={row.id} selected={isSelected}>
-											<TableCell padding="checkbox">
-												<Checkbox
-													checked={isSelected}
-													onChange={(event) => (event.target.checked ? selectOne(row.id) : deselectOne(row.id))}
-												/>
-											</TableCell>
 											<TableCell>
 												<Stack direction="row" spacing={2} alignItems="center">
 													<Avatar src={`http://localhost:8000${row?.image}`} />
@@ -279,12 +265,31 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 											</TableCell>
 											<TableCell>{row?.name}</TableCell>
 											<TableCell>{row?.slug}</TableCell>
-											<TableCell>{row?.description ?? "-"}</TableCell>
+											<TableCell
+												sx={{
+													display: "-webkit-box",
+													WebkitLineClamp: 2, // max 2 lines
+													WebkitBoxOrient: "vertical",
+													overflow: "hidden",
+													textOverflow: "ellipsis",
+													maxWidth: 250,
+												}}
+											>
+												{row?.description ?? "-"}
+											</TableCell>
+											<TableCell>
+												{row?.createdBy?.name}
+												{row?.createdBy?.role && (
+													<span style={{ color: "#6b7280", fontSize: "0.875rem", marginLeft: 6 }}>
+														({row.createdBy.role})
+													</span>
+												)}
+											</TableCell>
 											<TableCell align="center">
 												<Stack direction="row" spacing={1} justifyContent="center">
 													{user?.role?.name === "superadmin" ? (
 														<>
-															<Tooltip title="Edit User">
+															<Tooltip title="Edit Category">
 																<IconButton
 																	onClick={() => handleEditUser(row.id)}
 																	color="primary"
@@ -294,7 +299,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 																	<PencilIcon fontSize="var(--icon-fontSize-sm)" />
 																</IconButton>
 															</Tooltip>
-															<Tooltip title="Delete User">
+															<Tooltip title="Delete Category">
 																<IconButton
 																	onClick={() => handleDeleteClick(row.id, row.name)}
 																	color="error"
@@ -312,7 +317,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 													) : (
 														<>
 															{modules?.update && (
-																<Tooltip title="Edit User">
+																<Tooltip title="Edit Category">
 																	<IconButton
 																		onClick={() => handleEditUser(row.id)}
 																		color="primary"
@@ -324,7 +329,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 																</Tooltip>
 															)}
 															{modules?.delete && (
-																<Tooltip title="Delete User">
+																<Tooltip title="Delete Category">
 																	<IconButton
 																		onClick={() => handleDeleteClick(row.id, row.name)}
 																		color="error"

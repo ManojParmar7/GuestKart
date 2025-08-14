@@ -11,6 +11,12 @@ export const paths = {
     categories: '/dashboard/categories',
     roles: '/dashboard/roles',
     products: '/dashboard/products',
+        size: '/dashboard/size',
+                color: '/dashboard/color',
+
+          extra: '/dashboard/accessories',
+
+
              
 
         

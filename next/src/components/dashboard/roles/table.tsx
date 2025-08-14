@@ -33,11 +33,10 @@ import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { authClient } from "@/lib/auth/client";
 import { useSelection } from "@/hooks/use-selection";
 
-import { deleteRoles, getAllRoles, GetPermissions } from "../../../app/query-common";
+import { deleteRoles, getAllRoles } from "../../../app/query-common";
 import TableSkeletonLoader from "../loader/table-skeleton-loader";
 
 function applyPagination<T>(rows: T[] = [], page: number, rowsPerPage: number): T[] {
-	console.log("rows: ", rows);
 	return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }
 
@@ -46,7 +45,7 @@ type CustomersTableProps = {
 	setPermissionsData: any;
 	setUserData: any;
 };
-export function TablePage({ search, setPermissionsData, setUserData }: CustomersTableProps): React.JSX.Element {
+export function TablePage({ search, setUserData }: CustomersTableProps): React.JSX.Element {
 	const [page, setPage] = React.useState(0);
 	const [rowsPerPage, setRowsPerPage] = React.useState(10);
 	const router = useRouter();
@@ -80,13 +79,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 			setUser(data);
 		})();
 	}, []);
-	const { data: permissionsData } = useQuery(GetPermissions, {
-		variables: {
-			subadminId: user?.id,
-			superadminId: user?.superadmin_id,
-		},
-		fetchPolicy: "network-only",
-	});
+
 	const variables = {
 		search: search,
 		page: page,
@@ -97,14 +90,10 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 		variables,
 		fetchPolicy: "network-only",
 	});
-	const modules = permissionsData?.getPermission?.modules?.categories;
-	const handleData = () => {
-		setPermissionsData(modules?.create);
-	};
+
 	React.useEffect(() => {
 		refetch(variables);
-		handleData();
-	}, [search, page, rowsPerPage, handleData]);
+	}, [search, page, rowsPerPage]);
 
 	const [deleteCategory] = useMutation(deleteRoles, {
 		refetchQueries: [{ query: getAllRoles, variables: { deleteRoles: deleteDialog?.userId } }],
@@ -147,7 +136,6 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	const selectedAll = rows.length > 0 && selected.size === rows.length;
 
 	const totalCount = data?.getAllRoles?.total || 0; // assuming backend gives total count
-	console.log("totalCount: ", totalCount);
 
 	const handlePageChange = (_event: unknown, newPage: number) => {
 		setPage(newPage);
@@ -159,7 +147,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	};
 
 	const handleEditUser = (userId: string) => {
-		router.push(`/dashboard/categories/update/${userId}`);
+		router.push(`/dashboard/roles/update/${userId}`);
 	};
 
 	const handleDeleteClick = (userId: string, userName: string) => {
@@ -259,65 +247,30 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 											<TableCell>{row?.description ?? "-"}</TableCell>
 											<TableCell align="center">
 												<Stack direction="row" spacing={1} justifyContent="center">
-													{user?.role?.name === "superadmin" ? (
-														<>
-															<Tooltip title="Edit User">
-																<IconButton
-																	onClick={() => handleEditUser(row.id)}
-																	color="primary"
-																	size="small"
-																	disabled={isDeleting}
-																>
-																	<PencilIcon fontSize="var(--icon-fontSize-sm)" />
-																</IconButton>
-															</Tooltip>
-															<Tooltip title="Delete User">
-																<IconButton
-																	onClick={() => handleDeleteClick(row.id, row.name)}
-																	color="error"
-																	size="small"
-																	disabled={isDeleting}
-																>
-																	{isDeleting ? (
-																		<CircularProgress size={16} />
-																	) : (
-																		<TrashIcon fontSize="var(--icon-fontSize-sm)" />
-																	)}
-																</IconButton>
-															</Tooltip>
-														</>
-													) : (
-														<>
-															{modules?.update && (
-																<Tooltip title="Edit User">
-																	<IconButton
-																		onClick={() => handleEditUser(row.id)}
-																		color="primary"
-																		size="small"
-																		disabled={isDeleting}
-																	>
-																		<PencilIcon fontSize="var(--icon-fontSize-sm)" />
-																	</IconButton>
-																</Tooltip>
+													<Tooltip title="Edit User">
+														<IconButton
+															onClick={() => handleEditUser(row.id)}
+															color="primary"
+															size="small"
+															disabled={isDeleting}
+														>
+															<PencilIcon fontSize="var(--icon-fontSize-sm)" />
+														</IconButton>
+													</Tooltip>
+													<Tooltip title="Delete User">
+														<IconButton
+															onClick={() => handleDeleteClick(row.id, row.name)}
+															color="error"
+															size="small"
+															disabled={isDeleting}
+														>
+															{isDeleting ? (
+																<CircularProgress size={16} />
+															) : (
+																<TrashIcon fontSize="var(--icon-fontSize-sm)" />
 															)}
-															{modules?.delete && (
-																<Tooltip title="Delete User">
-																	<IconButton
-																		onClick={() => handleDeleteClick(row.id, row.name)}
-																		color="error"
-																		size="small"
-																		disabled={isDeleting}
-																	>
-																		{isDeleting ? (
-																			<CircularProgress size={16} />
-																		) : (
-																			<TrashIcon fontSize="var(--icon-fontSize-sm)" />
-																		)}
-																	</IconButton>
-																</Tooltip>
-															)}
-														</>
-													)}
+														</IconButton>
+													</Tooltip>
 												</Stack>
 											</TableCell>
 										</TableRow>
