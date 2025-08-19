@@ -8,10 +8,10 @@ import { Button, Card, CardActions, CardContent, CardHeader, Divider, MenuItem, 
 import { authClient } from "@/lib/auth/client";
 import { showToast } from "@/hooks/toast-message";
 
-import { createColor, GetUsersBySuperadmin } from "../../../app/query-common";
+import { createExtra, GetUsersBySuperadmin } from "../../../app/query-common";
 
 export function CreateForm(): React.JSX.Element {
-	const [CreateColor] = useMutation(createColor);
+	const [CreateExtra] = useMutation(createExtra);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [user, setUser] = useState<any>(null);
 	const loginUser = localStorage.getItem("login_id");
@@ -100,17 +100,17 @@ export function CreateForm(): React.JSX.Element {
 			};
 
 			try {
-				const { data } = await CreateColor({
+				const { data } = await CreateExtra({
 					variables: {
 						...payload,
 					},
 				});
 
 				showToast({
-					message: data?.createColor?.message || " created successfully.",
+					message: data?.createExtra?.message || " created successfully.",
 					type: "success",
 				});
-				router.push(`/dashboard/color`);
+				router.push(`/dashboard/accessories`);
 			} catch (error) {
 				console.error("Error submitting permissions:", error);
 				showToast({
@@ -124,7 +124,11 @@ export function CreateForm(): React.JSX.Element {
 	return (
 		<form onSubmit={handleSubmit}>
 			<Card elevation={3} sx={{ p: 2 }}>
-				<CardHeader name="Create Color" subheader="Fill in the details to create a new Color" sx={{ mb: 2 }} />
+				<CardHeader
+					name="Create Accessories"
+					subheader="Fill in the details to create a new Accessories"
+					sx={{ mb: 2 }}
+				/>
 
 				<CardContent>
 					<Stack spacing={4}>
@@ -180,7 +184,7 @@ export function CreateForm(): React.JSX.Element {
 				<Divider sx={{ my: 2 }} />
 
 				<CardActions sx={{ justifyContent: "flex-end", gap: 2 }}>
-					<Button variant="outlined" color="error" onClick={() => router.push(`/dashboard/color`)}>
+					<Button variant="outlined" color="error" onClick={() => router.push(`/dashboard/accessories`)}>
 						Cancel
 					</Button>
 					<Button variant="contained" type="submit">

@@ -52,7 +52,7 @@ import dayjs from "dayjs";
 
 import { showToast } from "@/hooks/toast-message";
 
-import { getColorsById, updateColor } from "../../../app/query-common";
+import { getExtraById, updateExtra } from "../../../app/query-common";
 import BannerUpdateSkeleton from "../../dashboard/loader/form-skeleton-loader";
 
 interface FormData {
@@ -74,25 +74,22 @@ export function UpdateForm(): React.JSX.Element {
 	const theme = useTheme();
 	const router = useRouter();
 	const params = useParams();
-	const getColorId = params?.id as string;
+	const getExtraId = params?.id as string;
 
 	// Apollo hooks
-	const [updatedColor, { loading: updating }] = useMutation(updateColor);
-	const { data, loading, error } = useQuery(getColorsById, {
-		variables: { getColorId: getColorId },
-		skip: !getColorId,
+	const [updatedAccessories, { loading: updating }] = useMutation(updateExtra);
+	const { data, loading, error } = useQuery(getExtraById, {
+		variables: { getExtraId: getExtraId },
+		skip: !getExtraId,
 		onCompleted: (data) => {
-			if (data?.getColor) {
-				const color = data.getColor;
+			if (data?.getExtra) {
+				const color = data.getExtra;
 				setFormData({
 					name: color.name || "",
 					price: color.price || "",
 				});
 				setOriginalData(color);
 				// Set current avatar as preview if exists
-				if (color.avatar) {
-					setImagePreview(color.avatar);
-				}
 			}
 		},
 		onError: (error) => {
@@ -117,9 +114,6 @@ export function UpdateForm(): React.JSX.Element {
 	const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
 
 	// Image upload states
-	const [selectedImage, setSelectedImage] = React.useState<File | null>(null);
-	const [imagePreview, setImagePreview] = React.useState<string>("");
-	const [imageChanged, setImageChanged] = React.useState(false);
 
 	// Check for unsaved changes
 	React.useEffect(() => {
@@ -186,7 +180,7 @@ export function UpdateForm(): React.JSX.Element {
 
 		// Prepare payload with only changed fields
 		const payload: any = {
-			updateColorId: getColorId,
+			updateExtraId: getExtraId,
 			subadminId: originalData?.subadminId,
 			superadminId: originalData?.superadminId,
 		};
@@ -208,21 +202,21 @@ export function UpdateForm(): React.JSX.Element {
 		try {
 			// If you need to upload image separately
 
-			const { data: responseData } = await updatedColor({
+			const { data: responseData } = await updatedAccessories({
 				variables: {
 					...payload,
 				},
 			});
 
-			if (responseData?.updateColor?.success) {
+			if (responseData?.updateExtra?.success) {
 				showToast({
-					message: `${responseData?.updateColor?.message}`,
+					message: `${responseData?.updateExtra?.message}`,
 					type: "success",
 				});
-				router.push("/dashboard/color");
+				router.push("/dashboard/accessories");
 			} else {
 				showToast({
-					message: responseData?.updateColor?.message || "An error occurred while updating user",
+					message: responseData?.updateExtra?.message || "An error occurred while updating user",
 					type: "error",
 				});
 			}
@@ -240,7 +234,7 @@ export function UpdateForm(): React.JSX.Element {
 			const confirmed = window.confirm("You have unsaved changes. Are you sure you want to leave?");
 			if (!confirmed) return;
 		}
-		router.push("/dashboard/color");
+		router.push("/dashboard/accessories");
 	};
 
 	// Loading state
@@ -259,7 +253,7 @@ export function UpdateForm(): React.JSX.Element {
 				severity="error"
 				sx={{ mt: 2, p: 3 }}
 				action={
-					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/color")}>
+					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/accessories")}>
 						Go Back
 					</Button>
 				}
@@ -279,13 +273,13 @@ export function UpdateForm(): React.JSX.Element {
 				severity="warning"
 				sx={{ mt: 2, p: 3 }}
 				action={
-					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/color")}>
+					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/accessories")}>
 						Go Back
 					</Button>
 				}
 			>
-				<Typography variant="h6">Color not found</Typography>
-				<Typography variant="body2">The requested Color could not be found.</Typography>
+				<Typography variant="h6">Accessories not found</Typography>
+				<Typography variant="body2">The requested Accessories could not be found.</Typography>
 			</Alert>
 		);
 	}
@@ -294,7 +288,11 @@ export function UpdateForm(): React.JSX.Element {
 		<Box sx={{ width: "100%", p: 2 }}>
 			<form onSubmit={handleSubmit}>
 				<Card elevation={3} sx={{ p: 2 }}>
-					<CardHeader name="Update Size Information" subheader="Modify Size details and preferences" sx={{ mb: 2 }} />
+					<CardHeader
+						name="Update Accessories Information"
+						subheader="Modify Accessories details and preferences"
+						sx={{ mb: 2 }}
+					/>
 
 					<CardContent>
 						<Stack spacing={4}>

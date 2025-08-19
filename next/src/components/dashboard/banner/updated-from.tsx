@@ -312,7 +312,7 @@ export function UpdateForm(): React.JSX.Element {
 			const confirmed = window.confirm("You have unsaved changes. Are you sure you want to leave?");
 			if (!confirmed) return;
 		}
-		router.push("/dashboard/categories");
+		router.push("/dashboard/banner");
 	};
 
 	// Loading state
@@ -331,7 +331,7 @@ export function UpdateForm(): React.JSX.Element {
 				severity="error"
 				sx={{ mt: 2, p: 3 }}
 				action={
-					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/customers")}>
+					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/banner")}>
 						Go Back
 					</Button>
 				}
@@ -351,7 +351,7 @@ export function UpdateForm(): React.JSX.Element {
 				severity="warning"
 				sx={{ mt: 2, p: 3 }}
 				action={
-					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/customers")}>
+					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/banner")}>
 						Go Back
 					</Button>
 				}

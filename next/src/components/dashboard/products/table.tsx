@@ -293,19 +293,36 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 											</TableCell>
 
 											<TableCell>{row.name}</TableCell>
-											<TableCell>₹{row.price}</TableCell>
+											<TableCell>
+												{row.discountPrice && row.discountPrice < row.price ? (
+													<>
+														<span style={{ textDecoration: "line-through", color: "gray" }}>₹{row.price}</span>
+														<span
+															style={{
+																marginLeft: "8px",
+																color: "green",
+																fontWeight: "bold",
+															}}
+														>
+															₹{row.discountPrice}
+														</span>
+													</>
+												) : (
+													<span>₹{row.price}</span>
+												)}
+											</TableCell>
 											<TableCell>{row.stock}</TableCell>
 											<TableCell>{row.category?.name}</TableCell>
 
 											{/* Sizes */}
+											{/* Sizes */}
 											<TableCell>{row.sizes?.map((size: any) => size.name).join(", ")}</TableCell>
 
-											{/* Colors with label */}
+											{/* Colors */}
 											<TableCell>
-												<Stack direction="row" spacing={1}>
+												<Stack direction="row" spacing={1} sx={{ overflowX: "auto", maxWidth: 180, p: 0.5 }}>
 													{row.colors?.map((color: any, i: number) => {
 														const colorCode = getColorFromName(color.name);
-
 														return (
 															<Stack
 																key={i}
@@ -316,6 +333,9 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 																	border: "1px solid #ccc",
 																	borderRadius: "8px",
 																	padding: "2px 6px",
+																	whiteSpace: "nowrap",
+																	flexShrink: 0,
+																	bgcolor: "#f9fafb",
 																}}
 															>
 																<Box
@@ -335,7 +355,26 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 											</TableCell>
 
 											{/* Extras */}
-											<TableCell>{row.extras?.map((extra: any) => extra.name).join(", ")}</TableCell>
+											<TableCell>
+												<Stack direction="row" spacing={1} sx={{ overflowX: "auto", maxWidth: 180, p: 0.5 }}>
+													{row.extras?.map((extra: any, i: number) => (
+														<Box
+															key={i}
+															sx={{
+																border: "1px solid #ccc",
+																borderRadius: "8px",
+																padding: "2px 8px",
+																whiteSpace: "nowrap",
+																fontSize: "0.875rem",
+																bgcolor: "#f9fafb",
+																flexShrink: 0,
+															}}
+														>
+															{extra.name}
+														</Box>
+													))}
+												</Stack>
+											</TableCell>
 
 											<TableCell>
 												{row?.createdBy?.name}

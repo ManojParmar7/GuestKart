@@ -16,7 +16,7 @@ export function Filters({ onSearch }: Props): React.JSX.Element {
 	const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
 		setSearch(value);
-		onSearch(value);
+		onSearch(value); // pass to parent
 	};
 
 	return (
@@ -25,7 +25,7 @@ export function Filters({ onSearch }: Props): React.JSX.Element {
 				value={search}
 				onChange={handleSearchChange}
 				fullWidth
-				placeholder="Search Color Name"
+				placeholder="Search Accessories Name"
 				startAdornment={
 					<InputAdornment position="start">
 						<MagnifyingGlassIcon fontSize="var(--icon-fontSize-md)" />

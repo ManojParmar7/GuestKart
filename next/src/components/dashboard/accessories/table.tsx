@@ -5,11 +5,11 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@apollo/client";
+import { Typography } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -33,20 +33,17 @@ import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { authClient } from "@/lib/auth/client";
 import { useSelection } from "@/hooks/use-selection";
 
-import { deleteSize, GetPermissions, getSizes } from "../../../app/query-common";
+import { deleteExtra, getExtras } from "../../../app/query-common";
 import TableSkeletonLoader from "../loader/table-skeleton-loader";
 
 function applyPagination<T>(rows: T[] = [], page: number, rowsPerPage: number): T[] {
-	console.log("rows: ", rows);
 	return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }
 
 type CustomersTableProps = {
 	search: string;
-	setPermissionsData: any;
-	setUserData: any;
 };
-export function TablePage({ search, setPermissionsData, setUserData }: CustomersTableProps): React.JSX.Element {
+export function TablePage({ search }: CustomersTableProps): React.JSX.Element {
 	const [page, setPage] = React.useState(0);
 	const [rowsPerPage, setRowsPerPage] = React.useState(10);
 	const router = useRouter();
@@ -68,7 +65,6 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 		(async () => {
 			const { data } = await authClient.getUser();
 			setUser(data);
-			setUserData(data);
 		})();
 		// emitUserUpdate();
 	}, []);
@@ -80,13 +76,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 			setUser(data);
 		})();
 	}, []);
-	const { data: permissionsData } = useQuery(GetPermissions, {
-		variables: {
-			subadminId: user?.id,
-			superadminId: user?.superadmin_id,
-		},
-		fetchPolicy: "network-only",
-	});
+
 	const variables = {
 		search: search,
 		...(user?.role?.name === "superadmin"
@@ -102,33 +92,29 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 				: {}),
 	};
 
-	const { data, loading, error, refetch } = useQuery(getSizes, {
+	const { data, loading, error, refetch } = useQuery(getExtras, {
 		variables,
 		fetchPolicy: "network-only",
 	});
-	const modules = permissionsData?.getPermission?.modules?.categories;
-	const handleData = () => {
-		setPermissionsData(modules?.create);
-	};
+
 	React.useEffect(() => {
 		refetch(variables);
-		handleData();
-	}, [search, page, rowsPerPage, handleData]);
+	}, [search, page, rowsPerPage]);
 
-	const [deleteCategory] = useMutation(deleteSize, {
-		refetchQueries: [{ query: getSizes, variables: { deleteSizeId: deleteDialog?.userId } }],
+	const [deleteCategory] = useMutation(deleteExtra, {
+		refetchQueries: [{ query: getExtras, variables: { deleteExtraId: deleteDialog?.userId } }],
 		onCompleted: (data) => {
-			if (data.deleteSize.success) {
+			if (data.deleteExtra?.success) {
 				setSnackbar({
 					open: true,
-					message: `${data?.deleteSize?.message}` || "deleted successfully!",
+					message: `${data?.deleteExtra?.message}` || "deleted successfully!",
 					severity: "success",
 				});
 				refetch(variables);
 			} else {
 				setSnackbar({
 					open: true,
-					message: data.deleteSize.message || "Failed to delete user",
+					message: data.deleteExtra?.message || "Failed to delete user",
 					severity: "error",
 				});
 			}
@@ -145,14 +131,14 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	});
 
 	const rows = React.useMemo(() => {
-		const size = data?.getSizes?.sizes ?? [];
-		return applyPagination(size, page, rowsPerPage);
+		const extra = data?.getExtras?.extras ?? [];
+		return applyPagination(extra, page, rowsPerPage);
 	}, [data, page, rowsPerPage]);
 	console.log(rows);
 	const rowIds = React.useMemo(() => rows.map((r: any) => r.id), [rows]);
 	const { selected } = useSelection(rowIds);
 
-	const totalCount = data?.getSizes?.totalCount || 0; // assuming backend gives total count
+	const totalCount = data?.getExtras?.totalCount || 0;
 
 	const handlePageChange = (_event: unknown, newPage: number) => {
 		setPage(newPage);
@@ -164,7 +150,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	};
 
 	const handleEditUser = (userId: string) => {
-		router.push(`/dashboard/size/update/${userId}`);
+		router.push(`/dashboard/accessories/update/${userId}`);
 	};
 
 	const handleDeleteClick = (userId: string, userName: string) => {
@@ -183,7 +169,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 		try {
 			await deleteCategory({
 				variables: {
-					deleteSizeId: deleteDialog.userId,
+					deleteExtraId: deleteDialog.userId,
 				},
 			});
 		} catch (error) {
@@ -214,6 +200,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 			</Card>
 		);
 	}
+	// eslint-disable-next-line unicorn/consistent-function-scoping
 
 	return (
 		<>
@@ -224,9 +211,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 							<TableRow>
 								<TableCell> Name</TableCell>
 								<TableCell> Price</TableCell>
-
 								{user?.role?.name === "superadmin" && <TableCell>Created By</TableCell>}
-
 								<TableCell align="center">Actions</TableCell>
 							</TableRow>
 						</TableHead>
@@ -243,8 +228,12 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 									const isDeleting = deletingUserId === row.id;
 
 									return (
-										<TableRow hover key={row.id} selected={isSelected}>
-											<TableCell>{row?.name}</TableCell>
+										<TableRow hover key={row?.id} selected={isSelected}>
+											<TableCell>
+												<Stack direction="row" spacing={1}>
+													<Typography variant="body2">{row?.name}</Typography>
+												</Stack>
+											</TableCell>
 
 											<TableCell>{row?.price ?? "-"}</TableCell>
 											{user?.role?.name === "superadmin" && (
@@ -315,7 +304,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 				<DialogTitle id="delete-dialog-title">Confirm Delete</DialogTitle>
 				<DialogContent>
 					<DialogContentText id="delete-dialog-description">
-						Are you sure you want to delete size &quot;<strong>{deleteDialog.userName}</strong>&quot;? This action
+						Are you sure you want to delete color &quot;<strong>{deleteDialog.userName}</strong>&quot;? This action
 						cannot be undone.
 					</DialogContentText>
 				</DialogContent>

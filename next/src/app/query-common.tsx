@@ -652,6 +652,7 @@ export const getAllProducts = gql`
 				}
 				subadminId
 				superadminId
+				discountPrice
 			}
 		}
 	}
@@ -796,6 +797,7 @@ export const getProductById = gql`
 				}
 				subadminId
 				superadminId
+				discountPrice
 			}
 		}
 	}

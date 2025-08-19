@@ -7,8 +7,8 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import { PlusIcon } from "@phosphor-icons/react/dist/ssr/Plus";
 
-import { Filters } from "@/components/dashboard/color/filters";
-import { TablePage } from "@/components/dashboard/color/table";
+import { Filters } from "@/components/dashboard/accessories/filters";
+import { TablePage } from "@/components/dashboard/accessories/table";
 
 export default function ClientPage(): React.JSX.Element {
 	const router = useRouter();
@@ -22,7 +22,7 @@ export default function ClientPage(): React.JSX.Element {
 				<Stack spacing={1} sx={{ flex: "1 1 auto" }} />
 				<div>
 					<Button
-						onClick={() => router.push(`/dashboard/color/create`)}
+						onClick={() => router.push(`/dashboard/accessories/create`)}
 						startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />}
 						variant="contained"
 					>

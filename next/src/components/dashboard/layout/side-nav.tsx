@@ -44,7 +44,7 @@ export function SideNav(): React.JSX.Element {
 	// 3️⃣ Build nav items
 	React.useEffect(() => {
 		if (!user) return;
-		let items: NavItemConfig[] = [
+		const items: NavItemConfig[] = [
 			{ key: "overview", title: "Overview", href: paths.dashboard.overview, icon: "chart-pie" },
 		];
 
@@ -58,7 +58,7 @@ export function SideNav(): React.JSX.Element {
 			items.push({ key: "roles", title: "Roles", href: paths.dashboard.roles, icon: "roles" });
 			items.push({ key: "size", title: "Size", href: paths.dashboard.size, icon: "size" });
 			items.push({ key: "color", title: "Color", href: paths.dashboard.color, icon: "color" });
-			items.push({ key: "extra", title: "Accessories", href: paths.dashboard.color, icon: "accessories" });
+			items.push({ key: "extra", title: "Accessories", href: paths.dashboard.extra, icon: "accessories" });
 		} else if (data?.getPermission?.modules) {
 			const modules = data.getPermission.modules;
 
@@ -76,7 +76,7 @@ export function SideNav(): React.JSX.Element {
 			}
 			items.push({ key: "size", title: "Size", href: paths.dashboard.size, icon: "size" });
 			items.push({ key: "color", title: "Color", href: paths.dashboard.color, icon: "color" });
-			items.push({ key: "extra", title: "Accessories", href: paths.dashboard.color, icon: "accessories" });
+			items.push({ key: "extra", title: "Accessories", href: paths.dashboard.extra, icon: "accessories" });
 		}
 
 		// Common items

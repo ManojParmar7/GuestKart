@@ -199,7 +199,7 @@ export function UpdateForm(): React.JSX.Element {
 		}
 
 		if (formData.price !== originalData?.price) {
-			payload.price = formData.price;
+			payload.price = Number(formData.price);
 			changeCount++;
 		}
 
@@ -259,7 +259,7 @@ export function UpdateForm(): React.JSX.Element {
 				severity="error"
 				sx={{ mt: 2, p: 3 }}
 				action={
-					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/customers")}>
+					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/size")}>
 						Go Back
 					</Button>
 				}
@@ -279,7 +279,7 @@ export function UpdateForm(): React.JSX.Element {
 				severity="warning"
 				sx={{ mt: 2, p: 3 }}
 				action={
-					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/customers")}>
+					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/size")}>
 						Go Back
 					</Button>
 				}

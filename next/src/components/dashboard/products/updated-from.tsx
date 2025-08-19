@@ -347,14 +347,6 @@ export function UpdateForm(): React.JSX.Element {
 		}
 	};
 
-	const handleCancel = () => {
-		if (hasUnsavedChanges) {
-			const confirmed = window.confirm("You have unsaved changes. Are you sure you want to leave?");
-			if (!confirmed) return;
-		}
-		router.push("/dashboard/categories");
-	};
-
 	// Loading state
 	if (loading) {
 		return (
@@ -370,7 +362,7 @@ export function UpdateForm(): React.JSX.Element {
 				severity="error"
 				sx={{ mt: 2, p: 3 }}
 				action={
-					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/customers")}>
+					<Button color="inherit" size="small" onClick={() => router.push("/dashboard/products")}>
 						Go Back
 					</Button>
 				}

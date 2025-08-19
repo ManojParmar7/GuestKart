@@ -3,14 +3,14 @@ import type { Metadata } from "next";
 import Stack from "@mui/material/Stack";
 
 import { config } from "@/config";
-import { CreateForm } from "@/components/dashboard/color/create-form";
+import { UpdateForm } from "@/components/dashboard/accessories/updated-from";
 
 export const metadata = { title: `Settings | Dashboard | ${config.site.name}` } satisfies Metadata;
 
 export default function Page(): React.JSX.Element {
 	return (
 		<Stack spacing={3}>
-			<CreateForm />
+			<UpdateForm />
 		</Stack>
 	);
 }
