@@ -1,17 +1,20 @@
 const mongoose = require("mongoose");
+
 function todayDateOnly() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return today;
 }
-const discountSchema = new mongoose.Schema(
-  {
-    productId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-      required: true,
-    },
 
+const couponSchema = new mongoose.Schema(
+  {
+    code: {
+      type: String,
+      required: true,
+      unique: true, // ek hi coupon code do baar na ho
+      uppercase: true,
+      trim: true,
+    },
     type: {
       type: String,
       enum: ["percentage", "flat"],
@@ -21,6 +24,22 @@ const discountSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    minOrderAmount: {
+      type: Number,
+      default: 0, // optional rule
+    },
+    maxDiscountAmount: {
+      type: Number,
+      default: null, // optional (for percentage coupons)
+    },
+    usageLimit: {
+      type: Number,
+      default: null, // null = unlimited usage
+    },
+    usedCount: {
+      type: Number,
+      default: 0,
+    },
     startDate: {
       type: Date,
       required: true,
@@ -29,20 +48,18 @@ const discountSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-
     subadminId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "subadminId",
+      ref: "Subadmin",
     },
     superadminId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "superadminId",
+      ref: "Superadmin",
     },
     isActive: {
       type: Boolean,
       default: true,
     },
-
     createdAt: {
       type: Date,
       default: todayDateOnly,
@@ -57,4 +74,4 @@ const discountSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Discount", discountSchema);
+module.exports = mongoose.model("Coupon", couponSchema);

@@ -38,7 +38,7 @@ module.exports = {
           currentPage: page || 1,
         };
       } catch (err) {
-        throw new Error("Error fetching extras: " + err.message);
+        throw new Error("Error fetching accessories: " + err.message);
       }
     },
 
@@ -55,7 +55,8 @@ module.exports = {
         if (exists) {
           return {
             success: false,
-            message: "Extra with this name already exists for this admin.",
+            message:
+              "Accessories with this name already exists for this admin.",
             extra: null,
           };
         }
@@ -79,7 +80,7 @@ module.exports = {
 
         return {
           success: true,
-          message: "Extra created successfully",
+          message: "Accessories created successfully",
           extra: saved,
         };
       } catch (err) {
@@ -103,13 +104,13 @@ module.exports = {
 
         return {
           success: true,
-          message: "Extra updated successfully",
+          message: "Accessories updated successfully",
           extra: updated,
         };
       } catch (err) {
         return {
           success: false,
-          message: "Failed to update extra",
+          message: "Failed to update accessories",
           extra: null,
         };
       }
@@ -121,13 +122,13 @@ module.exports = {
 
         return {
           success: true,
-          message: "Extra deleted successfully",
+          message: "Accessories deleted successfully",
           extra: deleted,
         };
       } catch (err) {
         return {
           success: false,
-          message: "Failed to delete extra",
+          message: "Failed to delete accessories",
           extra: null,
         };
       }

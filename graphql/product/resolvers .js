@@ -7,7 +7,7 @@ const User = require("../../modals/User");
 const Color = require("../../modals/colors");
 const Size = require("../../modals/size");
 const Extra = require("../../modals/extras");
-
+const Discount = require("../../modals/discount");
 module.exports = {
   Upload: require("graphql-upload").GraphQLUpload,
 
@@ -30,64 +30,62 @@ module.exports = {
     ) => {
       let query = {};
 
-      // Superadmin wise filter
-      if (superadminId) {
-        query.superadminId = superadminId;
-      }
+      if (superadminId) query.superadminId = superadminId;
+      if (subadminId) query.subadminId = subadminId;
+      if (categoryId) query.categoryId = categoryId;
+      if (search) query.name = { $regex: search, $options: "i" };
 
-      // Subadmin wise filter
-      if (subadminId) {
-        query.subadminId = subadminId;
-      }
-
-      // Category filter (optional)
-      if (categoryId) {
-        query.categoryId = categoryId;
-      }
-
-      // Search by product name
-      if (search) {
-        query.name = { $regex: search, $options: "i" };
-      }
-
-      // If no pagination params, return all
-      if (!page || !limit) {
-        const products = await Products.find(query)
-          .populate("categoryId")
-          .sort({ createdAt: -1 });
-
-        return {
-          success: true,
-          message: "Products fetched successfully",
-          total: products.length,
-          currentPage: null,
-          totalPages: null,
-          products,
-        };
-      }
-
-      // Pagination logic
-      const skip = (page - 1) * limit;
+      const skip = page && limit ? (page - 1) * limit : 0;
       const total = await Products.countDocuments(query);
 
       const products = await Products.find(query)
         .populate("categoryId")
-
         .skip(skip)
-        .limit(limit)
+        .limit(limit || 0)
         .sort({ createdAt: -1 });
+
+      const finalProducts = [];
+
+      for (let product of products) {
+        const discount = await Discount.findOne({
+          productId: product._id,
+          subadminId: product.subadminId,
+          superadminId: product.superadminId,
+          isActive: true,
+        });
+
+        let discountPrice = product.price;
+
+        if (discount) {
+          if (discount.type === "percentage") {
+            discountPrice =
+              product.price - (product.price * discount.value) / 100;
+          } else if (discount.type === "flat") {
+            discountPrice = product.price - discount.value;
+          }
+          if (discountPrice < 0) discountPrice = 0;
+        }
+
+        finalProducts.push({
+          id: product._id.toString(),
+          ...product.toObject(),
+          discountPrice,
+        });
+      }
 
       return {
         success: true,
         message: "Products fetched successfully",
         total,
-        currentPage: page,
-        totalPages: Math.ceil(total / limit),
-        products,
+        currentPage: page || null,
+        totalPages: limit ? Math.ceil(total / limit) : null,
+        products: finalProducts,
       };
     },
+
     getProduct: async (_, { getProductId }) => {
       try {
+        // Step 1: Product find karo
         const product = await Products.findById(getProductId);
 
         if (!product) {
@@ -98,10 +96,37 @@ module.exports = {
           };
         }
 
+        // Step 2: Base discountPrice = product.price
+        let discountPrice = product.price;
+
+        // Step 3: Active discount check karo
+        const discount = await Discount.findOne({
+          productId: product._id,
+          subadminId: product.subadminId,
+          superadminId: product.superadminId,
+          isActive: true,
+        });
+
+        // Step 4: Discount calculation (agar discount mila aur active hai to)
+        if (discount) {
+          if (discount.type === "percentage") {
+            discountPrice =
+              product.price - (product.price * discount.value) / 100;
+          } else if (discount.type === "flat") {
+            discountPrice = product.price - discount.value;
+          }
+
+          if (discountPrice < 0) discountPrice = 0;
+        }
+
         return {
           success: true,
           message: "Product fetched successfully",
-          product,
+          product: {
+            id: product._id.toString(),
+            ...product.toObject(),
+            discountPrice,
+          },
         };
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -112,6 +137,94 @@ module.exports = {
         };
       }
     },
+
+    // getAllProducts: async (
+    //   _,
+    //   { page, limit, search = "", subadminId, superadminId, categoryId }
+    // ) => {
+    //   let query = {};
+
+    //   // Superadmin wise filter
+    //   if (superadminId) {
+    //     query.superadminId = superadminId;
+    //   }
+
+    //   // Subadmin wise filter
+    //   if (subadminId) {
+    //     query.subadminId = subadminId;
+    //   }
+
+    //   // Category filter (optional)
+    //   if (categoryId) {
+    //     query.categoryId = categoryId;
+    //   }
+
+    //   // Search by product name
+    //   if (search) {
+    //     query.name = { $regex: search, $options: "i" };
+    //   }
+
+    //   // If no pagination params, return all
+    //   if (!page || !limit) {
+    //     const products = await Products.find(query)
+    //       .populate("categoryId")
+    //       .sort({ createdAt: -1 });
+
+    //     return {
+    //       success: true,
+    //       message: "Products fetched successfully",
+    //       total: products.length,
+    //       currentPage: null,
+    //       totalPages: null,
+    //       products,
+    //     };
+    //   }
+
+    //   // Pagination logic
+    //   const skip = (page - 1) * limit;
+    //   const total = await Products.countDocuments(query);
+
+    //   const products = await Products.find(query)
+    //     .populate("categoryId")
+    //     .skip(skip)
+    //     .limit(limit)
+    //     .sort({ createdAt: -1 });
+
+    //   return {
+    //     success: true,
+    //     message: "Products fetched successfully",
+    //     total,
+    //     currentPage: page,
+    //     totalPages: Math.ceil(total / limit),
+    //     products,
+    //   };
+    // },
+    // getProduct: async (_, { getProductId }) => {
+    //   try {
+    //     const product = await Products.findById(getProductId);
+
+    //     if (!product) {
+    //       return {
+    //         success: false,
+    //         message: "Product not found",
+    //         product: null,
+    //       };
+    //     }
+
+    //     return {
+    //       success: true,
+    //       message: "Product fetched successfully",
+    //       product,
+    //     };
+    //   } catch (error) {
+    //     console.error("Error fetching product:", error);
+    //     return {
+    //       success: false,
+    //       message: "Server error",
+    //       product: null,
+    //     };
+    //   }
+    // },
 
     getUserProducts: async (_, { userId }) => {
       return await Products.find({ userId });
@@ -290,7 +403,7 @@ module.exports = {
         ...args,
         subadminId,
         superadminId,
-        userId: user.id,
+
         images: imagePaths,
         sizes,
         colors,

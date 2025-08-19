@@ -13,6 +13,7 @@ module.exports = gql`
     description: String
     stock: Int!
     images: [String]
+    discountPrice: Float
     category: Category
     createdBy: CreatedBy
 

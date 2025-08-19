@@ -181,35 +181,33 @@ module.exports = {
   },
 
   Mutation: {
-    placeOrder: async (_, { sessionId, contactInfo, couponCode }) => {
+    placeOrder: async (_, { sessionId, contactInfo }) => {
       const cart = await Cart.findOne({ sessionId: sessionId });
       if (!cart || cart.items.length === 0) {
         return { success: false, message: "Cart is empty", order: null };
       }
 
       let total = 0;
-      let discountAmount = 0;
-      let appliedCouponId = null;
       const orderItems = [];
 
       for (const item of cart.items) {
         const product = await Product.findById(item.productId);
         if (!product) continue;
 
-        let productDiscount = 0;
+        let discountValue = 0;
         const discount = await Discount.findOne({
           productId: product._id,
           isActive: true,
         });
 
         if (discount) {
-          productDiscount =
+          discountValue =
             discount.type === "percentage"
               ? (product.price * discount.value) / 100
               : discount.value;
         }
 
-        const finalPrice = product.price - productDiscount;
+        const finalPrice = product.price - discountValue;
         total += finalPrice * item.quantity;
 
         if (product.stock < item.quantity) {
@@ -228,48 +226,12 @@ module.exports = {
           quantity: item.quantity,
           price: product.price,
           discountType: discount?.type || null,
-          discount: productDiscount,
+          discount: discountValue,
         });
       }
 
-      // Apply coupon if provided
-      if (couponCode) {
-        const coupon = await Discount.findOne({
-          code: couponCode,
-          isActive: true,
-        });
-        if (coupon) {
-          const today = new Date();
-          if (today >= coupon.startDate && today <= coupon.endDate) {
-            if (total >= coupon.minOrderAmount) {
-              let couponDiscount =
-                coupon.type === "percentage"
-                  ? (total * coupon.value) / 100
-                  : coupon.value;
-
-              if (
-                coupon.maxDiscountAmount &&
-                couponDiscount > coupon.maxDiscountAmount
-              ) {
-                couponDiscount = coupon.maxDiscountAmount;
-              }
-
-              discountAmount = couponDiscount;
-              appliedCouponId = coupon._id;
-
-              // Increment usedCount
-              coupon.usedCount += 1;
-              await coupon.save();
-            }
-          }
-        }
-      }
-
-      const finalAmount = total - discountAmount;
-
-      // Stripe payment intent
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(finalAmount * 100),
+        amount: Math.round(total * 100),
         currency: "usd",
         payment_method_types: ["card"],
         metadata: { sessionId },
@@ -280,10 +242,6 @@ module.exports = {
         subAdminId: cart?.subAdminId,
         items: orderItems,
         totalAmount: total,
-        couponCode: couponCode || null,
-        couponId: appliedCouponId,
-        discountAmount,
-        finalAmount,
         paymentStatus: "pending",
         orderStatus: "created",
         stripePaymentIntentId: paymentIntent.id,

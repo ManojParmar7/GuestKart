@@ -6,12 +6,14 @@ module.exports = gql`
     name: String
     price: Float
     stock: Int
+    # Add other necessary fields here
   }
 
   type User {
     id: ID
     name: String
     email: String
+    # Add other necessary fields here
   }
 
   type OrderItem {
@@ -27,6 +29,7 @@ module.exports = gql`
     email: String
     phone: String
     address: String
+    # Add additional fields as needed
   }
 
   type Order {
@@ -36,9 +39,6 @@ module.exports = gql`
     user: User
     items: [OrderItem]
     totalAmount: Float
-    couponCode: String # Added
-    discountAmount: Float # Added
-    finalAmount: Float # Added
     paymentStatus: String
     orderStatus: String
     contactInfo: ContactInfo
@@ -57,10 +57,7 @@ module.exports = gql`
     email: String
     phone: String
     address: String
-  }
-
-  input CouponInput { # Added
-    code: String!
+    # Add additional fields as needed
   }
 
   extend type Query {
@@ -68,12 +65,10 @@ module.exports = gql`
     getAdminOrders: [Order]
     getSuperAdminOrders: [Order]
   }
-
   extend type Mutation {
     placeOrder(
       sessionId: String!
       contactInfo: ContactInfoInput!
-      coupon: CouponInput # Added
     ): OrderResponse
   }
 `;

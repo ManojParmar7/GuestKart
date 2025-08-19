@@ -1,38 +1,3 @@
-// // Order Schema (Order.js)
-
-// const mongoose = require("mongoose");
-
-// const orderSchema = new mongoose.Schema({
-//   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-//   items: [
-//     {
-//       productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-//       quantity: Number,
-//       price: Number,
-//       discount: Number,
-//     },
-//   ],
-//   totalAmount: Number,
-//   paymentStatus: {
-//     type: String,
-//     enum: ["pending", "paid", "failed", "refunded"],
-//     default: "pending",
-//   },
-//   orderStatus: {
-//     type: String,
-//     enum: ["created", "confirmed", "shipped", "delivered", "cancelled"],
-//     default: "created",
-//   },
-//   stripePaymentIntentId: String,
-//   clientSecret: String,
-
-//   createdAt: {
-//     type: Date,
-//     default: Date.now,
-//   },
-// });
-
-// module.exports = mongoose.model("Order", orderSchema);
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
@@ -53,20 +18,22 @@ const contactInfoSchema = new Schema({
 
 const orderSchema = new Schema(
   {
-    subAdminId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    sessionId: {
-      type: String,
-      default: null,
-    },
-    superadminId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
+    subAdminId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    sessionId: { type: String, default: null },
+    superadminId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     items: [orderItemSchema],
     totalAmount: { type: Number, required: true },
+
+    // Coupon related fields
+    couponCode: { type: String, default: null },
+    couponId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Discount",
+      default: null,
+    },
+    discountAmount: { type: Number, default: 0 },
+    finalAmount: { type: Number, required: true },
+
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "failed", "refunded"],

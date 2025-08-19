@@ -1,68 +1,78 @@
 const gql = String.raw;
 
 const typeDefs = gql`
-  type Discount {
+  type Coupon {
     id: ID!
+    code: String!
     type: String!
     value: Float!
+    minOrderAmount: Float
+    maxDiscountAmount: Float
+    usageLimit: Int
+    usedCount: Int
     startDate: String
     endDate: String
-    product: Product
-    user: User
     isActive: Boolean
     subadminId: ID
     superadminId: ID
   }
 
-  type DiscountPaginationResponse {
+  type CouponPaginationResponse {
     success: Boolean!
     message: String
     total: Int
     currentPage: Int
     totalPages: Int
-    discounts: [Discount]
+    coupons: [Coupon]
   }
 
-  type DiscountResponse {
+  type CouponResponse {
     success: Boolean!
     message: String!
-    discount: Discount
+    coupon: Coupon
   }
 
   extend type Query {
-    getAllDiscounts(
+    getAllCoupons(
       page: Int
       limit: Int
       search: String
       subadminId: ID
       superadminId: ID
-    ): DiscountPaginationResponse
+    ): CouponPaginationResponse
 
-    getDiscount(id: ID!): DiscountResponse
+    getCoupon(id: ID!): CouponResponse
   }
 
   extend type Mutation {
-    createDiscount(
-      productId: ID!
+    createCoupon(
+      code: String!
       type: String!
       value: Float!
-      startDate: String
-      endDate: String
+      minOrderAmount: Float
+      maxDiscountAmount: Float
+      usageLimit: Int
+      startDate: String!
+      endDate: String!
       subadminId: ID!
       superadminId: ID!
-    ): DiscountResponse
+    ): CouponResponse
 
-    updateDiscount(
+    updateCoupon(
       id: ID!
+      code: String
       type: String
       value: Float
+      minOrderAmount: Float
+      maxDiscountAmount: Float
+      usageLimit: Int
       startDate: String
       endDate: String
       subadminId: ID
       superadminId: ID!
-    ): DiscountResponse
+    ): CouponResponse
 
-    deleteDiscount(id: ID!): DiscountResponse
+    deleteCoupon(id: ID!): CouponResponse
   }
 `;
 

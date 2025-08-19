@@ -12,8 +12,13 @@ const cartResolvers = {
   },
 
   Query: {
-    getCartBySession: async (_, { sessionId }) => {
-      return await Cart.findOne({ sessionId });
+    getCartBySession: async (_, { sessionId, subAdminId }) => {
+      const query = {};
+
+      if (sessionId) query.sessionId = sessionId;
+      if (subAdminId) query.subAdminId = subAdminId;
+
+      return await Cart.find(query);
     },
   },
 
@@ -108,7 +113,6 @@ const cartResolvers = {
         }
       }
 
-   
       const existingItem = cart.items.find(
         (item) =>
           item.productId.equals(productId) &&

@@ -46,7 +46,6 @@ async function startServer() {
         if (token) {
           try {
             const decoded = jwt.verify(token.replace("Bearer ", ""), SECRET);
-            console.log("Decoded Token:", decoded); // ✅ Debug here
 
             user = {
               id: decoded.id,

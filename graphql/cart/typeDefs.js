@@ -1,4 +1,3 @@
-
 const gql = String.raw;
 
 module.exports = gql`
@@ -44,8 +43,9 @@ module.exports = gql`
   }
 
   extend type Query {
-    getCartBySession(sessionId: String!): Cart
+    getCartBySession(sessionId: String, subAdminId: ID): [Cart]
   }
+
   input ExtraOptionInput {
     _id: ID
     name: String
