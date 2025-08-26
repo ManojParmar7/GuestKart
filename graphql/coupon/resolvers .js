@@ -144,12 +144,13 @@ const couponResolvers = {
     },
 
     updateCoupon: async (_, { id, ...updates }, { user }) => {
+      console.log("user: ", user);
       const coupon = await Coupon.findById(id);
       if (!coupon)
         return { success: false, message: "Coupon not found", coupon: null };
 
       if (
-        user.role === "superadmin" &&
+        user?.role === "superadmin" &&
         coupon.superadminId.toString() !== user.id
       ) {
         return {
@@ -159,7 +160,7 @@ const couponResolvers = {
         };
       }
       if (
-        user.role === "subadmin" &&
+        user?.role === "subadmin" &&
         coupon.subadminId.toString() !== user.id
       ) {
         return {

@@ -8,15 +8,15 @@ const cartResolvers = {
   },
 
   Cart: {
-    user: async (parent) => await User.findById(parent.subAdminId),
+    user: async (parent) => await User.findById(parent.subadminId),
   },
 
   Query: {
-    getCartBySession: async (_, { sessionId, subAdminId }) => {
+    getCartBySession: async (_, { sessionId, subadminId }) => {
       const query = {};
 
       if (sessionId) query.sessionId = sessionId;
-      if (subAdminId) query.subAdminId = subAdminId;
+      if (subadminId) query.subadminId = subadminId;
 
       return await Cart.find(query);
     },
@@ -25,7 +25,7 @@ const cartResolvers = {
   Mutation: {
     // addToCart: async (
     //   _,
-    //   { subAdminId, sessionId, productId, quantity = 1, selectedOptions }
+    //   { subadminId, sessionId, productId, quantity = 1, selectedOptions }
     // ) => {
     //   const product = await Product.findById(productId);
     //   if (!product) {
@@ -47,7 +47,7 @@ const cartResolvers = {
     //   let cart = await Cart.findOne({ sessionId });
 
     //   if (!cart) {
-    //     cart = new Cart({ subAdminId, sessionId, items: [] });
+    //     cart = new Cart({ subadminId, sessionId, items: [] });
     //   }
 
     //   // Check if same product with same selectedOptions already exists
@@ -75,7 +75,7 @@ const cartResolvers = {
 
     addToCart: async (
       _,
-      { subAdminId, sessionId, productId, quantity = 1, selectedOptions }
+      { subadminId, sessionId, productId, quantity = 1, selectedOptions }
     ) => {
       const product = await Product.findById(productId);
       if (!product) {
@@ -95,9 +95,22 @@ const cartResolvers = {
       }
 
       let cart = await Cart.findOne({ sessionId });
-
+      let superadmin_id = null;
+      if (subadminId) {
+        const subadminUser = await User.findById(subadminId).select(
+          "superadmin_id"
+        );
+        if (subadminUser) {
+          superadmin_id = subadminUser.superadmin_id;
+        }
+      }
       if (!cart) {
-        cart = new Cart({ subAdminId, sessionId, items: [] });
+        cart = new Cart({
+          subadminId,
+          sessionId,
+          superadminId: superadmin_id,
+          items: [],
+        });
       }
 
       let totalOptionPrice = 0;

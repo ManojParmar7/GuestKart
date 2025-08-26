@@ -43,7 +43,7 @@ module.exports = gql`
   }
 
   extend type Query {
-    getCartBySession(sessionId: String, subAdminId: ID): [Cart]
+    getCartBySession(sessionId: String, subadminId: ID): [Cart]
   }
 
   input ExtraOptionInput {
@@ -70,7 +70,7 @@ module.exports = gql`
   }
   extend type Mutation {
     addToCart(
-      subAdminId: ID!
+      subadminId: ID!
       sessionId: String!
       productId: ID!
       quantity: Int

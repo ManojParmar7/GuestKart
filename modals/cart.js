@@ -1,10 +1,13 @@
 const mongoose = require("mongoose");
 
 const cartSchema = new mongoose.Schema({
-  subAdminId: {
+  subadminId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+    ref: "subadminId",
+  },
+  superadminId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "superadminId",
   },
   sessionId: {
     type: String,
