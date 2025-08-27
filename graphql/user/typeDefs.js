@@ -21,6 +21,7 @@ module.exports = gql`
     role: Role!
     createdBy: ID
     superadmin_id: ID
+    subadmin_id: ID
     country: String
     currency: String
     createdAt: String
@@ -50,6 +51,8 @@ module.exports = gql`
 
     getUsersBySuperadmin(
       superadmin_id: ID!
+      subadmin_id: ID
+      roleName: String
       page: Int = 1
       limit: Int = 10
       filters: UserFilterInput
@@ -69,6 +72,7 @@ module.exports = gql`
       role: ID!
       createdBy: ID
       superadmin_id: ID
+      subadmin_id: ID
       image: Upload!
     ): UserResponse
 
@@ -85,6 +89,7 @@ module.exports = gql`
       role: ID
       createdBy: ID
       superadmin_id: ID
+      subadmin_id: ID
       image: Upload
     ): UserResponse
 

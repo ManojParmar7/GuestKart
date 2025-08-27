@@ -43,9 +43,108 @@ module.exports = {
     getUser: async (_, { id }) => {
       return await User.findById(id).populate("role");
     },
+    // getUsersBySuperadmin: async (
+    //   _,
+    //   {
+    //     superadmin_id,
+    //     subadmin_id,
+    //     page = 1,
+    //     limit = 10,
+    //     filters = {},
+    //     roleName,
+    //   },
+    //   { user }
+    // ) => {
+    //   if (!user) {
+    //     return {
+    //       success: false,
+    //       message: "Unauthorized access",
+    //       users: [],
+    //     };
+    //   }
+
+    //   // ✅ Sirf superadmin khud ke hi data dekh sake
+    //   if (user.role !== "superadmin" || user.id !== superadmin_id) {
+    //     return {
+    //       success: false,
+    //       message: "Forbidden: You are not authorized to access this data",
+    //       users: [],
+    //     };
+    //   }
+
+    //   try {
+    //     const superadmin = await User.findById(superadmin_id);
+    //     if (!superadmin) {
+    //       return {
+    //         success: false,
+    //         message: "Superadmin does not exist",
+    //         users: [],
+    //       };
+    //     }
+
+    //     const query = { superadmin_id };
+
+    //     // ✅ Agar subadmin_id bheja hai toh uske hisaab se filter karo
+    //     if (subadmin_id) {
+    //       query.subadmin_id = subadmin_id;
+    //     }
+
+    //     // ✅ Role filter (subadmin ya deliveryBoy)
+    //     if (roleName) {
+    //       const roleDoc = await Role.findOne({ name: roleName });
+    //       if (!roleDoc) {
+    //         return {
+    //           success: false,
+    //           message: "Invalid role name provided",
+    //           users: [],
+    //         };
+    //       }
+    //       query.role = roleDoc._id;
+    //     }
+
+    //     // ✅ Extra filters
+    //     if (filters.name) {
+    //       query.name = { $regex: filters.name, $options: "i" };
+    //     }
+    //     if (filters.email) {
+    //       query.email = { $regex: filters.email, $options: "i" };
+    //     }
+
+    //     const skip = (page - 1) * limit;
+    //     const users = await User.find(query)
+    //       .populate("role")
+    //       .skip(skip)
+    //       .limit(limit);
+
+    //     const totalUsers = await User.countDocuments(query);
+
+    //     return {
+    //       success: true,
+    //       message: `${roleName ? roleName : "Users"} fetched successfully`,
+    //       users,
+    //       total: totalUsers,
+    //       page,
+    //       limit,
+    //     };
+    //   } catch (error) {
+    //     console.error("Error fetching users by superadmin:", error);
+    //     return {
+    //       success: false,
+    //       message: "Error fetching users",
+    //       users: [],
+    //     };
+    //   }
+    // },
     getUsersBySuperadmin: async (
       _,
-      { superadmin_id, page = 1, limit = 10, filters = {} },
+      {
+        superadmin_id,
+        subadmin_id,
+        page = 1,
+        limit = 10,
+        filters = {},
+        roleName,
+      },
       { user }
     ) => {
       if (!user) {
@@ -56,27 +155,44 @@ module.exports = {
         };
       }
 
-      if (user.role !== "superadmin" || user.id !== superadmin_id) {
-        return {
-          success: false,
-          message: "Forbidden: You are not authorized to access this data",
-          users: [],
-        };
-      }
-
       try {
-        const superadmin = await User.findById(superadmin_id);
-        if (!superadmin) {
+        const query = {};
+
+        // ✅ Agar superadmin login hai
+        if (user.role === "superadmin") {
+          query.superadmin_id = superadmin_id;
+          if (subadmin_id) {
+            query.subadmin_id = subadmin_id;
+          }
+        }
+        // ✅ Agar subadmin login hai
+        else if (user.role === "subadmin") {
+          query.superadmin_id = superadmin_id;
+          query.subadmin_id = user.id; // <- logged in subadmin ka id fix hoga
+        }
+        // ✅ Baaki koi role allowed nahi
+        else {
           return {
             success: false,
-            message: "Superadmin does not exist",
+            message: "Forbidden: You are not authorized to access this data",
             users: [],
           };
         }
 
-        const query = { superadmin_id };
+        // ✅ Role filter (subadmin ya deliveryBoy)
+        if (roleName) {
+          const roleDoc = await Role.findOne({ name: roleName });
+          if (!roleDoc) {
+            return {
+              success: false,
+              message: "Invalid role name provided",
+              users: [],
+            };
+          }
+          query.role = roleDoc._id;
+        }
 
-        // Add filters
+        // ✅ Extra filters
         if (filters.name) {
           query.name = { $regex: filters.name, $options: "i" };
         }
@@ -94,17 +210,17 @@ module.exports = {
 
         return {
           success: true,
-          message: "Sub admins fetched successfully",
+          message: `${roleName ? roleName : "Users"} fetched successfully`,
           users,
           total: totalUsers,
           page,
           limit,
         };
       } catch (error) {
-        console.error("Error fetching subadmins:", error);
+        console.error("Error fetching users by superadmin:", error);
         return {
           success: false,
-          message: "Error fetching subadmins",
+          message: "Error fetching users",
           users: [],
         };
       }
@@ -240,11 +356,12 @@ module.exports = {
         website,
         password,
         role,
-        superadmin_id,
+        superadmin_id, // ❌ direct use nahi karenge delivery boy ke liye
+        subadmin_id, // ✅ frontend se aayega delivery boy create karte waqt
         country = "IN",
         image,
       },
-      { user } // 👈 context se aaya hua user
+      { user }
     ) => {
       try {
         const currency = getCurrencyFromCountry(country);
@@ -258,6 +375,7 @@ module.exports = {
           };
         }
 
+        // ✅ Only superadmin can create subadmin
         if (roleDoc.name === "subadmin") {
           if (!user || user.role !== "superadmin") {
             return {
@@ -275,6 +393,82 @@ module.exports = {
           imagePath = await saveImage(image);
         }
 
+        let finalSuperadminId = null;
+        let finalSubadminId = null;
+
+        // --- SUPERADMIN creation ---
+        if (roleDoc.name === "superadmin") {
+          // Check duplicate for superadmin scope
+          const existing = await User.findOne({
+            role: roleDoc._id,
+            $or: [{ username }, { email }],
+          });
+          if (existing) {
+            return {
+              success: false,
+              message:
+                "Username or Email already exists under this role (superadmin)",
+              users: null,
+            };
+          }
+
+          // --- SUBADMIN creation ---
+        } else if (roleDoc.name === "subadmin") {
+          finalSuperadminId = superadmin_id;
+
+          // Check duplicate for subadmin scope
+          const existing = await User.findOne({
+            role: roleDoc._id,
+            superadmin_id: superadmin_id,
+            $or: [{ username }, { email }],
+          });
+          if (existing) {
+            return {
+              success: false,
+              message: "Username or Email already exists under this subadmin",
+              users: null,
+            };
+          }
+
+          // --- DELIVERY BOY creation ---
+        } else if (roleDoc.name === "deliveryBoy") {
+          if (!subadmin_id) {
+            return {
+              success: false,
+              message: "Subadmin ID is required to create a delivery boy",
+              users: null,
+            };
+          }
+
+          const subadmin = await User.findById(subadmin_id);
+          if (!subadmin || !subadmin.superadmin_id) {
+            return {
+              success: false,
+              message:
+                "Invalid subadmin ID or subadmin does not belong to any superadmin",
+              users: null,
+            };
+          }
+
+          finalSubadminId = subadmin_id;
+          finalSuperadminId = subadmin.superadmin_id;
+
+          // Check duplicate for delivery boy scope
+          const existing = await User.findOne({
+            role: roleDoc._id,
+            subadmin_id: subadmin_id,
+            $or: [{ username }, { email }],
+          });
+          if (existing) {
+            return {
+              success: false,
+              message:
+                "Username or Email already exists under this delivery boy",
+              users: null,
+            };
+          }
+        }
+
         const newUser = new User({
           name,
           username,
@@ -286,7 +480,8 @@ module.exports = {
           currency,
           image: imagePath,
           role: roleDoc._id,
-          superadmin_id: roleDoc.name === "subadmin" ? superadmin_id : null,
+          superadmin_id: finalSuperadminId,
+          subadmin_id: finalSubadminId,
         });
 
         const savedUser = await newUser.save();
@@ -295,7 +490,11 @@ module.exports = {
         return {
           success: true,
           message: `${
-            roleDoc.name === "superadmin" ? "Super Admin" : "Sub Admin"
+            roleDoc.name === "superadmin"
+              ? "Super Admin"
+              : roleDoc.name === "subadmin"
+              ? "Sub Admin"
+              : "Delivery Boy"
           } created successfully.`,
           users: [populatedUser],
         };

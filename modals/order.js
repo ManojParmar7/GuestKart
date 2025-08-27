@@ -43,24 +43,34 @@ const orderSchema = new Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid", "failed", "refunded"],
-      default: "pending",
+      enum: ["PENDING", "PAID", "FAILED", "REFUNDED"],
+      default: "PENDING",
+    },
+    deliveryBoy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    deliveryStatus: {
+      type: String,
+      enum: ["PENDING", "ACCEPTED", "DELIVERED"],
+      default: "PENDING",
     },
 
     // Order lifecycle
     orderStatus: {
       type: String,
       enum: [
-        "created", // jab order place hua
-        "confirmed", // COD (direct confirm) ya ONLINE (jab payment success)
-        "approved", // Superadmin/Subadmin approve karega
-        "rejected", // Superadmin/Subadmin reject
-        "shipped", // Delivery boy pick karega
-        "delivered", // Delivery complete
-        "cancelled", // Fail or user/admin cancel
-        "returned", // Refund after return
+        "CREATED", // jab order place hua
+        "CONFIRMED", // COD (direct confirm) ya ONLINE (jab payment success)
+        "APPROVED", // Superadmin/Subadmin approve karega
+        "REJECTED", // Superadmin/Subadmin reject
+        "SHIPPED", // Delivery boy pick karega
+        "DELIVERED", // Delivery complete
+        "CANCELLED", // Fail or user/admin cancel
+        "RETURNED", // Refund after return
       ],
-      default: "created",
+      default: "CREATED",
     },
 
     createdBy: {

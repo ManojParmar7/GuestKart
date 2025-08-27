@@ -32,6 +32,8 @@ const authTypeDefs = require("./graphql/auth/typeDefs");
 const authResolvers = require("./graphql/auth/resolvers ");
 const couponTypeDefs = require("./graphql/coupon/typeDefs");
 const couponResolvers = require("./graphql/coupon/resolvers ");
+const deliveryBoyTypeDefs = require("./graphql/deliveryBoy/typeDefs");
+const deliveryBoyResolvers = require("./graphql/deliveryBoy/resolvers ");
 const rootTypeDefs = `
   type Query
   type Mutation
@@ -54,6 +56,7 @@ const typeDefs = mergeTypeDefs([
   permissionsTypeDefs,
   authTypeDefs,
   couponTypeDefs,
+  deliveryBoyTypeDefs,
 ]);
 
 const resolvers = mergeResolvers([
@@ -72,6 +75,7 @@ const resolvers = mergeResolvers([
   permissionsResolvers,
   authResolvers,
   couponResolvers,
+  deliveryBoyResolvers,
 ]);
 
 module.exports = {

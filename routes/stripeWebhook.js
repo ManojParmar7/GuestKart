@@ -56,8 +56,8 @@
 //           await Order.findOneAndUpdate(
 //             { stripePaymentIntentId: intentId },
 //             {
-//               paymentStatus: "paid",
-//               orderStatus: "confirmed",
+//               paymentStatus: "PAID",
+//               orderStatus: "CONFIRMED",
 //             }
 //           );
 
@@ -67,7 +67,7 @@
 //             orderId: order._id,
 //             paymentIntentId: intentId,
 //             amount: order.totalAmount,
-//             status: "paid",
+//             status: "PAID",
 //           });
 
 //           await newPayment.save();
@@ -128,11 +128,11 @@ const isTestMode = true;
 
 /**
  * Order Status Flow:
- * created -> confirmed -> approved/rejected -> shipped -> delivered
+ * created -> CONFIRMED -> approved/rejected -> shipped -> delivered
  * cancelled (if fail) / returned (if refund)
  *
  * Payment Status Flow:
- * pending -> paid -> failed -> refunded
+ * pending -> PAID -> failed -> refunded
  */
 router.post(
   "/webhook",
@@ -156,8 +156,8 @@ router.post(
       switch (event.type) {
         /**
          * ✅ Payment Successful
-         * - paymentStatus = paid
-         * - orderStatus = confirmed
+         * - paymentStatus = PAID
+         * - orderStatus = CONFIRMED
          */
         case "payment_intent.succeeded": {
           const paymentIntent = event.data.object;
@@ -169,6 +169,17 @@ router.post(
           if (!order) {
             console.log("⚠️ Order not found for paymentIntent:", intentId);
             return res.status(404).send({ message: "Order not found" });
+          }
+
+          // ✅ COD orders ko ignore karo
+          if (order.paymentMethod === "COD") {
+            console.log(
+              "🚫 COD order hai, online payment allow nahi:",
+              order._id
+            );
+            return res
+              .status(200)
+              .send({ message: "COD order, no online payment" });
           }
 
           // check existing payment
@@ -188,8 +199,8 @@ router.post(
           await Order.findOneAndUpdate(
             { stripePaymentIntentId: intentId },
             {
-              paymentStatus: "paid",
-              orderStatus: "confirmed", // Payment ke baad confirmed
+              paymentStatus: "PAID",
+              orderStatus: "CONFIRMED", // Payment ke baad CONFIRMED
             }
           );
 
@@ -199,10 +210,10 @@ router.post(
             orderId: order._id,
             paymentIntentId: intentId,
             amount: order.finalAmount || order.totalAmount,
-            status: "paid",
+            status: "PAID",
           });
 
-          console.log("✅ Payment succeeded & order confirmed:", intentId);
+          console.log("✅ Payment succeeded & order CONFIRMED:", intentId);
           break;
         }
 

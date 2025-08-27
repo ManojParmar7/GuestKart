@@ -20,6 +20,12 @@ const userSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    subadmin_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
     image: {
       type: String,
       default: "",
