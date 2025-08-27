@@ -28,11 +28,11 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { GearSixIcon } from "@phosphor-icons/react/dist/ssr/GearSix";
 import { PencilIcon } from "@phosphor-icons/react/dist/ssr/Pencil";
 import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import dayjs from "dayjs";
 
+import { authClient } from "@/lib/auth/client";
 import { useSelection } from "@/hooks/use-selection";
 
 import { deleteUser, GetUsersBySuperadmin } from "../../../app/query-common";
@@ -45,22 +45,41 @@ function applyPagination<T>(rows: T[] = [], page: number, rowsPerPage: number): 
 type CustomersTableProps = {
 	search: string;
 };
-export function CustomersTable({ search }: CustomersTableProps): React.JSX.Element {
+export function DeliveryStaffTable({ search }: CustomersTableProps): React.JSX.Element {
 	const loginUser = localStorage.getItem("login_id");
 	const [page, setPage] = React.useState(0);
 	const [rowsPerPage, setRowsPerPage] = React.useState(10);
 	const router = useRouter();
+	const [user, setUser] = React.useState<any>(null);
 
+	React.useEffect(() => {
+		(async () => {
+			const { data } = await authClient.getUser();
+			setUser(data);
+		})();
+
+		// emitUserUpdate();
+	}, []);
 	const variables = {
-		superadminId: loginUser,
-		roleName: "subadmin",
-
 		filters: {
 			name: search || null,
 			email: null,
 		},
+		roleName: "deliveryBoy",
+
 		limit: rowsPerPage,
 		page: page + 1,
+		...(user?.role?.name === "superadmin"
+			? {
+					superadminId: loginUser,
+					subadminId: null,
+				}
+			: user?.role?.name === "subadmin"
+				? {
+						superadminId: user?.superadmin_id,
+						subadminId: loginUser,
+					}
+				: {}),
 	};
 
 	const { data, loading, error, refetch } = useQuery(GetUsersBySuperadmin, {
@@ -116,11 +135,11 @@ export function CustomersTable({ search }: CustomersTableProps): React.JSX.Eleme
 		return applyPagination(users, page, rowsPerPage);
 	}, [data, page, rowsPerPage]);
 
-	const rowIds = React.useMemo(() => rows.map((r: any) => r.id), [rows]);
-	const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
+	// const rowIds = React.useMemo(() => rows.map((r: any) => r.id), [rows]);
+	// const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
 
-	const selectedSome = selected.size > 0 && selected.size < rows.length;
-	const selectedAll = rows.length > 0 && selected.size === rows.length;
+	// const selectedSome = selected.size > 0 && selected.size < rows.length;
+	// const selectedAll = rows.length > 0 && selected.size === rows.length;
 
 	const totalCount = data?.getUsersBySuperadmin?.total || 0; // assuming backend gives total count
 
@@ -133,12 +152,8 @@ export function CustomersTable({ search }: CustomersTableProps): React.JSX.Eleme
 		setPage(0); // reset to first page
 	};
 
-	const handleNavigate = (row: any) => {
-		router.push(`/dashboard/customers/permission/${row}`);
-	};
-
 	const handleEditUser = (userId: string) => {
-		router.push(`/dashboard/customers/update/${userId}`);
+		router.push(`/dashboard/deliveryStaff/update/${userId}`);
 	};
 
 	const handleDeleteClick = (userId: string, userName: string) => {
@@ -196,38 +211,21 @@ export function CustomersTable({ search }: CustomersTableProps): React.JSX.Eleme
 					<Table sx={{ minWidth: "800px" }}>
 						<TableHead>
 							<TableRow>
-								<TableCell padding="checkbox">
-									<Checkbox
-										checked={selectedAll}
-										indeterminate={selectedSome}
-										onChange={(event) => {
-											if (event.target.checked) selectAll();
-											else deselectAll();
-										}}
-									/>
-								</TableCell>
 								<TableCell>Name</TableCell>
 								<TableCell>Email</TableCell>
 								<TableCell>Country</TableCell>
 								<TableCell>Phone</TableCell>
 								<TableCell>Signed Up</TableCell>
-								<TableCell align="center">Permission</TableCell>
+
 								<TableCell align="center">Actions</TableCell>
 							</TableRow>
 						</TableHead>
 						<TableBody>
 							{rows.map((row: any) => {
-								const isSelected = selected.has(row.id);
 								const isDeleting = deletingUserId === row.id;
 
 								return (
-									<TableRow hover key={row.id} selected={isSelected}>
-										<TableCell padding="checkbox">
-											<Checkbox
-												checked={isSelected}
-												onChange={(event) => (event.target.checked ? selectOne(row.id) : deselectOne(row.id))}
-											/>
-										</TableCell>
+									<TableRow hover key={row.id}>
 										<TableCell>
 											<Stack direction="row" spacing={2} alignItems="center">
 												<Avatar src={`http://localhost:8000${row?.image}`} />
@@ -238,13 +236,7 @@ export function CustomersTable({ search }: CustomersTableProps): React.JSX.Eleme
 										<TableCell>{row.country ?? "-"}</TableCell>
 										<TableCell>{row.phone}</TableCell>
 										<TableCell>{dayjs(row.createdAt).format("MMM D, YYYY")}</TableCell>
-										<TableCell align="center">
-											<Tooltip title="Manage Permissions">
-												<IconButton onClick={() => handleNavigate(row.id)} color="primary" size="small">
-													<GearSixIcon fontSize="var(--icon-fontSize-md)" />
-												</IconButton>
-											</Tooltip>
-										</TableCell>
+
 										<TableCell align="center">
 											<Stack direction="row" spacing={1} justifyContent="center">
 												<Tooltip title="Edit User">

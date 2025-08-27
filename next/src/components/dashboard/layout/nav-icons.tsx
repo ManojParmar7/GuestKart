@@ -8,9 +8,11 @@ import { PlugsConnectedIcon } from "@phosphor-icons/react/dist/ssr/PlugsConnecte
 import { Ruler } from "@phosphor-icons/react/dist/ssr/Ruler";
 import { ShoppingBag } from "@phosphor-icons/react/dist/ssr/ShoppingBag";
 import { SquaresFour } from "@phosphor-icons/react/dist/ssr/SquaresFour";
+import { Truck } from "@phosphor-icons/react/dist/ssr/Truck";
 import { UserIcon } from "@phosphor-icons/react/dist/ssr/User";
 import { UserGear } from "@phosphor-icons/react/dist/ssr/UserGear";
 import { UsersIcon } from "@phosphor-icons/react/dist/ssr/Users";
+// import { UsersThree } from "@phosphor-icons/react/dist/ssr/UsersThree";
 import { XSquare } from "@phosphor-icons/react/dist/ssr/XSquare";
 
 export const navIcons = {
@@ -28,4 +30,5 @@ export const navIcons = {
 	users: UsersIcon,
 	category: SquaresFour,
 	roles: UserGear,
+	deliveryStaff: Truck, // or Truck
 } as Record<string, Icon>;

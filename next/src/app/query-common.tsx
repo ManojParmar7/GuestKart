@@ -2,8 +2,22 @@
 import { gql } from "@apollo/client";
 
 export const GetUsersBySuperadmin = gql`
-	query GetUsersBySuperadmin($superadminId: ID!, $filters: UserFilterInput, $limit: Int, $page: Int) {
-		getUsersBySuperadmin(superadmin_id: $superadminId, filters: $filters, limit: $limit, page: $page) {
+	query GetUsersBySuperadmin(
+		$superadminId: ID!
+		$subadminId: ID
+		$filters: UserFilterInput
+		$roleName: String
+		$limit: Int
+		$page: Int
+	) {
+		getUsersBySuperadmin(
+			superadmin_id: $superadminId
+			roleName: $roleName
+			filters: $filters
+			limit: $limit
+			page: $page
+			subadmin_id: $subadminId
+		) {
 			success
 			message
 			users {
@@ -18,9 +32,11 @@ export const GetUsersBySuperadmin = gql`
 					id
 					name
 				}
+
 				image
 				createdBy
 				superadmin_id
+				subadmin_id
 				country
 				currency
 				createdAt
@@ -113,6 +129,7 @@ export const createSubadmin = gql`
 		$superadminId: ID
 		$image: Upload!
 		$createdBy: ID
+		$subadminId: ID
 	) {
 		createUser(
 			name: $name
@@ -125,6 +142,7 @@ export const createSubadmin = gql`
 			superadmin_id: $superadminId
 			image: $image
 			createdBy: $createdBy
+			subadmin_id: $subadminId
 		) {
 			success
 			message

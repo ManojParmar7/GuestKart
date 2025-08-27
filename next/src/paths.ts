@@ -15,6 +15,7 @@ export const paths = {
                 color: '/dashboard/color',
 
           extra: '/dashboard/accessories',
+            deliveryStaff: '/dashboard/deliveryStaff',
 
 
              

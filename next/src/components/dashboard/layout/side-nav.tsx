@@ -59,6 +59,12 @@ export function SideNav(): React.JSX.Element {
 			items.push({ key: "size", title: "Size", href: paths.dashboard.size, icon: "size" });
 			items.push({ key: "color", title: "Color", href: paths.dashboard.color, icon: "color" });
 			items.push({ key: "extra", title: "Accessories", href: paths.dashboard.extra, icon: "accessories" });
+			items.push({
+				key: "deliveryStaff",
+				title: "Delivery Staff",
+				href: paths.dashboard.deliveryStaff,
+				icon: "deliveryStaff",
+			});
 		} else if (data?.getPermission?.modules) {
 			const modules = data.getPermission.modules;
 
@@ -77,6 +83,12 @@ export function SideNav(): React.JSX.Element {
 			items.push({ key: "size", title: "Size", href: paths.dashboard.size, icon: "size" });
 			items.push({ key: "color", title: "Color", href: paths.dashboard.color, icon: "color" });
 			items.push({ key: "extra", title: "Accessories", href: paths.dashboard.extra, icon: "accessories" });
+			items.push({
+				key: "deliveryStaff",
+				title: "Delivery Staff",
+				href: paths.dashboard.deliveryStaff,
+				icon: "deliveryStaff",
+			});
 		}
 
 		// Common items

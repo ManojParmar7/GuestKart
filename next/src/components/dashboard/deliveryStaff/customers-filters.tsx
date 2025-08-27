@@ -10,7 +10,7 @@ type Props = {
 	onSearch: (value: string) => void;
 };
 
-export function CustomersFilters({ onSearch }: Props): React.JSX.Element {
+export function DeliveryStaffFilters({ onSearch }: Props): React.JSX.Element {
 	const [search, setSearch] = React.useState("");
 
 	const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,7 +25,7 @@ export function CustomersFilters({ onSearch }: Props): React.JSX.Element {
 				value={search}
 				onChange={handleSearchChange}
 				fullWidth
-				placeholder="Search sub admins"
+				placeholder="Search Delivery Boy"
 				startAdornment={
 					<InputAdornment position="start">
 						<MagnifyingGlassIcon fontSize="var(--icon-fontSize-md)" />
