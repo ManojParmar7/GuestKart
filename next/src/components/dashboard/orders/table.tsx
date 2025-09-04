@@ -413,29 +413,35 @@ export function TablePage({ search, setUserData }: OrdersTableProps): React.JSX.
 																	<Divider sx={{ my: 1 }} />
 
 																	{/* Sizes */}
-																	{item?.selectedOptions?.size?.length > 0 && (
+																	{item?.selectedOptions?.size && (
 																		<Box mb={1}>
 																			<Typography variant="body2" fontWeight="bold">
 																				Sizes:
 																			</Typography>
 																			<Stack direction="row" spacing={1} flexWrap="wrap">
-																				{item?.selectedOptions?.size.map((s: any) => (
-																					<Chip key={s.id} size="small" label={s.name} />
-																				))}
+																				{/* {item?.selectedOptions?.size.map((s: any) => ( */}
+																				<Chip
+																					key={item?.selectedOptions?.size?.id}
+																					size="small"
+																					label={item?.selectedOptions?.size?.name}
+																				/>
+																				{/* ))} */}
 																			</Stack>
 																		</Box>
 																	)}
 
 																	{/* Colors */}
-																	{item?.selectedOptions?.color?.length > 0 && (
+																	{item?.selectedOptions?.color && (
 																		<Box mb={1}>
 																			<Typography variant="body2" fontWeight="bold">
 																				Colors:
 																			</Typography>
 																			<Stack direction="row" spacing={1} flexWrap="wrap">
-																				{item?.selectedOptions?.color.map((c: any) => (
-																					<Chip key={c.id} size="small" label={c.name} />
-																				))}
+																				<Chip
+																					key={item?.selectedOptions?.color?.id}
+																					size="small"
+																					label={item?.selectedOptions?.color?.name}
+																				/>
 																			</Stack>
 																		</Box>
 																	)}
@@ -455,9 +461,7 @@ export function TablePage({ search, setUserData }: OrdersTableProps): React.JSX.
 																	)}
 
 																	{/* Stock & Discount */}
-																	<Typography variant="body2">
-																		<strong>Stock:</strong> {item.product?.stock}
-																	</Typography>
+
 																	{item.product?.discountPrice && (
 																		<Typography variant="body2" color="error">
 																			<strong>Discount Price:</strong> ₹{item.product?.discountPrice}
