@@ -51,6 +51,12 @@ export function SideNav(): React.JSX.Element {
 		if (user.role.name === "superadmin") {
 			// Superadmin → direct items
 			items.push({ key: "customers", title: "Sub Admins", href: paths.dashboard.customers, icon: "users" });
+			items.push({
+				key: "orders",
+				title: "Orders",
+				href: paths.dashboard.orders,
+				icon: "orders",
+			});
 			items.push({ key: "products", title: "Products", href: paths.dashboard.products, icon: "product" });
 
 			items.push({ key: "banner", title: "Banners", href: paths.dashboard.banner, icon: "image-square" });
@@ -89,14 +95,21 @@ export function SideNav(): React.JSX.Element {
 				href: paths.dashboard.deliveryStaff,
 				icon: "deliveryStaff",
 			});
+			items.push({
+				key: "orders",
+				title: "Orders",
+				href: paths.dashboard.orders,
+				icon: "orders",
+			});
 		}
 
 		// Common items
 		items.push(
-			{ key: "integrations", title: "Integrations", href: paths.dashboard.integrations, icon: "plugs-connected" },
-			{ key: "settings", title: "Settings", href: paths.dashboard.settings, icon: "gear-six" },
-			{ key: "account", title: "Account", href: paths.dashboard.account, icon: "user" },
-			{ key: "error", title: "Error", href: paths.errors.notFound, icon: "x-square" }
+			// { key: "integrations", title: "Integrations", href: paths.dashboard.integrations, icon: "plugs-connected" },
+			// { key: "settings", title: "Settings", href: paths.dashboard.settings, icon: "gear-six" },
+			{ key: "account", title: "Account", href: paths.dashboard.account, icon: "user" }
+
+			// { key: "error", title: "Error", href: paths.errors.notFound, icon: "x-square" }
 		);
 
 		setNavItems(items);

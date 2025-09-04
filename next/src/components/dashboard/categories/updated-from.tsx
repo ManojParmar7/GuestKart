@@ -395,7 +395,7 @@ export function UpdateForm(): React.JSX.Element {
 										{imagePreview || originalData?.image ? (
 											<Box
 												component="img"
-												src={imagePreview || `http://localhost:8000${originalData?.image}`}
+												src={imagePreview || `${process.env.NEXT_PUBLIC_API_URL}${originalData?.image}`}
 												alt="Categories Preview"
 												sx={{
 													width: "100%",

@@ -159,10 +159,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 	}, [data, page, rowsPerPage]);
 	console.log(rows);
 	const rowIds = React.useMemo(() => rows.map((r: any) => r.id), [rows]);
-	const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
-
-	const selectedSome = selected.size > 0 && selected.size < rows.length;
-	const selectedAll = rows.length > 0 && selected.size === rows.length;
+	const { selected } = useSelection(rowIds);
 
 	const totalCount = data?.getAllCategories?.total || 0; // assuming backend gives total count
 
@@ -260,7 +257,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 										<TableRow hover key={row.id} selected={isSelected}>
 											<TableCell>
 												<Stack direction="row" spacing={2} alignItems="center">
-													<Avatar src={`http://localhost:8000${row?.image}`} />
+													<Avatar src={`${process.env.NEXT_PUBLIC_API_URL}${row?.image}`} />
 												</Stack>
 											</TableCell>
 											<TableCell>{row?.name}</TableCell>

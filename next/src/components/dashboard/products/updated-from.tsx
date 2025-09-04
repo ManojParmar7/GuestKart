@@ -469,7 +469,7 @@ export function UpdateForm(): React.JSX.Element {
 														<Box key={index} sx={{ position: "relative", px: 1 }}>
 															<Box
 																component="img"
-																src={`http://localhost:8000${src}`}
+																src={`${process.env.NEXT_PUBLIC_API_URL}${src}`}
 																alt={`Image ${index + 1}`}
 																sx={{
 																	width: "100%",

@@ -22,7 +22,7 @@ export interface ResetPasswordParams {
   email: string;
 }
 
-const API_URL = 'http://localhost:8000/graphql'; // ✅ Change this to your backend GraphQL URL
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/graphql`; // ✅ Change this to your backend GraphQL URL
 
 async function graphqlRequest(query: string, variables: any = {}, token?: string) {
   const res = await fetch(API_URL, {

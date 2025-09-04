@@ -1,5 +1,6 @@
 import type { Icon } from "@phosphor-icons/react/dist/lib/types";
 import { ChartPieIcon } from "@phosphor-icons/react/dist/ssr/ChartPie";
+import { ClipboardTextIcon } from "@phosphor-icons/react/dist/ssr/ClipboardText";
 import { Eyedropper } from "@phosphor-icons/react/dist/ssr/Eyedropper";
 import { GearSixIcon } from "@phosphor-icons/react/dist/ssr/GearSix";
 import { ImageSquare } from "@phosphor-icons/react/dist/ssr/ImageSquare";
@@ -31,4 +32,5 @@ export const navIcons = {
 	category: SquaresFour,
 	roles: UserGear,
 	deliveryStaff: Truck, // or Truck
+	orders: ClipboardTextIcon,
 } as Record<string, Icon>;

@@ -14,7 +14,7 @@ import "@/styles/global.css";
 
 // Create upload link
 const uploadLink = createUploadLink({
-	uri: "http://localhost:8000/graphql",
+	uri: `${process.env.NEXT_PUBLIC_API_URL}/graphql`,
 });
 
 // Add auth header if needed

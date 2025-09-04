@@ -215,27 +215,25 @@ export function DeliveryStaffTable({ search }: CustomersTableProps): React.JSX.E
 								<TableCell>Email</TableCell>
 								<TableCell>Country</TableCell>
 								<TableCell>Phone</TableCell>
-								<TableCell>Signed Up</TableCell>
 
 								<TableCell align="center">Actions</TableCell>
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{rows.map((row: any) => {
+							{rows?.map((row: any) => {
 								const isDeleting = deletingUserId === row.id;
 
 								return (
 									<TableRow hover key={row.id}>
 										<TableCell>
 											<Stack direction="row" spacing={2} alignItems="center">
-												<Avatar src={`http://localhost:8000${row?.image}`} />
+												<Avatar src={`${process.env.NEXT_PUBLIC_API_URL}${row?.image}`} />
 												<Typography variant="subtitle2">{row.name}</Typography>
 											</Stack>
 										</TableCell>
 										<TableCell>{row.email}</TableCell>
 										<TableCell>{row.country ?? "-"}</TableCell>
 										<TableCell>{row.phone}</TableCell>
-										<TableCell>{dayjs(row.createdAt).format("MMM D, YYYY")}</TableCell>
 
 										<TableCell align="center">
 											<Stack direction="row" spacing={1} justifyContent="center">

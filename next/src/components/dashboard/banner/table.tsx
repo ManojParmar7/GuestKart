@@ -257,7 +257,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 											<TableCell>
 												<Stack direction="row" spacing={2} alignItems="center">
 													<Avatar
-														src={`http://localhost:8000${row?.image}`} // banner image ka path
+														src={`${process.env.NEXT_PUBLIC_API_URL}${row?.image}`}
 														variant="rounded"
 														sx={{ width: 56, height: 56 }}
 													/>

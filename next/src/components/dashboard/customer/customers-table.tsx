@@ -230,7 +230,7 @@ export function CustomersTable({ search }: CustomersTableProps): React.JSX.Eleme
 										</TableCell>
 										<TableCell>
 											<Stack direction="row" spacing={2} alignItems="center">
-												<Avatar src={`http://localhost:8000${row?.image}`} />
+												<Avatar src={`${process.env.NEXT_PUBLIC_API_URL}${row?.image}`} />
 												<Typography variant="subtitle2">{row.name}</Typography>
 											</Stack>
 										</TableCell>

@@ -80,7 +80,7 @@ export function MainNav(): React.JSX.Element {
 						<Avatar
 							onClick={userPopover.handleOpen}
 							ref={userPopover.anchorRef}
-							src={`http://localhost:8000${user?.image}`}
+							src={`${process.env.NEXT_PUBLIC_API_URL}${user?.image}`}
 							sx={{ cursor: "pointer" }}
 						/>
 					</Stack>

@@ -284,7 +284,7 @@ export function TablePage({ search, setPermissionsData, setUserData }: Customers
 													{row.images?.map((img: string, i: number) => (
 														<Avatar
 															key={i}
-															src={`http://localhost:8000${img}`}
+															src={`${process.env.NEXT_PUBLIC_API_URL}${img}`}
 															variant="rounded"
 															sx={{ width: 50, height: 50 }}
 														/>

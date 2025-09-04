@@ -87,7 +87,7 @@ export function UpdateForm(): React.JSX.Element {
 
 	// Apollo hooks
 	const [updateUserMutation, { loading: updating }] = useMutation(updateUser);
-	const { data, loading, error } = useQuery(getUserById, {
+	const { loading, error } = useQuery(getUserById, {
 		variables: { getUserId: userId },
 		skip: !userId,
 		onCompleted: (data) => {
@@ -452,7 +452,7 @@ export function UpdateForm(): React.JSX.Element {
 									</Typography>
 									<Stack direction="row" spacing={3} alignItems="center">
 										<Avatar
-											src={imagePreview || `http://localhost:8000${originalData?.image}`}
+											src={imagePreview || `${process.env.NEXT_PUBLIC_API_URL}${originalData?.image}`}
 											sx={{
 												width: 120,
 												height: 120,

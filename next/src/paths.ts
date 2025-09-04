@@ -16,6 +16,8 @@ export const paths = {
 
           extra: '/dashboard/accessories',
             deliveryStaff: '/dashboard/deliveryStaff',
+                orders: '/dashboard/orders',
+
 
 
              

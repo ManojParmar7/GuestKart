@@ -44,7 +44,7 @@ export function AccountInfo({ user, onImageChange }: Props): React.JSX.Element {
 							<Skeleton variant="circular" width={80} height={80} />
 						) : (
 							<Avatar
-								src={previewUrl || (user?.image && `http://localhost:8000${user?.image}`)}
+								src={previewUrl || (user?.image && `${process.env.NEXT_PUBLIC_API_URL}${user?.image}`)}
 								sx={{ height: "80px", width: "80px" }}
 							/>
 						)}
