@@ -7,6 +7,30 @@ const orderItemSchema = new Schema({
   price: Number,
   discount: Number,
   discountType: String,
+
+  // ✅ New field for total option price
+  totalOptionPrice: { type: Number, default: 0 },
+
+  // ✅ New field for selected options
+  selectedOptions: {
+    color: {
+      _id: { type: mongoose.Schema.Types.ObjectId },
+      name: String,
+      price: Number,
+    },
+    size: {
+      _id: { type: mongoose.Schema.Types.ObjectId },
+      name: String,
+      price: Number,
+    },
+    extras: [
+      {
+        _id: { type: mongoose.Schema.Types.ObjectId },
+        name: String,
+        price: Number,
+      },
+    ],
+  },
 });
 
 const contactInfoSchema = new Schema({
@@ -51,28 +75,40 @@ const orderSchema = new Schema(
       ref: "User",
       default: null,
     },
+
     deliveryStatus: {
       type: String,
-      enum: ["PENDING", "ACCEPTED", "DELIVERED"],
+      enum: [
+        "PENDING",
+        "ACCEPTED",
+        "PICKED_UP",
+        "OUT_FOR_DELIVERY",
+        "DELIVERED",
+        "CANCELLED",
+      ],
       default: "PENDING",
     },
-
-    // Order lifecycle
     orderStatus: {
       type: String,
       enum: [
-        "CREATED", // jab order place hua
-        "CONFIRMED", // COD (direct confirm) ya ONLINE (jab payment success)
-        "APPROVED", // Superadmin/Subadmin approve karega
-        "REJECTED", // Superadmin/Subadmin reject
-        "SHIPPED", // Delivery boy pick karega
-        "DELIVERED", // Delivery complete
-        "CANCELLED", // Fail or user/admin cancel
-        "RETURNED", // Refund after return
+        "PLACED",
+        "PENDING",
+        "CONFIRMED",
+        "APPROVED",
+        "PACKED",
+        "ASSIGNED",
+        "OUT_FOR_DELIVERY",
+        "DELIVERED",
+        "CANCELLED",
+        "REJECTED",
+        "RETURN_REQUESTED",
+        "RETURNED",
+        "REFUNDED",
+        "FAILED",
+        "SHIPPED",
       ],
-      default: "CREATED",
+      default: "PLACED",
     },
-
     createdBy: {
       name: { type: String, required: true },
       role: { type: String, required: true },
@@ -85,4 +121,5 @@ const orderSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Order", orderSchema);
+// 👇 FIX: overwrite error se bachne ke liye
+module.exports = mongoose.models.Order || mongoose.model("Order", orderSchema);

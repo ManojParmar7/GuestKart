@@ -1,4 +1,4 @@
-const Order = require("../../modals/Order");
+const Order = require("../../modals/order");
 const Cart = require("../../modals/cart");
 const Product = require("../../modals/Product");
 const Discount = require("../../modals/discount");
@@ -13,17 +13,27 @@ const getsubadminIds = async (adminId) => {
 };
 module.exports = {
   Order: {
-    user: async (parent) => await User.findById(parent.userId),
-    items: async (parent) =>
-      Promise.all(
-        parent.items.map(async (item) => ({
-          product: await Product.findById(item.productId),
-          quantity: item.quantity,
-          price: item.price,
-          discount: item.discount,
-          discountType: item.discountType,
-        }))
-      ),
+    // 👇 Yeh add karo
+    id: (parent) => parent._id.toString(),
+
+    // ✅ User resolve
+    user: async (parent) => {
+      if (!parent.createdBy) return null;
+      return await User.findById(parent.createdBy.id);
+    },
+
+    // ✅ Items resolve
+    items: (parent) => {
+      return parent.items.map((item) => ({
+        product: item.productId, // populated Product
+        quantity: item.quantity,
+        price: item.price,
+        discount: item.discount,
+        discountType: item.discountType,
+        selectedOptions: item.selectedOptions || {}, // include selectedOptions
+        totalOptionPrice: item.totalOptionPrice || 0, // include totalOptionPrice
+      }));
+    },
   },
 
   Query: {
@@ -49,49 +59,32 @@ module.exports = {
 
     getAllOrders: async (
       _,
-      { page = 1, limit = 10, search = "", subadminId, superadminId },
-      { user }
+      { page = 1, limit = 10, search, subadminId, superadminId, sessionId }
     ) => {
       try {
-        if (!user) {
-          throw new Error("Unauthorized");
-        }
-
         const query = {};
-
-        // ✅ subadmin wise orders
-        if (subadminId && !superadminId) {
-          query.subadminId = subadminId;
-        }
-
-        // ✅ superadmin wise orders
-        if (superadminId) {
-          query.superadminId = superadminId;
-        }
-
-        // ✅ search filter
-        if (search) {
-          query.$or = [
-            { orderNumber: { $regex: search, $options: "i" } },
-            { "contactInfo.name": { $regex: search, $options: "i" } },
-          ];
-        }
+        if (subadminId) query.subadminId = subadminId;
+        if (superadminId) query.superadminId = superadminId;
+        if (sessionId) query.sessionId = sessionId;
 
         const skip = (page - 1) * limit;
 
         const orders = await Order.find(query)
+          .populate("items.productId") // ✅ Product data populate
+          .populate("deliveryBoy")
           .skip(skip)
           .limit(limit)
-          .sort({ createdAt: -1 });
+          .sort({ createdAt: -1 })
+          .lean();
 
-        const totalOrders = await Order.countDocuments(query);
+        const total = await Order.countDocuments(query);
 
         return {
           data: orders,
-          total: totalOrders,
+          total,
           page,
           limit,
-          totalPages: Math.ceil(totalOrders / limit),
+          totalPages: Math.ceil(total / limit),
         };
       } catch (error) {
         throw new Error(error.message);
@@ -100,6 +93,185 @@ module.exports = {
   },
 
   Mutation: {
+    // placeOrder: async (
+    //   _,
+    //   { sessionId, contactInfo, coupon, paymentMethod }
+    // ) => {
+    //   try {
+    //     const couponCode = coupon?.code || null;
+    //     const cart = await Cart.findOne({ sessionId });
+
+    //     if (!cart || cart.items.length === 0) {
+    //       return { success: false, message: "Cart is empty", order: null };
+    //     }
+
+    //     let total = 0;
+    //     let productDiscountAmount = 0;
+    //     let couponDiscountAmount = 0;
+    //     let appliedCouponId = null;
+    //     let totalOptionPrice = 0;
+    //     const orderItems = [];
+
+    //     // ✅ Product level discount
+    //     for (const item of cart.items) {
+    //       const product = await Product.findById(item.productId);
+    //       if (!product) continue;
+
+    //       let productDiscount = 0;
+    //       const discount = await Discount.findOne({
+    //         productId: product._id,
+    //         isActive: true,
+    //       });
+
+    //       if (discount) {
+    //         productDiscount =
+    //           discount.type === "percentage"
+    //             ? (product.price * discount.value) / 100
+    //             : discount.value;
+    //       }
+
+    //       total += product.price * item.quantity;
+    //       productDiscountAmount += productDiscount * item.quantity;
+    //       totalOptionPrice +=
+    //         (item.selectedOptions?.totalOptionPrice || 0) * item.quantity; // ✅ (NEW) options price bhi add kiya
+
+    //       // stock check
+    //       if (product.stock < item.quantity) {
+    //         return {
+    //           success: false,
+    //           message: `${product.name} is out of stock`,
+    //           order: null,
+    //         };
+    //       }
+
+    //       product.stock -= item.quantity;
+    //       await product.save();
+
+    //       orderItems.push({
+    //         productId: product._id,
+    //         quantity: item.quantity,
+    //         price: product.price,
+    //         discountType: discount?.type || null,
+    //         discount: productDiscount,
+    //       });
+    //     }
+
+    //     // ✅ Coupon discount
+    //     if (couponCode) {
+    //       const couponDoc = await Coupon.findOne({
+    //         code: { $regex: new RegExp(`^${couponCode}$`, "i") },
+    //         isActive: true,
+    //       });
+
+    //       if (couponDoc) {
+    //         const today = new Date();
+    //         if (
+    //           today >= new Date(couponDoc.startDate) &&
+    //           today <= new Date(couponDoc.endDate)
+    //         ) {
+    //           if (total >= (couponDoc.minOrderAmount || 0)) {
+    //             if (
+    //               !couponDoc.usageLimit ||
+    //               couponDoc.usedCount < couponDoc.usageLimit
+    //             ) {
+    //               let cDiscount =
+    //                 couponDoc.type === "percentage"
+    //                   ? ((total - productDiscountAmount) * couponDoc.value) /
+    //                     100
+    //                   : couponDoc.value;
+
+    //               if (
+    //                 couponDoc.maxDiscountAmount &&
+    //                 cDiscount > couponDoc.maxDiscountAmount
+    //               ) {
+    //                 cDiscount = couponDoc.maxDiscountAmount;
+    //               }
+
+    //               couponDiscountAmount = cDiscount;
+    //               appliedCouponId = couponDoc._id;
+    //               couponDoc.usedCount = (couponDoc.usedCount || 0) + 1;
+    //               await couponDoc.save();
+    //             } else {
+    //               return {
+    //                 success: false,
+    //                 message: "Coupon usage limit exceeded",
+    //                 order: null,
+    //               };
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+
+    //     // ✅ Final Amount
+    //     const finalAmount =
+    //       total - (productDiscountAmount || 0) - (couponDiscountAmount || 0);
+
+    //     let paymentStatus = "PENDING";
+    //     let orderStatus = "PLACED";
+    //     let stripePaymentIntentId = null;
+    //     let clientSecret = null;
+
+    //     // ✅ Payment Flow
+    //     if (paymentMethod === "ONLINE") {
+    //       const paymentIntent = await stripe.paymentIntents.create({
+    //         amount: Math.round(finalAmount * 100),
+    //         currency: "usd",
+    //         payment_method_types: ["card"],
+    //         metadata: { sessionId },
+    //       });
+    //       stripePaymentIntentId = paymentIntent.id;
+    //       clientSecret = paymentIntent.client_secret;
+    //       paymentStatus = "PENDING";
+    //       orderStatus = "PLACED";
+    //     } else if (paymentMethod === "COD") {
+    //       paymentStatus = "PENDING";
+    //       orderStatus = "PLACED"; // COD direct confirm
+    //     }
+
+    //     const user = await User.findById(cart?.subadminId).populate("role");
+
+    //     // ✅ Create Order
+    //     const order = await Order.create({
+    //       sessionId: cart?.sessionId,
+    //       subadminId: cart?.subadminId,
+    //       superadminId: cart?.superadminId,
+    //       items: orderItems,
+    //       totalAmount: total,
+    //       discountAmount: productDiscountAmount + couponDiscountAmount,
+    //       finalAmount,
+    //       couponCode: couponCode || null,
+    //       couponId: appliedCouponId,
+    //       paymentMethod, // 👈 SAVE
+    //       paymentStatus,
+    //       orderStatus,
+    //       stripePaymentIntentId,
+    //       clientSecret,
+    //       contactInfo,
+    //       createdBy: {
+    //         name: user?.name || null,
+    //         role: user?.role?.name || null,
+    //       },
+    //     });
+
+    //     // ✅ Clear cart
+    //     cart.items = [];
+    //     await cart.save();
+
+    //     return {
+    //       success: true,
+    //       message:
+    //         paymentMethod === "COD"
+    //           ? "Order placed with Cash on Delivery."
+    //           : "Order placed. Awaiting online payment.",
+    //       order,
+    //       clientSecret,
+    //     };
+    //   } catch (error) {
+    //     console.error("Order place error:", error);
+    //     return { success: false, message: error.message, order: null };
+    //   }
+    // },
     placeOrder: async (
       _,
       { sessionId, contactInfo, coupon, paymentMethod }
@@ -117,8 +289,9 @@ module.exports = {
         let couponDiscountAmount = 0;
         let appliedCouponId = null;
         const orderItems = [];
+        let totalOptionPrice = 0;
 
-        // ✅ Product level discount
+        // ✅ Product + Options Price
         for (const item of cart.items) {
           const product = await Product.findById(item.productId);
           if (!product) continue;
@@ -136,7 +309,13 @@ module.exports = {
                 : discount.value;
           }
 
+          // 👇 Product base price
           total += product.price * item.quantity;
+
+          // 👇 Options price (per item bhi multiply hoga)
+          totalOptionPrice +=
+            (item.selectedOptions?.totalOptionPrice || 0) * item.quantity;
+
           productDiscountAmount += productDiscount * item.quantity;
 
           // stock check
@@ -151,12 +330,14 @@ module.exports = {
           product.stock -= item.quantity;
           await product.save();
 
+          // ✅ Push product with selectedOptions
           orderItems.push({
             productId: product._id,
             quantity: item.quantity,
             price: product.price,
             discountType: discount?.type || null,
             discount: productDiscount,
+            selectedOptions: item.selectedOptions || {}, // 👈 FULL selectedOptions save
           });
         }
 
@@ -180,7 +361,8 @@ module.exports = {
                 ) {
                   let cDiscount =
                     couponDoc.type === "percentage"
-                      ? ((total - productDiscountAmount) * couponDoc.value) /
+                      ? ((total + totalOptionPrice - productDiscountAmount) *
+                          couponDoc.value) /
                         100
                       : couponDoc.value;
 
@@ -207,12 +389,15 @@ module.exports = {
           }
         }
 
-        // ✅ Final Amount
+        // ✅ Final Amount (include options)
         const finalAmount =
-          total - (productDiscountAmount || 0) - (couponDiscountAmount || 0);
+          total +
+          totalOptionPrice -
+          (productDiscountAmount || 0) -
+          (couponDiscountAmount || 0);
 
         let paymentStatus = "PENDING";
-        let orderStatus = "CREATED";
+        let orderStatus = "PLACED";
         let stripePaymentIntentId = null;
         let clientSecret = null;
 
@@ -227,10 +412,10 @@ module.exports = {
           stripePaymentIntentId = paymentIntent.id;
           clientSecret = paymentIntent.client_secret;
           paymentStatus = "PENDING";
-          orderStatus = "CREATED";
+          orderStatus = "PLACED";
         } else if (paymentMethod === "COD") {
           paymentStatus = "PENDING";
-          orderStatus = "CONFIRMED"; // COD direct confirm
+          orderStatus = "PLACED"; // COD direct confirm
         }
 
         const user = await User.findById(cart?.subadminId).populate("role");
@@ -241,12 +426,12 @@ module.exports = {
           subadminId: cart?.subadminId,
           superadminId: cart?.superadminId,
           items: orderItems,
-          totalAmount: total,
+          totalAmount: total + totalOptionPrice, // 👈 include options here also
           discountAmount: productDiscountAmount + couponDiscountAmount,
           finalAmount,
           couponCode: couponCode || null,
           couponId: appliedCouponId,
-          paymentMethod, // 👈 SAVE
+          paymentMethod,
           paymentStatus,
           orderStatus,
           stripePaymentIntentId,

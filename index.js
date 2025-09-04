@@ -8,6 +8,7 @@ const cors = require("cors");
 const path = require("path");
 const jwt = require("jsonwebtoken");
 const { graphqlUploadExpress } = require("graphql-upload");
+const seedData = require("./graphql/seedData/seedData");
 
 const { typeDefs, resolvers } = require("./server");
 
@@ -19,7 +20,10 @@ async function startServer() {
   // MongoDB connect
   await mongoose
     .connect("mongodb://127.0.0.1:27017/graphql_crud")
-    .then(() => console.log("✅ DB connected"))
+    .then(async () => {
+      console.log("✅ DB connected");
+      await seedData();
+    })
     .catch((err) => console.error("❌ DB error:", err));
   const server = new ApolloServer({
     typeDefs,

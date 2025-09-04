@@ -14,14 +14,21 @@ module.exports = gql`
   }
 
   enum OrderStatus {
-    CREATED # Order place hua hai (COD ya ONLINE dono case me)
-    CONFIRMED # COD auto confirm ho gaya OR Online payment successful
-    APPROVED # Superadmin/Subadmin ne accept kiya
-    REJECTED # Superadmin/Subadmin ne reject kiya
-    SHIPPED # Delivery boy ne pick kiya
-    DELIVERED # Delivery boy ne complete delivery ki
-    CANCELLED # User/Admin ne cancel kiya ya payment fail
-    RETURNED # Delivery ke baad return/refund hua
+    PLACED
+    PENDING
+    CONFIRMED
+    APPROVED
+    PACKED
+    ASSIGNED
+    OUT_FOR_DELIVERY
+    DELIVERED
+    CANCELLED
+    REJECTED
+    RETURN_REQUESTED
+    RETURNED
+    REFUNDED
+    FAILED
+    SHIPPED
   }
 
   type Product {
@@ -29,12 +36,24 @@ module.exports = gql`
     name: String
     price: Float
     stock: Int
+    discountPrice: Float
   }
 
   type User {
     id: ID
     name: String
     email: String
+  }
+  type OptionDetail {
+    _id: ID
+    name: String
+    price: Float
+  }
+
+  type OrderSelectedOptions {
+    color: OptionDetail
+    size: OptionDetail
+    extras: [OptionDetail]
   }
 
   type OrderItem {
@@ -43,6 +62,8 @@ module.exports = gql`
     price: Float
     discount: Float
     discountType: String
+    totalOptionPrice: Float
+    selectedOptions: OrderSelectedOptions
   }
 
   type ContactInfo {
@@ -97,14 +118,16 @@ module.exports = gql`
   }
 
   extend type Query {
-    getGuestOrders(sessionId: String!, email: String, phone: String): [Order]
     getAllOrders(
       page: Int
       limit: Int
       search: String
       subadminId: ID
       superadminId: ID
+      sessionId: ID
     ): OrderPaginationResponse
+
+    getGuestOrders(sessionId: String!, email: String, phone: String): [Order]
   }
 
   extend type Mutation {

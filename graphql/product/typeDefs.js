@@ -16,7 +16,6 @@ module.exports = gql`
     discountPrice: Float
     category: Category
     createdBy: CreatedBy
-
     sizes: [Size]
     user: User
     colors: [Color]

@@ -200,7 +200,6 @@ router.post(
             { stripePaymentIntentId: intentId },
             {
               paymentStatus: "PAID",
-              orderStatus: "CONFIRMED", // Payment ke baad CONFIRMED
             }
           );
 
