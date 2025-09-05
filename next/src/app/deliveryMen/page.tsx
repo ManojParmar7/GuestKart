@@ -188,7 +188,7 @@ const DeliveryBoyUI: React.FC = () => {
 	return (
 		<Box sx={{ flexGrow: 1, bgcolor: "background.default", minHeight: "100vh" }}>
 			{/* Header */}
-			<AppBar position="static" elevation={1}>
+			{/* <AppBar position="static" elevation={1}>
 				<Toolbar>
 					<DirectionsBike sx={{ mr: 2 }} />
 					<Typography variant="h6" sx={{ flexGrow: 1 }}>
@@ -201,7 +201,7 @@ const DeliveryBoyUI: React.FC = () => {
 						<Avatar sx={{ bgcolor: "secondary.main", width: 32, height: 32 }}>{deliveryBoyName.charAt(0)}</Avatar>
 					</Box>
 				</Toolbar>
-			</AppBar>
+			</AppBar> */}
 
 			<Container maxWidth="lg" sx={{ py: 2 }}>
 				{/* Profile Section */}
