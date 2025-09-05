@@ -140,194 +140,195 @@ const deliveryBoyResolvers = {
       }
     },
 
-    assignOrderToDeliveryBoy: async (
-      _,
-      { orderId, deliveryBoyId },
-      { user }
-    ) => {
-      try {
-        if (!user) {
-          throw new Error("Unauthorized");
-        }
-        console.log("-=-=-=user", user);
-        // 🟢 Fetch order
-        const order = await Order.findById(orderId);
-        if (!order) {
-          throw new Error("Order not found");
-        }
+    // assignOrderToDeliveryBoy: async (
+    //   _,
+    //   { orderId, deliveryBoyId },
+    //   { user }
+    // ) => {
+    //   try {
+    //     if (!user) {
+    //       throw new Error("Unauthorized");
+    //     }
+    //     console.log("-=-=-=user", user);
+    //     // 🟢 Fetch order
+    //     const order = await Order.findById(orderId);
+    //     if (!order) {
+    //       throw new Error("Order not found");
+    //     }
 
-        // 🟢 Role-based check
-        if (user.role === "subadmin") {
-          if (order.subadminId.toString() !== user.id.toString()) {
-            throw new Error(
-              "You are not authorized to assign delivery boy for this order"
-            );
-          }
-        } else if (user.role === "superadmin") {
-          if (order.superadminId.toString() !== user.id.toString()) {
-            throw new Error(
-              "You are not authorized to assign delivery boy for this order"
-            );
-          }
-        } else {
-          throw new Error(
-            "Only subadmin or superadmin can assign delivery boy"
-          );
-        }
+    //     // 🟢 Role-based check
+    //     if (user.role === "subadmin") {
+    //       if (order.subadminId.toString() !== user.id.toString()) {
+    //         throw new Error(
+    //           "You are not authorized to assign delivery boy for this order"
+    //         );
+    //       }
+    //     } else if (user.role === "superadmin") {
+    //       if (order.superadminId.toString() !== user.id.toString()) {
+    //         throw new Error(
+    //           "You are not authorized to assign delivery boy for this order"
+    //         );
+    //       }
+    //     } else {
+    //       throw new Error(
+    //         "Only subadmin or superadmin can assign delivery boy"
+    //       );
+    //     }
 
-        // 🟢 Update order with delivery boy
-        order.deliveryBoy = deliveryBoyId;
-        order.deliveryStatus = "PENDING"; // assigned but not yet accepted
-        await order.save();
+    //     // 🟢 Update order with delivery boy
+    //     order.deliveryBoy = deliveryBoyId;
+    //     order.deliveryStatus = "PENDING"; // assigned but not yet accepted
+    //     await order.save();
 
-        return {
-          success: true,
-          message: "Delivery boy assigned successfully",
-          order,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          message: error.message,
-          order: null,
-        };
-      }
-    },
+    //     return {
+    //       success: true,
+    //       message: "Delivery boy assigned successfully",
+    //       order,
+    //     };
+    //   } catch (error) {
+    //     return {
+    //       success: false,
+    //       message: error.message,
+    //       order: null,
+    //     };
+    //   }
+    // },
 
-    acceptOrderDeliveryBoy: async (_, { orderId }) => {
-      try {
-        const order = await Order.findById(orderId);
-        if (!order) {
-          return { success: false, message: "Order not found", order: null };
-        }
+    // acceptOrderDeliveryBoy: async (_, { orderId }) => {
+    //   try {
+    //     const order = await Order.findById(orderId);
+    //     if (!order) {
+    //       return { success: false, message: "Order not found", order: null };
+    //     }
 
-        // Check valid state
-        if (order.deliveryStatus !== "PENDING") {
-          return {
-            success: false,
-            message: "Order is not in pending state",
-            order,
-          };
-        }
+    //     // Check valid state
+    //     if (order.deliveryStatus !== "PENDING") {
+    //       return {
+    //         success: false,
+    //         message: "Order is not in pending state",
+    //         order,
+    //       };
+    //     }
 
-        // ✅ Make sure you use the ENUM values defined in schema
-        order.deliveryStatus = "ACCEPTED";
+    //     // ✅ Make sure you use the ENUM values defined in schema
+    //     order.deliveryStatus = "ACCEPTED";
 
-        order.paymentStatus = "PENDING"; // check your enum spelling (PENDING or Pending?)
+    //     order.paymentStatus = "PENDING"; // check your enum spelling (PENDING or Pending?)
 
-        await order.save();
+    //     await order.save();
 
-        return {
-          success: true,
-          message: "Order accepted by delivery boy",
-          order,
-        };
-      } catch (error) {
-        return { success: false, message: error.message, order: null };
-      }
-    },
+    //     return {
+    //       success: true,
+    //       message: "Order accepted by delivery boy",
+    //       order,
+    //     };
+    //   } catch (error) {
+    //     return { success: false, message: error.message, order: null };
+    //   }
+    // },
 
-    // ✅ Delivery boy picks up the order from shop/warehouse
-    pickUpOrder: async (_, { orderId }) => {
-      try {
-        const order = await Order.findById(orderId);
-        if (!order) {
-          return { success: false, message: "Order not found", order: null };
-        }
+    // // ✅ Delivery boy picks up the order from shop/warehouse
+    // pickUpOrder: async (_, { orderId }) => {
+    //   try {
+    //     const order = await Order.findById(orderId);
+    //     if (!order) {
+    //       return { success: false, message: "Order not found", order: null };
+    //     }
 
-        if (order.deliveryStatus !== "ACCEPTED") {
-          return {
-            success: false,
-            message: "Order must be accepted before pickup",
-            order,
-          };
-        }
+    //     if (order.deliveryStatus !== "ACCEPTED") {
+    //       return {
+    //         success: false,
+    //         message: "Order must be accepted before pickup",
+    //         order,
+    //       };
+    //     }
 
-        // Delivery boy ne pickup kar liya
-        order.deliveryStatus = "PICKED_UP";
+    //     // Delivery boy ne pickup kar liya
+    //     order.deliveryStatus = "PICKED_UP";
 
-        // Yaha orderStatus bhi update kar sakte ho
-        order.orderStatus = "SHIPPED"; // ya "OUT_FOR_DELIVERY" aapke naming ke hisaab se
+    //     // Yaha orderStatus bhi update kar sakte ho
+    //     order.orderStatus = "SHIPPED"; // ya "OUT_FOR_DELIVERY" aapke naming ke hisaab se
 
-        await order.save();
+    //     await order.save();
 
-        return {
-          success: true,
-          message: "Order picked up by delivery boy",
-          order,
-        };
-      } catch (error) {
-        return { success: false, message: error.message, order: null };
-      }
-    },
+    //     return {
+    //       success: true,
+    //       message: "Order picked up by delivery boy",
+    //       order,
+    //     };
+    //   } catch (error) {
+    //     return { success: false, message: error.message, order: null };
+    //   }
+    // },
 
-    // ✅ Delivery boy goes out for delivery
-    outForDelivery: async (_, { orderId }) => {
-      try {
-        const order = await Order.findById(orderId);
-        if (!order) {
-          return { success: false, message: "Order not found", order: null };
-        }
+    // // ✅ Delivery boy goes out for delivery
+    // outForDelivery: async (_, { orderId }) => {
+    //   try {
+    //     const order = await Order.findById(orderId);
+    //     if (!order) {
+    //       return { success: false, message: "Order not found", order: null };
+    //     }
 
-        if (order.deliveryStatus !== "PICKED_UP") {
-          return {
-            success: false,
-            message: "Order must be picked up before going out for delivery",
-            order,
-          };
-        }
-        order.orderStatus = "OUT_FOR_DELIVERY";
+    //     if (order.deliveryStatus !== "PICKED_UP") {
+    //       return {
+    //         success: false,
+    //         message: "Order must be picked up before going out for delivery",
+    //         order,
+    //       };
+    //     }
+    //     order.orderStatus = "OUT_FOR_DELIVERY";
 
-        order.deliveryStatus = "OUT_FOR_DELIVERY";
-        await order.save();
+    //     order.deliveryStatus = "OUT_FOR_DELIVERY";
+    //     await order.save();
 
-        return {
-          success: true,
-          message: "Order is out for delivery",
-          order,
-        };
-      } catch (error) {
-        return { success: false, message: error.message, order: null };
-      }
-    },
-    deliverOrder: async (_, { orderId }) => {
-      try {
-        const order = await Order.findById(orderId);
-        if (!order) {
-          return { success: false, message: "Order not found", order: null };
-        }
+    //     return {
+    //       success: true,
+    //       message: "Order is out for delivery",
+    //       order,
+    //     };
+    //   } catch (error) {
+    //     return { success: false, message: error.message, order: null };
+    //   }
+    // },
 
-        if (order.deliveryStatus !== "OUT_FOR_DELIVERY") {
-          return {
-            success: false,
-            message:
-              "Order must be out for delivery before it can be delivered",
-            order,
-          };
-        }
+    // deliverOrder: async (_, { orderId }) => {
+    //   try {
+    //     const order = await Order.findById(orderId);
+    //     if (!order) {
+    //       return { success: false, message: "Order not found", order: null };
+    //     }
 
-        // if (order.paymentStatus !== "PAID") {
-        //   return {
-        //     success: false,
-        //     message: "Order cannot be delivered until payment is completed",
-        //     order,
-        //   };
-        // }
-        order.paymentStatus = "PAID";
+    //     if (order.deliveryStatus !== "OUT_FOR_DELIVERY") {
+    //       return {
+    //         success: false,
+    //         message:
+    //           "Order must be out for delivery before it can be delivered",
+    //         order,
+    //       };
+    //     }
 
-        order.orderStatus = "DELIVERED";
-        order.deliveryStatus = "DELIVERED";
-        await order.save();
+    //     // if (order.paymentStatus !== "PAID") {
+    //     //   return {
+    //     //     success: false,
+    //     //     message: "Order cannot be delivered until payment is completed",
+    //     //     order,
+    //     //   };
+    //     // }
+    //     order.paymentStatus = "PAID";
 
-        return {
-          success: true,
-          message: "Order delivered successfully",
-          order,
-        };
-      } catch (error) {
-        return { success: false, message: error.message, order: null };
-      }
-    },
+    //     order.orderStatus = "DELIVERED";
+    //     order.deliveryStatus = "DELIVERED";
+    //     await order.save();
+
+    //     return {
+    //       success: true,
+    //       message: "Order delivered successfully",
+    //       order,
+    //     };
+    //   } catch (error) {
+    //     return { success: false, message: error.message, order: null };
+    //   }
+    // },
     cancelOrder: async (_, { orderId, subadminId, superadminId }, { user }) => {
       try {
         const order = await Order.findById(orderId);
@@ -375,46 +376,170 @@ const deliveryBoyResolvers = {
       }
     },
 
-    rejectOrderDeliveryBoy: async (_, { orderId, deliveryBoyId }) => {
+    // rejectOrderDeliveryBoy: async (_, { orderId, deliveryBoyId }) => {
+    //   try {
+    //     // 🟢 Order find karo
+    //     const order = await Order.findById(orderId);
+    //     if (!order) {
+    //       return {
+    //         success: false,
+    //         message: "Order not found",
+    //         order: null,
+    //       };
+    //     }
+
+    //     if (
+    //       !order.deliveryBoy ||
+    //       order.deliveryBoy.toString() !== deliveryBoyId
+    //     ) {
+    //       return {
+    //         success: false,
+    //         message: "This order is not assigned to this delivery boy",
+    //         order,
+    //       };
+    //     }
+
+    //     // 🟢 Reset delivery boy and status
+
+    //     order.deliveryStatus = "CANCELLED";
+    //     await order.save();
+
+    //     return {
+    //       success: true,
+    //       message: "Order cancelled by delivery boy",
+    //       order,
+    //     };
+    //   } catch (error) {
+    //     return {
+    //       success: false,
+    //       message: error.message,
+    //       order: null,
+    //     };
+    //   }
+    // },
+
+    assignOrderToDeliveryBoy: async (
+      _,
+      { orderId, deliveryBoyId },
+      { user }
+    ) => {
       try {
-        // 🟢 Order find karo
-        const order = await Order.findById(orderId);
-        if (!order) {
-          return {
-            success: false,
-            message: "Order not found",
-            order: null,
-          };
+        if (!user || user.role !== "subadmin") {
+          throw new Error("Unauthorized");
         }
 
-        if (
-          !order.deliveryBoy ||
-          order.deliveryBoy.toString() !== deliveryBoyId
-        ) {
-          return {
-            success: false,
-            message: "This order is not assigned to this delivery boy",
-            order,
-          };
-        }
+        const order = await Order.findByIdAndUpdate(
+          orderId,
+          {
+            deliveryBoy: deliveryBoyId,
+            deliveryStatus: "PENDING",
+            deliveryAssignedAt: new Date(),
+          },
+          { new: true }
+        );
 
-        // 🟢 Reset delivery boy and status
-
-        order.deliveryStatus = "CANCELLED";
-        await order.save();
+        if (!order) throw new Error("Order not found");
 
         return {
           success: true,
-          message: "Order cancelled by delivery boy",
+          message: "Delivery boy assigned successfully",
           order,
         };
-      } catch (error) {
-        return {
-          success: false,
-          message: error.message,
-          order: null,
-        };
+      } catch (err) {
+        return { success: false, message: err.message, order: null };
       }
+    },
+
+    // ✅ 2. Delivery boy accepts order
+    acceptOrderDeliveryBoy: async (_, { orderId }, { user }) => {
+      try {
+        if (!user || user.role !== "deliveryboy") {
+          throw new Error("Unauthorized");
+        }
+
+        const order = await Order.findByIdAndUpdate(
+          orderId,
+          {
+            deliveryStatus: "ACCEPTED",
+            deliveryAcceptedAt: new Date(),
+          },
+          { new: true }
+        );
+
+        return {
+          success: true,
+          message: "Order accepted",
+          order,
+        };
+      } catch (err) {
+        return { success: false, message: err.message, order: null };
+      }
+    },
+
+    // ✅ 3. Pickup order
+    pickUpOrder: async (_, { orderId }, { user }) => {
+      if (!user || user.role !== "deliveryboy") {
+        throw new Error("Unauthorized");
+      }
+      const order = await Order.findByIdAndUpdate(
+        orderId,
+        {
+          deliveryStatus: "PICKED_UP",
+          deliveryPickedAt: new Date(),
+        },
+        { new: true }
+      );
+      return { success: true, message: "Order picked up", order };
+    },
+
+    // ✅ 4. Out for delivery
+    outForDelivery: async (_, { orderId }, { user }) => {
+      if (!user || user.role !== "deliveryboy") {
+        throw new Error("Unauthorized");
+      }
+      const order = await Order.findByIdAndUpdate(
+        orderId,
+        {
+          deliveryStatus: "OUT_FOR_DELIVERY",
+          deliveryOutForDeliveryAt: new Date(),
+        },
+        { new: true }
+      );
+      return { success: true, message: "Order is out for delivery", order };
+    },
+
+    // ✅ 5. Deliver order
+    deliverOrder: async (_, { orderId, earning }, { user }) => {
+      if (!user || user.role !== "deliveryboy") {
+        throw new Error("Unauthorized");
+      }
+      const order = await Order.findByIdAndUpdate(
+        orderId,
+        {
+          deliveryStatus: "DELIVERED",
+          deliveryDeliveredAt: new Date(),
+          deliveryEarnings: earning || 0,
+        },
+        { new: true }
+      );
+      return { success: true, message: "Order delivered", order };
+    },
+
+    // ✅ 6. Cancel/Reject order
+    rejectOrderDeliveryBoy: async (_, { orderId, reason }, { user }) => {
+      if (!user || user.role !== "deliveryboy") {
+        throw new Error("Unauthorized");
+      }
+      const order = await Order.findByIdAndUpdate(
+        orderId,
+        {
+          deliveryStatus: "CANCELLED",
+          deliveryCancelledAt: new Date(),
+          deliveryNotes: reason,
+        },
+        { new: true }
+      );
+      return { success: true, message: "Order cancelled", order };
     },
   },
 };

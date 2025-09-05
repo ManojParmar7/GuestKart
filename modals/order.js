@@ -8,10 +8,10 @@ const orderItemSchema = new Schema({
   discount: Number,
   discountType: String,
 
-  // ✅ New field for total option price
+  // ✅ total option price
   totalOptionPrice: { type: Number, default: 0 },
 
-  // ✅ New field for selected options
+  // ✅ selected options
   selectedOptions: {
     color: {
       _id: { type: mongoose.Schema.Types.ObjectId },
@@ -70,24 +70,40 @@ const orderSchema = new Schema(
       enum: ["PENDING", "PAID", "FAILED", "REFUNDED"],
       default: "PENDING",
     },
+
+    // Delivery
     deliveryBoy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
     },
-
     deliveryStatus: {
       type: String,
       enum: [
-        "PENDING",
-        "ACCEPTED",
-        "PICKED_UP",
-        "OUT_FOR_DELIVERY",
-        "DELIVERED",
-        "CANCELLED",
+        "PENDING", // assigned but not accepted
+        "ACCEPTED", // delivery boy accepted
+        "PICKED_UP", // pickup from store
+        "OUT_FOR_DELIVERY", // en route
+        "DELIVERED", // completed
+        "CANCELLED", // cancelled
       ],
       default: "PENDING",
     },
+
+    // ✅ Delivery process timestamps
+    deliveryAssignedAt: Date,
+    deliveryAcceptedAt: Date,
+    deliveryPickedAt: Date,
+    deliveryOutForDeliveryAt: Date,
+    deliveryDeliveredAt: Date,
+    deliveryCancelledAt: Date,
+    deliveryCharge: { type: Number, default: 0 }, // customer से लिया जाने वाला charge
+
+    // ✅ Delivery extra info
+    deliveryEarnings: { type: Number, default: 0 }, // earning for this order
+    deliveryRating: { type: Number, min: 1, max: 5 }, // customer rating
+    deliveryNotes: String, // cancel reason / notes
+
     orderStatus: {
       type: String,
       enum: [
@@ -109,6 +125,7 @@ const orderSchema = new Schema(
       ],
       default: "PLACED",
     },
+
     createdBy: {
       name: { type: String, required: true },
       role: { type: String, required: true },

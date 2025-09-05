@@ -5,6 +5,7 @@ const Discount = require("../../modals/discount");
 const User = require("../../modals/User");
 const stripe = require("../../stripe/stripe");
 const Coupon = require("../../modals/coupon");
+const mongoose = require("mongoose");
 
 const getsubadminIds = async (adminId) => {
   console.log("adminId: ", adminId);
@@ -109,10 +110,10 @@ module.exports = {
     //     let productDiscountAmount = 0;
     //     let couponDiscountAmount = 0;
     //     let appliedCouponId = null;
-    //     let totalOptionPrice = 0;
     //     const orderItems = [];
+    //     let totalOptionPrice = 0;
 
-    //     // ✅ Product level discount
+    //     // ✅ Product + Options Price
     //     for (const item of cart.items) {
     //       const product = await Product.findById(item.productId);
     //       if (!product) continue;
@@ -130,10 +131,13 @@ module.exports = {
     //             : discount.value;
     //       }
 
+    //       // 👇 Product base price
     //       total += product.price * item.quantity;
+
+    //       // 👇 Options price (per item bhi multiply hoga)
+    //       totalOptionPrice += (item?.totalOptionPrice || 0) * item.quantity;
+
     //       productDiscountAmount += productDiscount * item.quantity;
-    //       totalOptionPrice +=
-    //         (item.selectedOptions?.totalOptionPrice || 0) * item.quantity; // ✅ (NEW) options price bhi add kiya
 
     //       // stock check
     //       if (product.stock < item.quantity) {
@@ -147,12 +151,15 @@ module.exports = {
     //       product.stock -= item.quantity;
     //       await product.save();
 
+    //       // ✅ Push product with selectedOptions
     //       orderItems.push({
     //         productId: product._id,
     //         quantity: item.quantity,
     //         price: product.price,
     //         discountType: discount?.type || null,
     //         discount: productDiscount,
+    //         totalOptionPrice: item?.totalOptionPrice,
+    //         selectedOptions: item.selectedOptions || {}, // 👈 FULL selectedOptions save
     //       });
     //     }
 
@@ -176,7 +183,8 @@ module.exports = {
     //             ) {
     //               let cDiscount =
     //                 couponDoc.type === "percentage"
-    //                   ? ((total - productDiscountAmount) * couponDoc.value) /
+    //                   ? ((total + totalOptionPrice - productDiscountAmount) *
+    //                       couponDoc.value) /
     //                     100
     //                   : couponDoc.value;
 
@@ -203,9 +211,12 @@ module.exports = {
     //       }
     //     }
 
-    //     // ✅ Final Amount
+    //     // ✅ Final Amount (include options)
     //     const finalAmount =
-    //       total - (productDiscountAmount || 0) - (couponDiscountAmount || 0);
+    //       total +
+    //       totalOptionPrice -
+    //       (productDiscountAmount || 0) -
+    //       (couponDiscountAmount || 0);
 
     //     let paymentStatus = "PENDING";
     //     let orderStatus = "PLACED";
@@ -237,12 +248,12 @@ module.exports = {
     //       subadminId: cart?.subadminId,
     //       superadminId: cart?.superadminId,
     //       items: orderItems,
-    //       totalAmount: total,
+    //       totalAmount: total + totalOptionPrice, // 👈 include options here also
     //       discountAmount: productDiscountAmount + couponDiscountAmount,
     //       finalAmount,
     //       couponCode: couponCode || null,
     //       couponId: appliedCouponId,
-    //       paymentMethod, // 👈 SAVE
+    //       paymentMethod,
     //       paymentStatus,
     //       orderStatus,
     //       stripePaymentIntentId,
@@ -313,8 +324,7 @@ module.exports = {
           total += product.price * item.quantity;
 
           // 👇 Options price (per item bhi multiply hoga)
-          totalOptionPrice +=
-            (item.selectedOptions?.totalOptionPrice || 0) * item.quantity;
+          totalOptionPrice += (item?.totalOptionPrice || 0) * item.quantity;
 
           productDiscountAmount += productDiscount * item.quantity;
 
@@ -337,7 +347,8 @@ module.exports = {
             price: product.price,
             discountType: discount?.type || null,
             discount: productDiscount,
-            selectedOptions: item.selectedOptions || {}, // 👈 FULL selectedOptions save
+            totalOptionPrice: item?.totalOptionPrice,
+            selectedOptions: item.selectedOptions || {},
           });
         }
 
@@ -389,10 +400,25 @@ module.exports = {
           }
         }
 
-        // ✅ Final Amount (include options)
+        // ✅ Delivery Charge Calculation (product price % based)
+        function calculateDeliveryCharge(amount) {
+          if (amount < 500) {
+            return 50; // flat charge for small orders
+          } else if (amount >= 500 && amount <= 2000) {
+            const percentageCharge = amount * 0.08; // 8%
+            return Math.min(percentageCharge, 100); // capped at 100
+          } else {
+            return 0; // free delivery for big orders
+          }
+        }
+
+        const deliveryCharge = calculateDeliveryCharge(total);
+
+        // ✅ Final Amount (include options + delivery + minus discounts)
         const finalAmount =
           total +
-          totalOptionPrice -
+          totalOptionPrice +
+          deliveryCharge -
           (productDiscountAmount || 0) -
           (couponDiscountAmount || 0);
 
@@ -415,7 +441,7 @@ module.exports = {
           orderStatus = "PLACED";
         } else if (paymentMethod === "COD") {
           paymentStatus = "PENDING";
-          orderStatus = "PLACED"; // COD direct confirm
+          orderStatus = "PLACED";
         }
 
         const user = await User.findById(cart?.subadminId).populate("role");
@@ -426,7 +452,7 @@ module.exports = {
           subadminId: cart?.subadminId,
           superadminId: cart?.superadminId,
           items: orderItems,
-          totalAmount: total + totalOptionPrice, // 👈 include options here also
+          totalAmount: total + totalOptionPrice + deliveryCharge, // include delivery here
           discountAmount: productDiscountAmount + couponDiscountAmount,
           finalAmount,
           couponCode: couponCode || null,
@@ -437,6 +463,7 @@ module.exports = {
           stripePaymentIntentId,
           clientSecret,
           contactInfo,
+          deliveryCharge, // 👈 new field save
           createdBy: {
             name: user?.name || null,
             role: user?.role?.name || null,
@@ -459,6 +486,29 @@ module.exports = {
       } catch (error) {
         console.error("Order place error:", error);
         return { success: false, message: error.message, order: null };
+      }
+    },
+
+    deleteOrder: async (_, { orderId }) => {
+      try {
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+          return { success: false, message: "Invalid orderId", order: null };
+        }
+
+        const order = await Order.findByIdAndDelete(orderId);
+
+        if (!order) {
+          return { success: false, message: "Order not found", order: null };
+        }
+
+        return {
+          success: true,
+          message: "Order deleted successfully",
+          order,
+        };
+      } catch (err) {
+        console.error("deleteOrder error:", err);
+        return { success: false, message: err.message, order: null };
       }
     },
   },
