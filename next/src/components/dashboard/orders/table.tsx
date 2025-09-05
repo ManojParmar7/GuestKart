@@ -44,9 +44,9 @@ import { TrashIcon } from "@phosphor-icons/react/dist/ssr/Trash";
 import { authClient } from "@/lib/auth/client";
 
 // eslint-disable-next-line import/namespace
-import { deleteBanner, GetUsersBySuperadmin } from "../../../app/query-common";
+import { GetUsersBySuperadmin } from "../../../app/query-common";
 import TableSkeletonLoader from "../loader/table-skeleton-loader";
-import { acceptOrder, assignDeliveryBoy, cancelOrder, getAllOrders } from "./commonquery";
+import { acceptOrder, assignDeliveryBoy, cancelOrder, deleteOrder, getAllOrders } from "./commonquery";
 
 function applyPagination<T>(rows: T[] = [], page: number, rowsPerPage: number): T[] {
 	return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -54,11 +54,9 @@ function applyPagination<T>(rows: T[] = [], page: number, rowsPerPage: number): 
 
 type OrdersTableProps = {
 	search: string;
-	setPermissionsData: any;
-	setUserData: any;
 };
 
-export function TablePage({ search, setUserData }: OrdersTableProps): React.JSX.Element {
+export function TablePage({ search }: OrdersTableProps): React.JSX.Element {
 	const loginUser = localStorage.getItem("login_id");
 	const [page, setPage] = React.useState(0);
 	const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -148,20 +146,20 @@ export function TablePage({ search, setUserData }: OrdersTableProps): React.JSX.
 	React.useEffect(() => {
 		refetchDeliveryBoy(deliveryBoyVariables);
 	}, [search, page, rowsPerPage]);
-	const [deleteOrder] = useMutation(deleteBanner, {
+	const [deleteOrders] = useMutation(deleteOrder, {
 		refetchQueries: [{ query: getAllOrders }],
 		onCompleted: (data) => {
-			if (data.deleteBanner.success) {
+			if (data.deleteOrder.success) {
 				setSnackbar({
 					open: true,
-					message: data.deleteBanner.message || "Order deleted successfully!",
+					message: data.deleteOrder.message || "Order deleted successfully!",
 					severity: "success",
 				});
 				refetch(variables);
 			} else {
 				setSnackbar({
 					open: true,
-					message: data.deleteBanner.message || "Failed to delete order",
+					message: data.deleteOrder.message || "Failed to delete order",
 					severity: "error",
 				});
 			}
@@ -206,9 +204,9 @@ export function TablePage({ search, setUserData }: OrdersTableProps): React.JSX.
 		setDeletingOrderId(deleteDialog.orderId);
 
 		try {
-			await deleteOrder({
+			await deleteOrders({
 				variables: {
-					deleteProductId: deleteDialog.orderId,
+					orderId: deleteDialog.orderId,
 				},
 			});
 		} catch (error) {
@@ -409,70 +407,87 @@ export function TablePage({ search, setUserData }: OrdersTableProps): React.JSX.
 																			</Typography>
 																		</Box>
 																	</Stack>
-
 																	<Divider sx={{ my: 1 }} />
-
+																	{/* Sizes */}
+																	{/* Sizes */}
 																	{/* Sizes */}
 																	{item?.selectedOptions?.size && (
 																		<Box mb={1}>
 																			<Typography variant="body2" fontWeight="bold">
 																				Sizes:
 																			</Typography>
-																			<Stack direction="row" spacing={1} flexWrap="wrap">
-																				{/* {item?.selectedOptions?.size.map((s: any) => ( */}
-																				<Chip
-																					key={item?.selectedOptions?.size?.id}
-																					size="small"
-																					label={item?.selectedOptions?.size?.name}
-																				/>
-																				{/* ))} */}
+																			<Stack direction="column" spacing={0.5}>
+																				<Box display="flex" justifyContent="space-between">
+																					<Typography variant="body2">{item.selectedOptions.size.name}</Typography>
+																					<Typography variant="body2" color="text.secondary">
+																						₹{item.selectedOptions.size.price}
+																					</Typography>
+																				</Box>
 																			</Stack>
 																		</Box>
 																	)}
-
 																	{/* Colors */}
 																	{item?.selectedOptions?.color && (
 																		<Box mb={1}>
 																			<Typography variant="body2" fontWeight="bold">
 																				Colors:
 																			</Typography>
-																			<Stack direction="row" spacing={1} flexWrap="wrap">
-																				<Chip
-																					key={item?.selectedOptions?.color?.id}
-																					size="small"
-																					label={item?.selectedOptions?.color?.name}
-																				/>
+																			<Stack direction="column" spacing={0.5}>
+																				<Box display="flex" justifyContent="space-between">
+																					<Typography variant="body2">{item.selectedOptions.color.name}</Typography>
+																					<Typography variant="body2" color="text.secondary">
+																						₹{item.selectedOptions.color.price}
+																					</Typography>
+																				</Box>
 																			</Stack>
 																		</Box>
 																	)}
-
 																	{/* Extras */}
 																	{item?.selectedOptions?.extras?.length > 0 && (
 																		<Box mb={1}>
 																			<Typography variant="body2" fontWeight="bold">
 																				Extras:
 																			</Typography>
-																			<Stack direction="row" spacing={1} flexWrap="wrap">
-																				{item.selectedOptions?.extras.map((ex: any) => (
-																					<Chip key={ex.id} size="small" label={ex.name} />
+																			<Stack direction="column" spacing={0.5}>
+																				{item.selectedOptions.extras.map((ex: any) => (
+																					<Box key={ex._id} display="flex" justifyContent="space-between">
+																						<Typography variant="body2">{ex.name}</Typography>
+																						<Typography variant="body2" color="text.secondary">
+																							₹{ex.price}
+																						</Typography>
+																					</Box>
 																				))}
 																			</Stack>
 																		</Box>
 																	)}
-
+																	{item?.totalOptionPrice && (
+																		<>
+																			{" "}
+																			<Divider sx={{ my: 1 }} />
+																			<Typography variant="body2" color="bold" textAlign="right">
+																				<strong>Total Add-ons price:</strong> ₹{item?.totalOptionPrice}
+																			</Typography>
+																		</>
+																	)}
 																	{/* Stock & Discount */}
-
 																	{item.product?.discountPrice && (
 																		<Typography variant="body2" color="error">
 																			<strong>Discount Price:</strong> ₹{item.product?.discountPrice}
 																		</Typography>
 																	)}
 
+																	{row?.deliveryCharge && (
+																		<>
+																			{" "}
+																			<Divider sx={{ my: 1 }} />
+																			<Typography variant="body2" color="error" textAlign="right">
+																				<strong>Delivery Charges:</strong>- ₹{row?.deliveryCharge}
+																			</Typography>
+																		</>
+																	)}
 																	<Divider sx={{ my: 1 }} />
-
-																	{/* Final Amount */}
 																	<Typography variant="subtitle1" fontWeight="bold" textAlign="right">
-																		Final Amount: ₹{item.quantity * item.product?.price}
+																		Final Amount: ₹{row?.totalAmount}
 																	</Typography>
 																</Paper>
 															}

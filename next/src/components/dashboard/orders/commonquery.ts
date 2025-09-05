@@ -53,6 +53,7 @@ query GetAllOrders($page: Int, $limit: Int, $search: String, $subadminId: ID, $s
           }
         }
       }
+
       totalAmount
       discountAmount
       finalAmount
@@ -65,6 +66,7 @@ query GetAllOrders($page: Int, $limit: Int, $search: String, $subadminId: ID, $s
         phone
         address
       }
+      deliveryCharge
       deliveryStatus
       deliveryBoy {
         id
@@ -131,6 +133,20 @@ mutation CancelOrder($orderId: ID!, $subadminId: ID, $superadminId: ID) {
     order {
       id
       
+    }
+    clientSecret
+  }
+}
+`;
+
+export const deleteOrder = gql`
+mutation DeleteOrder($orderId: ID!) {
+  deleteOrder(orderId: $orderId) {
+    success
+    message
+    order {
+      id
+      sessionId
     }
     clientSecret
   }

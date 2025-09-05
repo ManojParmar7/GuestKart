@@ -34,6 +34,7 @@ const client = new ApolloClient({
 	link: authLink.concat(uploadLink),
 	cache: new InMemoryCache(),
 });
+<script src="https://cdn.tailwindcss.com"></script>;
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 	return (
