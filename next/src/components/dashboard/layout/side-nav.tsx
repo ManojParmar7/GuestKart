@@ -101,8 +101,9 @@ export function SideNav(): React.JSX.Element {
 				href: paths.dashboard.orders,
 				icon: "orders",
 			});
+		} else if (user.role.name === "deliveryBoy") {
+			items.push({ key: "deliveryMen", title: "Delivery Men", href: paths.deliveryMen, icon: "deliveryStaff" });
 		}
-
 		// Common items
 		items.push(
 			// { key: "integrations", title: "Integrations", href: paths.dashboard.integrations, icon: "plugs-connected" },

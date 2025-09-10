@@ -51,11 +51,11 @@ export function SignInForm(): React.JSX.Element {
 
 		// emitUserUpdate();
 	}, []);
-	useEffect(() => {
-		import("../dashboard/layout/config").then((module) => {
-			setNavItems(module.navItems);
-		});
-	}, [user]);
+	// useEffect(() => {
+	// 	import("../dashboard/layout/config").then((module) => {
+	// 		setNavItems(module.navItems);
+	// 	});
+	// }, [user]);
 	const {
 		control,
 		handleSubmit,
@@ -76,11 +76,12 @@ export function SignInForm(): React.JSX.Element {
 			}
 
 			// Refresh the auth state
-			await checkSession?.();
+			const data = await checkSession?.();
+			console.log("data: ", data);
 
 			// UserProvider, for this case, will not refresh the router
 			// After refresh, GuestGuard will handle the redirect
-			router.refresh();
+			// router.refresh();
 		},
 		[checkSession, router, setError]
 	);

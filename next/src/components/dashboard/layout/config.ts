@@ -13,7 +13,7 @@ export function useNavItems(): NavItemConfig[] {
       const { data: user } = await authClient.getUser();
 
       const baseItems: NavItemConfig[] = [
-        { key: "overview", title: "Overview", href: paths.dashboard.overview, icon: "chart-pie" },
+        { key: "overview", title: "Overview", href: paths.deliveryMen, icon: "chart-pie" },
         ...(user?.role?.name === "superadmin"
           ? [{ key: "customers", title: "Sub Admins", href: paths.dashboard.customers, icon: "users" }]
           : []),

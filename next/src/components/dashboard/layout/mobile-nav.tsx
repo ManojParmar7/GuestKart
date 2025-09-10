@@ -3,6 +3,7 @@
 import * as React from "react";
 import RouterLink from "next/link";
 import { usePathname } from "next/navigation";
+import { useQuery } from "@apollo/client";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
@@ -12,21 +13,94 @@ import { CaretUpDownIcon } from "@phosphor-icons/react/dist/ssr/CaretUpDown";
 
 import type { NavItemConfig } from "@/types/nav";
 import { paths } from "@/paths";
+import { authClient } from "@/lib/auth/client";
 import { isNavItemActive } from "@/lib/is-nav-item-active";
 import { Logo } from "@/components/core/logo";
 
 import { GetPermissions } from "../../../app/query-common";
-import { navItems } from "./config";
 import { navIcons } from "./nav-icons";
 
 export interface MobileNavProps {
 	onClose?: () => void;
 	open?: boolean;
-	items?: NavItemConfig[];
 }
 
 export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element {
 	const pathname = usePathname();
+	const [user, setUser] = React.useState<any>(null);
+	const [navItems, setNavItems] = React.useState<NavItemConfig[]>([]);
+
+	// 1️⃣ load user
+	React.useEffect(() => {
+		(async () => {
+			const { data } = await authClient.getUser();
+			setUser(data);
+		})();
+	}, []);
+
+	// 2️⃣ get permissions
+	const { data } = useQuery(GetPermissions, {
+		variables: {
+			subadminId: user?.id,
+			superadminId: user?.superadmin_id,
+		},
+		fetchPolicy: "network-only",
+		skip: !user,
+	});
+
+	// 3️⃣ build nav items
+	React.useEffect(() => {
+		if (!user) return;
+		const items: NavItemConfig[] = [
+			{ key: "overview", title: "Overview", href: paths.dashboard.overview, icon: "chart-pie" },
+		];
+
+		if (user.role.name === "superadmin") {
+			items.push(
+				{ key: "customers", title: "Sub Admins", href: paths.dashboard.customers, icon: "users" },
+				{ key: "orders", title: "Orders", href: paths.dashboard.orders, icon: "orders" },
+				{ key: "products", title: "Products", href: paths.dashboard.products, icon: "product" },
+				{ key: "banner", title: "Banners", href: paths.dashboard.banner, icon: "image-square" },
+				{ key: "categories", title: "Categories", href: paths.dashboard.categories, icon: "squares-four" },
+				{ key: "roles", title: "Roles", href: paths.dashboard.roles, icon: "roles" },
+				{ key: "size", title: "Size", href: paths.dashboard.size, icon: "size" },
+				{ key: "color", title: "Color", href: paths.dashboard.color, icon: "color" },
+				{ key: "extra", title: "Accessories", href: paths.dashboard.extra, icon: "accessories" },
+				{
+					key: "deliveryStaff",
+					title: "Delivery Staff",
+					href: paths.dashboard.deliveryStaff,
+					icon: "deliveryStaff",
+				}
+			);
+		} else if (data?.getPermission?.modules) {
+			const modules = data.getPermission.modules;
+
+			if (modules.products?.view)
+				items.push({ key: "products", title: "Products", href: paths.dashboard.products, icon: "product" });
+			if (modules.categories?.view)
+				items.push({ key: "categories", title: "Categories", href: paths.dashboard.categories, icon: "squares-four" });
+			if (modules?.banners?.view)
+				items.push({ key: "banner", title: "Banners", href: paths.dashboard.banner, icon: "image-square" });
+			items.push(
+				{ key: "size", title: "Size", href: paths.dashboard.size, icon: "size" },
+				{ key: "color", title: "Color", href: paths.dashboard.color, icon: "color" },
+				{ key: "extra", title: "Accessories", href: paths.dashboard.extra, icon: "accessories" },
+				{
+					key: "deliveryStaff",
+					title: "Delivery Staff",
+					href: paths.dashboard.deliveryStaff,
+					icon: "deliveryStaff",
+				},
+				{ key: "orders", title: "Orders", href: paths.dashboard.orders, icon: "orders" }
+			);
+		} else if (user.role.name === "deliveryBoy") {
+			items.push({ key: "deliveryMen", title: "My Deliveries", href: paths.deliveryMen, icon: "deliveryStaff" });
+		}
+
+		items.push({ key: "account", title: "Account", href: paths.dashboard.account, icon: "user" });
+		setNavItems(items);
+	}, [user, data]);
 
 	return (
 		<Drawer
@@ -76,7 +150,7 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
 							Workspace
 						</Typography>
 						<Typography color="inherit" variant="subtitle1">
-							Devias
+							GuestKart
 						</Typography>
 					</Box>
 					<CaretUpDownIcon />
@@ -87,48 +161,12 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
 				{renderNavItems({ pathname, items: navItems })}
 			</Box>
 			<Divider sx={{ borderColor: "var(--mui-palette-neutral-700)" }} />
-			{/* <Stack spacing={2} sx={{ p: '12px' }}>
-        <div>
-          <Typography color="var(--mui-palette-neutral-100)" variant="subtitle2">
-            Need more features?
-          </Typography>
-          <Typography color="var(--mui-palette-neutral-400)" variant="body2">
-            Check out our Pro solution template.
-          </Typography>
-        </div>
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Box
-            component="img"
-            alt="Pro version"
-            src="/assets/devias-kit-pro.png"
-            sx={{ height: 'auto', width: '160px' }}
-          />
-        </Box>
-        <Button
-          component="a"
-          endIcon={<ArrowSquareUpRightIcon fontSize="var(--icon-fontSize-md)" />}
-          fullWidth
-          href="https://material-kit-pro-react.devias.io/"
-          sx={{ mt: 2 }}
-          target="_blank"
-          variant="contained"
-        >
-          Pro version
-        </Button>
-      </Stack> */}
 		</Drawer>
 	);
 }
 
 function renderNavItems({ items = [], pathname }: { items?: NavItemConfig[]; pathname: string }): React.JSX.Element {
-	const children = items.reduce((acc: React.ReactNode[], curr: NavItemConfig): React.ReactNode[] => {
-		const { key, ...item } = curr;
-
-		acc.push(<NavItem key={key} pathname={pathname} {...item} />);
-
-		return acc;
-	}, []);
-
+	const children = items.map(({ key, ...rest }) => <NavItem key={key} pathname={pathname} {...rest} />);
 	return (
 		<Stack component="ul" spacing={1} sx={{ listStyle: "none", m: 0, p: 0 }}>
 			{children}

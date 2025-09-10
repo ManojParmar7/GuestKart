@@ -17,6 +17,8 @@ export const paths = {
           extra: '/dashboard/accessories',
             deliveryStaff: '/dashboard/deliveryStaff',
                 orders: '/dashboard/orders',
+                               
+
 
 
 
@@ -27,5 +29,6 @@ export const paths = {
 
 
   },
+   deliveryMen: '/deliveryMen',
   errors: { notFound: '/errors/not-found' },
 } as const;
