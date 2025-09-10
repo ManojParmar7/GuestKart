@@ -96,7 +96,14 @@ const typeDefs = gql`
     DELIVERED # Successfully delivered
     CANCELLED # Cancelled by admin/user
   }
-
+  type DeliveryBoyStats {
+    todaysDeliveries: Int
+    activeOrders: Int
+    averageRating: Float
+    todaysEarnings: Float
+    totalCompletedOrders: Int
+    totalCancelledOrders: Int
+  }
   type Order {
     id: ID!
     product: Product
@@ -121,6 +128,7 @@ const typeDefs = gql`
     success: Boolean!
     message: String!
     orders: [Order]
+    stats: DeliveryBoyStats
   }
 
   # ================== MUTATIONS ==================

@@ -15,23 +15,95 @@ const deliveryBoyResolvers = {
 
   Query: {
     // ✅ Get all orders assigned to a delivery boy
-    getOrdersForDeliveryBoy: async (_, { deliveryBoyId }) => {
+    // getOrdersForDeliveryBoy: async (_, { deliveryBoyId }) => {
+    //   try {
+    //     const orders = await Order.find({ deliveryBoy: deliveryBoyId })
+    //       .populate("deliveryBoy")
+    //       .populate("items.productId");
+
+    //     return {
+    //       success: true,
+    //       message: "Orders fetched successfully",
+    //       orders,
+    //     };
+    //   } catch (error) {
+    //     return {
+    //       success: false,
+    //       message: error.message,
+    //       orders: [],
+    //     };
+    //   }
+    // },
+    getDeliveryBoyStats: async (_, { deliveryBoyId }) => {
       try {
-        const orders = await Order.find({ deliveryBoy: deliveryBoyId })
-          .populate("deliveryBoy")
-          .populate("items.productId");
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+
+        // Aaj ke orders
+        const todaysDeliveries = await Order.countDocuments({
+          deliveryBoy: deliveryBoyId,
+          status: "DELIVERED",
+          updatedAt: { $gte: todayStart, $lte: todayEnd },
+        });
+
+        // Active orders
+        const activeOrders = await Order.countDocuments({
+          deliveryBoy: deliveryBoyId,
+          status: {
+            $in: [
+              "PLACED",
+              "CONFIRMED",
+              "APPROVED",
+              "PACKED",
+              "OUT_FOR_DELIVERY",
+            ],
+          },
+        });
+
+        // Average rating (maan lo rating field hai)
+        const ratings = await Rating.find({ deliveryBoy: deliveryBoyId });
+        const averageRating =
+          ratings.length > 0
+            ? ratings.reduce((acc, r) => acc + r.score, 0) / ratings.length
+            : 0;
+
+        // Aaj ki earnings (maan lo earning/order me earning field hai)
+        const todaysEarningsAgg = await Order.aggregate([
+          {
+            $match: {
+              deliveryBoy: deliveryBoyId,
+              status: "DELIVERED",
+              updatedAt: { $gte: todayStart, $lte: todayEnd },
+            },
+          },
+          { $group: { _id: null, total: { $sum: "$earning" } } },
+        ]);
+        const todaysEarnings = todaysEarningsAgg[0]?.total || 0;
+
+        // ✅ Ab tak total completed orders
+        const totalCompletedOrders = await Order.countDocuments({
+          deliveryBoy: deliveryBoyId,
+          status: "DELIVERED",
+        });
+
+        // ✅ Ab tak total cancelled orders
+        const totalCancelledOrders = await Order.countDocuments({
+          deliveryBoy: deliveryBoyId,
+          status: "CANCELLED",
+        });
 
         return {
-          success: true,
-          message: "Orders fetched successfully",
-          orders,
+          todaysDeliveries,
+          activeOrders,
+          averageRating,
+          todaysEarnings,
+          totalCompletedOrders,
+          totalCancelledOrders,
         };
       } catch (error) {
-        return {
-          success: false,
-          message: error.message,
-          orders: [],
-        };
+        throw new Error(error.message);
       }
     },
   },
