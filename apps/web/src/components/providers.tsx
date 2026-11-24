@@ -4,7 +4,7 @@ import { ThemeProvider, createTheme, Snackbar, Alert } from '@mui/material';
 import type { CartLine, Product } from '@/lib/types';
 
 const theme = createTheme({
-  palette: { primary: { main: '#164c3b' }, secondary: { main: '#d1ee89' } },
+  palette: { primary: { main: '#1769aa' }, secondary: { main: '#f59e0b' } },
   typography: {
     fontFamily: 'Arial, Helvetica, sans-serif',
     button: { textTransform: 'none', fontWeight: 700 },

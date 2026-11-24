@@ -1,12 +1,15 @@
 @import 'tailwindcss';
 
 :root {
-  --ink: #173d31;
-  --green: #164c3b;
-  --muted: #717972;
-  --line: #e6eae6;
-  --mint: #edf4ed;
-  --lime: #d5eb9a;
+  --ink: #172337;
+  --green: #1769aa;
+  --brand-blue: #1769aa;
+  --brand-blue-dark: #11558d;
+  --brand-orange: #f59e0b;
+  --muted: #697586;
+  --line: #e6eaf0;
+  --mint: #edf5fc;
+  --lime: #fff2dc;
 }
 * {
   box-sizing: border-box;
@@ -53,7 +56,7 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 3px solid #7ab9a1;
+  outline: 3px solid #79baf1;
   outline-offset: 4px;
 }
 img {
@@ -109,7 +112,7 @@ small {
 }
 .announcement span {
   margin-left: 20px;
-  color: #d2e5cf;
+  color: #ffe0ad;
 }
 .site-header {
   background: #fffffff5;
@@ -145,7 +148,7 @@ small {
   margin-right: 3px;
 }
 .brand-dot {
-  color: #77a57b;
+  color: var(--brand-orange);
   margin-left: -6px;
 }
 .main-nav,
@@ -160,7 +163,7 @@ small {
 }
 .main-nav a:hover,
 .admin-link:hover {
-  color: #0c7b4c;
+  color: var(--brand-blue);
 }
 .header-actions {
   gap: 22px;
@@ -176,7 +179,7 @@ small {
   font-size: 14px;
 }
 .bag-button b {
-  background: #eef3eb;
+  background: #edf4fb;
   border-radius: 50%;
   min-width: 25px;
   text-align: center;
@@ -214,7 +217,7 @@ small {
 .hero-copy .eyebrow span {
   width: 6px;
   height: 6px;
-  background: #7aa87a;
+  background: var(--brand-orange);
   border-radius: 50%;
 }
 .hero h1 {
@@ -227,7 +230,7 @@ small {
 .hero h1 em {
   font-family: Georgia, 'Times New Roman', serif;
   font-weight: 400;
-  color: #659273;
+  color: var(--brand-blue);
   letter-spacing: -0.055em;
 }
 .hero-copy > p {
@@ -247,7 +250,7 @@ small {
 }
 .hero-art {
   min-height: 430px;
-  background: #e9f1e4;
+  background: #e8f2fa;
   border-radius: 22px;
   position: relative;
   overflow: hidden;
@@ -268,7 +271,7 @@ small {
   width: 380px;
   height: 380px;
   border-radius: 50%;
-  border: 1px solid #d3dfcb;
+  border: 1px solid #cddfed;
   left: 12%;
   top: 9%;
   z-index: -1;
@@ -278,7 +281,7 @@ small {
   position: absolute;
   inset: 20px;
   border-radius: 50%;
-  border: 1px solid #d3dfcb;
+  border: 1px solid #cddfed;
 }
 .hero-sticker {
   position: absolute;
@@ -325,7 +328,7 @@ small {
   line-height: 1.35;
   transform: rotate(8deg);
   font-family: Georgia, serif;
-  color: #47734f;
+  color: #98610c;
 }
 .trust-bar {
   display: grid;
@@ -374,7 +377,7 @@ small {
   margin-bottom: 28px;
 }
 .section-title .eyebrow {
-  color: #7a8d7c;
+  color: #54718f;
   margin-bottom: 9px;
 }
 .section-title h2 {
@@ -387,12 +390,12 @@ small {
   margin-bottom: 4px;
 }
 .demo-banner {
-  background: #f2f7ee;
-  border: 1px solid #dbe8d2;
+  background: #fff7e9;
+  border: 1px solid #f2deb9;
   padding: 10px 15px;
   border-radius: 8px;
   font-size: 13px;
-  color: #46613f;
+  color: #795519;
   margin-bottom: 24px;
 }
 .catalog-tools {
@@ -416,9 +419,9 @@ small {
   white-space: nowrap;
 }
 .category-tabs button.active {
-  background: var(--green);
+  background: var(--brand-blue);
   color: #fff;
-  border-color: var(--green);
+  border-color: var(--brand-blue);
 }
 .search-box {
   display: flex;
@@ -513,7 +516,7 @@ select {
   background: #ffffffeb;
   font-size: 10px;
   font-weight: 700;
-  color: #53744f;
+  color: #965d08;
   pointer-events: none;
 }
 .quick-add {
@@ -522,7 +525,7 @@ select {
   bottom: 12px;
   border: 1px solid #ffffff80;
   background: #fff;
-  color: var(--green);
+  color: var(--brand-blue);
   border-radius: 50%;
   width: 36px;
   height: 36px;
@@ -531,7 +534,7 @@ select {
   box-shadow: 0 2px 8px #173d3108;
 }
 .quick-add:hover {
-  background: var(--green);
+  background: var(--brand-blue);
   color: #fff;
 }
 .sold-out {
@@ -573,7 +576,7 @@ select {
   font-size: 12px;
 }
 .guest-story {
-  background: #edf4e9;
+  background: #edf5fc;
   border-radius: 14px;
   display: flex;
   gap: 34px;
@@ -583,13 +586,13 @@ select {
 }
 .guest-story-icon {
   padding: 18px;
-  border: 1px solid #d4e2cd;
+  border: 1px solid #d2e2f0;
   border-radius: 22px;
   transform: rotate(-8deg);
   margin-left: 10px;
 }
 .guest-story .eyebrow {
-  color: #7d9179;
+  color: #587692;
   font-size: 10px;
 }
 .guest-story h2 {
@@ -603,7 +606,7 @@ select {
   margin: 0;
 }
 .text-link {
-  color: var(--green);
+  color: var(--brand-blue);
   font-size: 14px;
   font-weight: 600;
   text-decoration: underline;
