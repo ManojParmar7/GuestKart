@@ -1,0 +1,107 @@
+'use client';
+import Link from 'next/link';
+import { Button } from '@mui/material';
+import { Minus, Plus, Trash2, ShoppingBag, ShieldCheck } from 'lucide-react';
+import { useCart } from '@/components/providers';
+import { money } from '@/lib/types';
+export default function CartPage() {
+  const { lines, quantity, hydrated } = useCart();
+  const subtotal = lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
+  const shipping = subtotal >= 249900 ? 0 : 9900;
+  return (
+    <main id="main" className="container page-space">
+      <div className="eyebrow">MAKE ROOM FOR THE GOOD STUFF</div>
+      <h1 className="page-title">
+        Your shopping bag<span>.</span>
+      </h1>
+      {!hydrated ? (
+        <p>Opening your bag…</p>
+      ) : !lines.length ? (
+        <div className="empty-state">
+          <ShoppingBag size={48} />
+          <h2>Your next favorite is waiting.</h2>
+          <p>Your bag is empty. Let&apos;s find something good.</p>
+          <Button component={Link} href="/#collection" variant="contained">
+            Explore the collection
+          </Button>
+        </div>
+      ) : (
+        <div className="checkout-grid">
+          <section>
+            <div className="cart-heading">
+              {lines.length} {lines.length === 1 ? 'good find' : 'good finds'} in your bag
+            </div>
+            {lines.map(({ product, quantity: count }) => (
+              <article className="cart-line" key={product.id}>
+                <img src={product.image} alt={product.name} />
+                <div className="cart-line-content">
+                  <h3>{product.name}</h3>
+                  <p>{money(product.price)} each</p>
+                  <div className="quantity-control">
+                    <button
+                      aria-label={`Reduce ${product.name} quantity`}
+                      onClick={() => quantity(product.id, count - 1)}
+                    >
+                      <Minus size={15} />
+                    </button>
+                    <span aria-live="polite">{count}</span>
+                    <button
+                      aria-label={`Increase ${product.name} quantity`}
+                      disabled={count >= Math.min(20, product.stock)}
+                      onClick={() => quantity(product.id, count + 1)}
+                    >
+                      <Plus size={15} />
+                    </button>
+                  </div>
+                </div>
+                <div className="cart-line-end">
+                  <b>{money(product.price * count)}</b>
+                  <button
+                    className="icon-button muted"
+                    onClick={() => quantity(product.id, 0)}
+                    aria-label={`Remove ${product.name}`}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </article>
+            ))}
+            <Link href="/#collection" className="text-link">
+              Keep exploring
+            </Link>
+          </section>
+          <aside className="order-summary">
+            <h2>The little details</h2>
+            <div>
+              <span>Subtotal</span>
+              <b>{money(subtotal)}</b>
+            </div>
+            <div>
+              <span>Delivery</span>
+              <b>{shipping ? money(shipping) : 'On us'}</b>
+            </div>
+            {shipping > 0 && (
+              <p className="shipping-note">
+                You&apos;re {money(249900 - subtotal)} away from free delivery.
+              </p>
+            )}
+            <div className="summary-total">
+              <span>Total</span>
+              <b>{money(subtotal + shipping)}</b>
+            </div>
+            <p className="muted">
+              All prices include applicable taxes. Final price and availability are checked at
+              checkout.
+            </p>
+            <Button fullWidth component={Link} href="/checkout" variant="contained">
+              Checkout as a guest
+            </Button>
+            <p className="secure-note">
+              <ShieldCheck size={16} /> No account needed. Ever.
+            </p>
+          </aside>
+        </div>
+      )}
+    </main>
+  );
+}
