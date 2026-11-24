@@ -429,6 +429,9 @@ module.exports = {
 
         // ✅ Payment Flow
         if (paymentMethod === "ONLINE") {
+          if (!stripe) {
+            return { success: false, message: "Online payments are not configured. Choose cash on delivery.", order: null };
+          }
           const paymentIntent = await stripe.paymentIntents.create({
             amount: Math.round(finalAmount * 100),
             currency: "usd",

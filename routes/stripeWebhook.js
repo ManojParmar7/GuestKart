@@ -120,11 +120,10 @@
 const express = require("express");
 const router = express.Router();
 const stripe = require("../stripe/stripe");
-const Order = require("../modals/Order");
+const Order = require("../modals/order");
 const Payment = require("../modals/payment");
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-const isTestMode = true;
 
 /**
  * Order Status Flow:
@@ -141,17 +140,11 @@ router.post(
     let event;
 
     try {
-      // ✅ Handle Test & Live Mode
-      if (isTestMode) {
-        event = JSON.parse(req.body.toString());
-      } else {
-        const signature = req.headers["stripe-signature"];
-        event = stripe.webhooks.constructEvent(
-          req.body,
-          signature,
-          endpointSecret
-        );
+      if (!stripe || !endpointSecret) {
+        return res.status(503).send({ message: "Stripe webhooks are not configured" });
       }
+      const signature = req.headers["stripe-signature"];
+      event = stripe.webhooks.constructEvent(req.body, signature, endpointSecret);
 
       switch (event.type) {
         /**

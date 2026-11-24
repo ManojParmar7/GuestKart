@@ -3,6 +3,8 @@ const Schema = mongoose.Schema;
 
 const orderItemSchema = new Schema({
   productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+  name: String,
+  image: String,
   quantity: { type: Number, required: true },
   price: Number,
   discount: Number,
@@ -42,6 +44,9 @@ const contactInfoSchema = new Schema({
 
 const orderSchema = new Schema(
   {
+    orderNumber: { type: String, index: true, sparse: true },
+    idempotencyKey: { type: String, unique: true, sparse: true },
+    guestTrackingTokenHash: String,
     subadminId: { type: mongoose.Schema.Types.ObjectId, ref: "Subadmin" },
     sessionId: { type: String, default: null },
     superadminId: { type: mongoose.Schema.Types.ObjectId, ref: "Superadmin" },
@@ -137,6 +142,7 @@ const orderSchema = new Schema(
   },
   { timestamps: true }
 );
+
 
 // 👇 FIX: overwrite error se bachne ke liye
 module.exports = mongoose.models.Order || mongoose.model("Order", orderSchema);

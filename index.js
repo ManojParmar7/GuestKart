@@ -12,19 +12,15 @@ const seedData = require("./graphql/seedData/seedData");
 
 const { typeDefs, resolvers } = require("./server");
 
-const SECRET = process.env.JWT_SECRET;
+const SECRET = process.env.JWT_SECRET || "defaultSecretKey";
 
 async function startServer() {
   const app = express();
 
   // MongoDB connect
-  await mongoose
-    .connect("mongodb://127.0.0.1:27017/graphql_crud")
-    .then(async () => {
-      console.log("✅ DB connected");
-      await seedData();
-    })
-    .catch((err) => console.error("❌ DB error:", err));
+  await mongoose.connect(process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/graphql_crud");
+  console.log("✅ DB connected");
+  await seedData();
   const server = new ApolloServer({
     typeDefs,
     resolvers,
@@ -68,8 +64,9 @@ async function startServer() {
     })
   );
 
-  app.listen(8000, () =>
-    console.log("🚀 Server ready at http://localhost:8000/graphql")
+  const port = Number(process.env.PORT) || 8000;
+  app.listen(port, () =>
+    console.log(`🚀 Server ready at http://localhost:${port}/graphql`)
   );
 }
 

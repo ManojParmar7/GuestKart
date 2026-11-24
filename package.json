@@ -1,7 +1,7 @@
 {
-  "name": "todo list",
+  "name": "guestkart-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "GraphQL API for the GuestKart marketplace",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
