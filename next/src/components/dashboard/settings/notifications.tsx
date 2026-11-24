@@ -10,7 +10,7 @@ import Checkbox from "@mui/material/Checkbox";
 import Divider from "@mui/material/Divider";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/GridLegacy";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 

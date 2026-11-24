@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { updateUser } from "@/app/query-common";
 import { useMutation } from "@apollo/client";
 import { Alert, Snackbar } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/GridLegacy";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 

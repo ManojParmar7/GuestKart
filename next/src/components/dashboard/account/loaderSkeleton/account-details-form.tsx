@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Card, CardActions, CardContent, CardHeader, Divider, Grid, Skeleton } from "@mui/material";
+import { Button, Card, CardActions, CardContent, CardHeader, Divider, GridLegacy as Grid, Skeleton } from "@mui/material";
 
 export function AccountDetailsFormSkeleton(): React.JSX.Element {
 	return (

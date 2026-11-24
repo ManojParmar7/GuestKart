@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Box, Card, CardContent, Divider, Grid, Skeleton, Stack } from "@mui/material";
+import { Box, Card, CardContent, Divider, GridLegacy as Grid, Skeleton, Stack } from "@mui/material";
 
 export default function BannerUpdateSkeleton() {
 	return (

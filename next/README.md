@@ -1,33 +1,52 @@
+# GuestKart Frontend
 
-## Pages 
+GuestKart has two frontend experiences: a public guest shopping storefront and a role-based operations dashboard.
 
+## Features
 
+- Product catalogue with search, category filters, availability, and product pricing from the GraphQL API.
+- Persistent guest bag with quantity changes, remove item, delivery estimate, and cash-on-delivery checkout.
+- Checkout validates live prices and inventory on the backend before placing the order.
+- Order confirmation and private order-status refresh using the order number, email, and browser-held checkout token.
+- Existing dashboard at `/dashboard` for Super Admin, Sub Admin, and Delivery Boy accounts.
 
-## Free Figma Community File
+## Run locally
 
-- [Duplicate File](https://www.figma.com/file/b3L1Np4RYiicZAOMopHNkm/Devias-Dashboard-Design-Library-Kit)
+From this directory:
 
-## Upgrade to PRO Version
+```bash
+npm install --legacy-peer-deps
+```
 
-We also have a pro version of this product which bundles even more pages and components if you want
-to save more time and design efforts :)
+Create `\.env\.local` with:
 
-| Free Version (this one)  | [GuestKart Pro]              |
-| ------------------------ | :--------------------------------------------------------------------------- |
-| **8** Pages              | **80+** Pages                                                                |
-| ✔ Custom Authentication  | ✔ Authentication with **Amplify**, **Auth0**, **Firebase** and **Supabase**  |
-| -                        | ✔ Vite Version                                                               |
-| -                        | ✔ Dark Mode Support                                                          |
-| -                        | ✔ Complete Users Flows                                                       |
-| -                        | ✔ Premium Technical Support                                                  |
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-## Quick start 
-- Make sure your Node.js and npm versions are up to date
-- Install dependencies: `npm install` or `yarn`
-- Start the server: `npm run dev` or `yarn dev`
-- Open browser: `http://localhost:3000`
+Start the backend first, then run:
 
-## File Structure
+```bash
+npm run dev
+```
 
-Within the download you'll find the following directories and files:
+Open `http://localhost:3000` for the storefront. The operations dashboard remains at `http://localhost:3000/dashboard`.
 
+## Demo roles and logins
+
+These accounts are seeded by the backend for local development. Change or remove them before using a public deployment.
+
+| Role         | Email                       | Password            |
+| ------------ | --------------------------- | ------------------- |
+| Super Admin  | `manojsuperadmin@gmail.com` | `manoj@1234567`     |
+| Sub Admin    | `subadmin@example.com`      | `manojsubadmin@123` |
+| Delivery Boy | `deliveryboy1@gmail.com`    | `12345678`          |
+
+Guest shopping does not require an account. Customers can browse, add products to the bag, submit contact and delivery details, place a COD order, then refresh its status from the confirmation panel.
+
+## Project layout
+
+- `next/src/app/shop/` — public storefront, cart, and guest checkout.
+- `next/src/app/dashboard/` — role-based store operations.
+- `next/src/app/auth/` — staff sign-in, registration, and password reset.
+- `next/src/app/apolloClient/` — GraphQL client used by dashboard screens.

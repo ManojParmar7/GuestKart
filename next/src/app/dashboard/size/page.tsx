@@ -4,7 +4,7 @@ import { Metadata } from "next";
 import ClientPage from "./client-page";
 
 export const metadata: Metadata = {
-	title: `Customers | Dashboard | YourSiteName`,
+	title: `Customers | Dashboard | GuestKart`,
 };
 
 export default function Page() {
