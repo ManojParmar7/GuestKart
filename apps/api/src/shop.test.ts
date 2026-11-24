@@ -83,10 +83,10 @@ afterEach(() => {
 
 describe('guest shopping and stock integrity', () => {
   it('filters, sorts and paginates the active catalog', async () => {
-    const response = await client().get('/api/catalog?search=wireless&limit=1&sort=price-asc');
+    const response = await client().get('/api/catalog?search=mustard&limit=1&sort=price-asc');
     expect(response.status).toBe(200);
     expect(response.body.products).toHaveLength(1);
-    expect(response.body.products[0].name.toLowerCase()).toContain('wireless');
+    expect(response.body.products[0].name.toLowerCase()).toContain('mustard');
     expect(response.body.demoMode).toBe(true);
   });
   it('uses server prices and creates a private trackable order without login', async () => {
