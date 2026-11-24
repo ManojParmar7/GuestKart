@@ -1,6 +1,6 @@
 # GuestKart
 
-**Good finds. Zero sign-ups.** A guest-first e-commerce starter with a responsive storefront, private order tracking and a role-based store workspace.
+**Shop as a guest. Leave as a regular.** A guest-first store with a persistent bag, one-click return to private parcel tracking, and a role-based store workspace.
 
 Built with **Next.js, TypeScript, Tailwind CSS, Material UI, Express, GraphQL, MongoDB, JWT and optional Stripe Checkout**. This repository contains a working application, with useful code rather than an arbitrary line count.
 

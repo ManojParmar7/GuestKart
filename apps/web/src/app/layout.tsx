@@ -3,9 +3,12 @@ import { Providers } from '@/components/providers';
 import { Header, Footer } from '@/components/chrome';
 import './globals.css';
 export const metadata: Metadata = {
-  title: { default: 'GuestKart — Good finds. Zero sign-ups.', template: '%s | GuestKart' },
+  title: {
+    default: 'GuestKart | Shop as a guest. Leave as a regular.',
+    template: '%s | GuestKart',
+  },
   description:
-    'Thoughtful everyday essentials. Browse, add to your bag and check out as a guest. No account needed.',
+    'A fresh way to shop without an account. Explore a considered collection, check out as a guest and follow your parcel from one private link.',
 };
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

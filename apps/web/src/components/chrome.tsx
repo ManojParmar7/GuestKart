@@ -9,7 +9,7 @@ export function Header() {
   return (
     <>
       <div className="announcement">
-        Good finds. Zero sign-ups. <span>Free delivery on orders ₹2,499+</span>
+        SHOP AS A GUEST. STAY FOR THE GOOD FINDS. <span>Delivery is on us over ₹2,499</span>
       </div>
       <header className="site-header">
         <div className="container header-inner">

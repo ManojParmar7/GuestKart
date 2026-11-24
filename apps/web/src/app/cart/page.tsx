@@ -10,17 +10,17 @@ export default function CartPage() {
   const shipping = subtotal >= 249900 ? 0 : 9900;
   return (
     <main id="main" className="container page-space">
-      <div className="eyebrow">MAKE ROOM FOR THE GOOD STUFF</div>
+      <div className="eyebrow">NO SIGN-IN NEEDED AT THE NEXT STEP</div>
       <h1 className="page-title">
-        Your shopping bag<span>.</span>
+        Your bag. Your call<span>.</span>
       </h1>
       {!hydrated ? (
         <p>Opening your bag…</p>
       ) : !lines.length ? (
         <div className="empty-state">
           <ShoppingBag size={48} />
-          <h2>Your next favorite is waiting.</h2>
-          <p>Your bag is empty. Let&apos;s find something good.</p>
+          <h2>Nothing in here just yet.</h2>
+          <p>The good part: no login to come back to, either.</p>
           <Button component={Link} href="/#collection" variant="contained">
             Explore the collection
           </Button>
@@ -29,7 +29,9 @@ export default function CartPage() {
         <div className="checkout-grid">
           <section>
             <div className="cart-heading">
-              {lines.length} {lines.length === 1 ? 'good find' : 'good finds'} in your bag
+              {lines.reduce((sum, line) => sum + line.quantity, 0)}{' '}
+              {lines.reduce((sum, line) => sum + line.quantity, 0) === 1 ? 'piece' : 'pieces'} ready
+              for the next step
             </div>
             {lines.map(({ product, quantity: count }) => (
               <article className="cart-line" key={product.id}>
@@ -67,11 +69,11 @@ export default function CartPage() {
               </article>
             ))}
             <Link href="/#collection" className="text-link">
-              Keep exploring
+              Leave the bag open. Keep looking
             </Link>
           </section>
           <aside className="order-summary">
-            <h2>The little details</h2>
+            <h2>Before we say hello</h2>
             <div>
               <span>Subtotal</span>
               <b>{money(subtotal)}</b>
@@ -94,10 +96,10 @@ export default function CartPage() {
               checkout.
             </p>
             <Button fullWidth component={Link} href="/checkout" variant="contained">
-              Checkout as a guest
+              Continue without an account
             </Button>
             <p className="secure-note">
-              <ShieldCheck size={16} /> No account needed. Ever.
+              <ShieldCheck size={16} /> No password. No account. Private tracking link.
             </p>
           </aside>
         </div>

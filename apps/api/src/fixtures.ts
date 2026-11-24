@@ -28,7 +28,7 @@ export async function seedStore(store: Store, email: string, password: string, d
       role: 'SUB_ADMIN',
       active: true,
     });
-    const names = ['Home & living', 'Tech essentials', 'Everyday carry', 'Wellness'];
+    const names = ['At home', 'Tech & sound', 'Bags & carry', 'Out & about'];
     const categories = names.map((name) => ({ id: randomUUID(), name, slug: slugify(name) }));
     for (const category of categories) await tx.put('categories', category);
     const products: [
@@ -42,8 +42,8 @@ export async function seedStore(store: Store, email: string, password: string, d
       number,
     ][] = [
       [
-        'Studio wireless headphones',
-        'Your own little quiet space. Cushioned over-ear headphones with balanced sound, USB-C charging and up to 30 hours of listening.',
+        'Studio headphones in mustard',
+        'A considered studio headset in bright mustard. Cushioned over-ear comfort, USB-C charging and a long-play battery for everything on your list.',
         349900,
         499900,
         18,
@@ -52,8 +52,8 @@ export async function seedStore(store: Store, email: string, password: string, d
         1,
       ],
       [
-        'Everyday canvas tote',
-        'A dependable carryall for market mornings and everything after. Heavyweight cotton canvas, reinforced handles and a useful inner pocket.',
+        'Market-day canvas carryall',
+        'A sturdy canvas tote sized for market mornings and everything after. Reinforced handles, a useful inner pocket and room for the unscheduled extras.',
         89900,
         119900,
         32,
@@ -62,8 +62,8 @@ export async function seedStore(store: Store, email: string, password: string, d
         2,
       ],
       [
-        'Slow morning ceramic cup',
-        'Make a little room for your morning ritual. A tactile, glazed ceramic cup with a comfortable handle. Capacity: 350 ml.',
+        'Speckled stoneware cup',
+        'Hand-finished stoneware with a soft speckle glaze and an easy, comfortable handle. A new favorite for the first cup of the day. Capacity: 350 ml.',
         64900,
         null,
         24,
@@ -72,8 +72,8 @@ export async function seedStore(store: Store, email: string, password: string, d
         0,
       ],
       [
-        'Pocket bluetooth speaker',
-        'A compact companion for your favorite playlists. Rich portable sound, splash resistance and 12-hour battery life.',
+        'Pocket speaker in cobalt',
+        'A small cobalt-blue speaker with a surprisingly full sound. Splash resistant and ready for up to 12 hours away from the wall.',
         229900,
         299900,
         9,
@@ -82,8 +82,8 @@ export async function seedStore(store: Store, email: string, password: string, d
         1,
       ],
       [
-        'The everyday backpack',
-        'Clean lines, clever pockets. A lightweight everyday backpack with a padded 15-inch laptop sleeve and weather-resistant finish.',
+        'Weekender pack in lilac',
+        'A light lilac pack that takes the long way around. Room for a 15-inch laptop, a weather-resistant shell and a pocket for the things that wander.',
         249900,
         329900,
         14,
@@ -92,8 +92,8 @@ export async function seedStore(store: Store, email: string, password: string, d
         2,
       ],
       [
-        'Flow stainless steel bottle',
-        'Keep your daily hydration close. A 750 ml double-wall stainless steel bottle that keeps drinks cold for up to 18 hours.',
+        'The cold-stays bottle',
+        'Double-wall steel for long days out. The 750 ml bottle keeps a cold drink cold for up to 18 hours.',
         119900,
         149900,
         40,
@@ -102,8 +102,8 @@ export async function seedStore(store: Store, email: string, password: string, d
         3,
       ],
       [
-        'Warm glow desk lamp',
-        'Soft light for focused evenings. A minimal adjustable desk lamp with three brightness settings and a warm, comfortable glow.',
+        'Late-light table lamp',
+        'An adjustable table lamp for the hour after the to-do list. Three gentle settings, a warm glow and a compact footprint.',
         189900,
         null,
         5,
@@ -112,8 +112,8 @@ export async function seedStore(store: Store, email: string, password: string, d
         0,
       ],
       [
-        'Move everyday sneakers',
-        'An easy pair for busy days. Breathable mesh, flexible soles and lightweight cushioning. Demo product supplied in standard size 8.',
+        'Rooftop-run trainers',
+        'Breathable mesh, flexible soles and a bright red finish for wherever the evening goes. Demo pair shown in standard size 8.',
         299900,
         399900,
         12,

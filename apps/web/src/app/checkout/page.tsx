@@ -95,7 +95,7 @@ export default function CheckoutPage() {
     <main id="main" className="container page-space">
       <div className="eyebrow">JUST THE ESSENTIALS</div>
       <h1 className="page-title">
-        Good finds. Almost yours<span>.</span>
+        One last thing before we send it<span>.</span>
       </h1>
       {!hydrated ? (
         <p>Preparing checkout…</p>
@@ -120,8 +120,8 @@ export default function CheckoutPage() {
                 {error}
               </Alert>
             )}
-            <h2>Where should we send it?</h2>
-            <p className="muted">No account to create. Just a few delivery details.</p>
+            <h2>Leave a delivery note.</h2>
+            <p className="muted">Just enough to find your door and keep you posted.</p>
             <div className="form-grid">
               {field('name', 'Full name', 'name')}
               {field('email', 'Email address', 'email', 'email')}
@@ -133,7 +133,7 @@ export default function CheckoutPage() {
               {field('state', 'State', 'address-level1')}
               {field('postalCode', 'PIN code', 'postal-code')}
             </div>
-            <h2>How would you like to pay?</h2>
+            <h2>Choose how to pay.</h2>
             <div className="payment-options">
               <label className={paymentMethod === 'COD' ? 'selected' : ''}>
                 <input
@@ -190,7 +190,7 @@ export default function CheckoutPage() {
             </label>
           </section>
           <aside className="order-summary">
-            <h2>Your good finds</h2>
+            <h2>From your bag</h2>
             {lines.map((line) => (
               <div className="mini-line" key={line.product.id}>
                 <img src={line.product.image} alt="" />
@@ -225,8 +225,8 @@ export default function CheckoutPage() {
               {busy
                 ? 'Placing your order…'
                 : paymentMethod === 'COD'
-                  ? 'Place guest order'
-                  : 'Continue to secure payment'}
+                  ? 'Confirm without an account'
+                  : 'Go to secure card checkout'}
             </Button>
             <p className="secure-note">
               <ShieldCheck size={16} /> Your details are used for this order.

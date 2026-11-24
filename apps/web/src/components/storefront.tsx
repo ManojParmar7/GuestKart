@@ -53,16 +53,16 @@ export function Storefront() {
       <section className="hero container">
         <div className="hero-copy">
           <div className="eyebrow">
-            <span /> A LITTLE LESS ORDINARY
+            <span /> YOUR CART DOESN&apos;T NEED AN ACCOUNT
           </div>
           <h1>
-            Everyday things.
+            Shopping is better
             <br />
-            <em>Extra good finds.</em>
+            <em>without the sign-up.</em>
           </h1>
           <p>
-            Meet your new everyday favorites. Thoughtfully picked, fairly priced, and yours without
-            the sign-up.
+            Browse at your own pace. One tap for your bag, a few details to check out, and one
+            private link to keep an eye on your delivery.
           </p>
           <Button
             component={Link}
@@ -71,32 +71,32 @@ export function Storefront() {
             size="large"
             endIcon={<ShoppingBag size={18} />}
           >
-            Find your next favorite
+            Start with the collection
           </Button>
           <div className="hero-check">
-            <Check size={16} /> No account. No hassle. Just good shopping.
+            <Check size={16} /> No password. No profile. Just your order link.
           </div>
         </div>
         <div className="hero-art">
           <div className="hero-orbit" />
           <span className="hero-sticker">
-            <Sparkles size={15} /> THE EVERYDAY EDIT
+            <Sparkles size={15} /> THE NO-ACCOUNT CHECKOUT
           </span>
           <img
             src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=90"
-            alt="Yellow wireless headphones from the everyday edit"
+            alt="Mustard studio headphones from the GuestKart collection"
             className="hero-image"
             fetchPriority="high"
           />
           <div className="hero-caption">
             <div>
-              <small>Better sound. Better days.</small>
-              <b>Studio wireless headphones</b>
+              <small>A closer look, a click away.</small>
+              <b>Studio headphones in mustard</b>
             </div>
             <span>₹3,499</span>
           </div>
           <span className="hero-note">
-            Small upgrades.
+            See the details.
             <br />
             Big everyday energy.
           </span>
@@ -106,10 +106,10 @@ export function Storefront() {
       <section id="collection" className="collection container">
         <div className="section-title">
           <div>
-            <div className="eyebrow">CURATED FOR REAL LIFE</div>
-            <h2>Good things, right here.</h2>
+            <div className="eyebrow">PICK UP WHERE YOU LEFT OFF</div>
+            <h2>A shelf worth scrolling.</h2>
           </div>
-          <p>A few things to make your day a little better.</p>
+          <p>Pick something. Leave whenever you like.</p>
         </div>
         {catalog?.demoMode && (
           <div className="demo-banner">
@@ -126,7 +126,7 @@ export function Storefront() {
                 setPage(1);
               }}
             >
-              All finds
+              The whole shelf
             </button>
             {catalog?.categories.map((c) => (
               <button
@@ -146,7 +146,7 @@ export function Storefront() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Find something good…"
+              placeholder="Search the shelf…"
               aria-label="Search products"
             />
             {search && (
@@ -162,7 +162,7 @@ export function Storefront() {
         </div>
         <div className="results-row">
           <span>
-            {loading ? 'Finding your favorites…' : `${catalog?.total ?? 0} thoughtful finds`}
+            {loading ? 'Loading the shelf…' : `${catalog?.total ?? 0} products on the shelf`}
           </span>
           <label>
             <SlidersHorizontal size={15} />
@@ -269,21 +269,44 @@ export function Storefront() {
           </div>
         )}
       </section>
+      <section className="guest-route" aria-label="How guest checkout works">
+        <div className="guest-route-heading">
+          <span className="eyebrow">THE WAY GUESTKART WORKS</span>
+          <p>A little more room for what brought you here.</p>
+        </div>
+        <ol>
+          <li>
+            <span>01</span>
+            <b>Pick what catches your eye</b>
+            <small>No membership, account or sign-in needed.</small>
+          </li>
+          <li>
+            <span>02</span>
+            <b>Tell us where to send it</b>
+            <small>A name, a contact and your delivery address.</small>
+          </li>
+          <li>
+            <span>03</span>
+            <b>Keep the link, skip the account</b>
+            <small>One private order link brings you back to your parcel.</small>
+          </li>
+        </ol>
+      </section>
       <section className="guest-story container">
         <div className="guest-story-icon">
           <ShoppingBag size={42} />
         </div>
         <div>
           <div className="eyebrow">YOU&apos;RE ALWAYS WELCOME</div>
-          <h2>A guest, never a stranger.</h2>
+          <h2>Your bag is your account.</h2>
           <p>
-            Find something you love, pop it in your bag, and check out.
+            No password to remember. Keep your private order link,
             <br />
-            We&apos;ll take care of the rest. No account required.
+            and come back when your parcel moves.
           </p>
         </div>
         <Link href="/about" className="text-link">
-          Get to know GuestKart
+          How guest shopping works
         </Link>
       </section>
       <Dialog open={Boolean(selected)} onClose={() => setSelected(null)} maxWidth="md" fullWidth>
@@ -299,7 +322,7 @@ export function Storefront() {
             <div className="product-detail">
               <img src={selected.image} alt={selected.name} />
               <div>
-                <div className="eyebrow">YOUR NEXT EVERYDAY FAVORITE</div>
+                <div className="eyebrow">PRODUCT DETAILS</div>
                 <h2>{selected.name}</h2>
                 <div className="product-price">
                   <b>{money(selected.price)}</b>
